@@ -4,6 +4,7 @@ namespace AmplitudeExperiment\Remote;
 
 use AmplitudeExperiment\FetchOptions;
 use AmplitudeExperiment\User;
+use AmplitudeExperiment\Utils;
 use AmplitudeExperiment\Variant;
 use Exception;
 use GuzzleHttp\Client;
@@ -39,7 +40,7 @@ class RemoteEvaluationClient
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
         $this->httpClient = new Client();
-        $this->logger = $this->initializeLogger();
+        $this->logger = Utils::initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
     }
 
     /**
@@ -179,15 +180,5 @@ class RemoteEvaluationClient
         $promise = new Promise();
         $promise->resolve($variants);
         return $promise;
-    }
-
-    private function initializeLogger(): Logger
-    {
-        $logger = new Logger('AmplitudeExperiment');
-        $handler = new StreamHandler('php://stdout', $this->config->debug ? Logger::DEBUG : Logger::INFO);
-        $formatter = new LineFormatter(null, null, false, true);
-        $handler->setFormatter($formatter);
-        $logger->pushHandler($handler);
-        return $logger;
     }
 }
