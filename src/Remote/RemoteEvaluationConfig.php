@@ -13,47 +13,47 @@ class RemoteEvaluationConfig
     /**
      * Set to true to log some extra information to the console.
      */
-    public ?bool $debug;
+    public bool $debug;
     /**
      * The server endpoint from which to request variants.
      */
-    public ?string $serverUrl;
+    public string $serverUrl;
     /**
      * The request socket timeout, in milliseconds.
      */
-    public ?int $fetchTimeoutMillis;
+    public int $fetchTimeoutMillis;
     /**
      * The number of retries to attempt before failing
      */
-    public ?int $fetchRetries;
+    public int $fetchRetries;
     /**
      * Retry backoff minimum (starting backoff delay) in milliseconds. The minimum backoff is scaled by
      * `fetchRetryBackoffScalar` after each retry failure.
      */
-    public ?int $fetchRetryBackoffMinMillis;
+    public int $fetchRetryBackoffMinMillis;
     /**
      * Retry backoff maximum in milliseconds. If the scaled backoff is greater than the max, the max is
      * used for all subsequent retries.
      */
-    public ?int $fetchRetryBackoffMaxMillis;
+    public int $fetchRetryBackoffMaxMillis;
     /**
      * Scales the minimum backoff exponentially.
      */
-    public ?float $fetchRetryBackoffScalar;
+    public float $fetchRetryBackoffScalar;
     /**
      * The request timeout for retrying fetch requests.
      */
     public ?int $fetchRetryTimeoutMillis;
 
     public function __construct(
-        ?bool   $debug,
-        ?string $serverUrl,
-        ?int    $fetchTimeoutMillis,
-        ?int    $fetchRetries,
-        ?int    $fetchRetryBackoffMinMillis,
-        ?int    $fetchRetryBackoffMaxMillis,
-        ?float  $fetchRetryBackoffScalar,
-        ?int    $fetchRetryTimeoutMillis
+        bool   $debug,
+        string $serverUrl,
+        int    $fetchTimeoutMillis,
+        int    $fetchRetries,
+        int    $fetchRetryBackoffMinMillis,
+        int    $fetchRetryBackoffMaxMillis,
+        float  $fetchRetryBackoffScalar,
+        int    $fetchRetryTimeoutMillis
     )
     {
         $this->debug = $debug;
