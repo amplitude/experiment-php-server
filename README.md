@@ -24,11 +24,12 @@ $client = $experiment->initializeRemote('<DEPLOYMENT_KEY>')
 $user = \AmplitudeExperiment\User::builder()
     ->deviceId('abcdefg')
     ->userId('user@company.com')
-    ->userProperties('premium' => True)
+    ->userProperties(['premium' => True])
     ->build();
-$variants = experiment.fetch(user);
+$variants = experiment.fetch($user);
 
 // (3) Access a flag's variant
+$variant = $variants['FLAG_KEY']
 if ($variant) {
     if ($variant->value == 'on') {
         // Flag is on
