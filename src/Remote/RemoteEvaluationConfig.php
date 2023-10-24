@@ -43,7 +43,7 @@ class RemoteEvaluationConfig
     /**
      * The request timeout for retrying fetch requests.
      */
-    public ?int $fetchRetryTimeoutMillis;
+    public int $fetchRetryTimeoutMillis;
 
     public function __construct(
         bool   $debug,
