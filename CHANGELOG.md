@@ -1,3 +1,10 @@
+## [0.1.1](https://github.com/amplitude/experiment-php-server/compare/v0.1.0...0.1.1) (2023-10-24)
+
+
+### Bug Fixes
+
+* RemoteEvaluationConfig fields are non-null ([#2](https://github.com/amplitude/experiment-php-server/issues/2)) ([df42ba4](https://github.com/amplitude/experiment-php-server/commit/df42ba4ad3a6fc6e071fafa4ee79fed1e759e728))
+
 # [0.1.0](https://github.com/amplitude/experiment-php-server/compare/0.0.0...0.1.0) (2023-10-24)
 
 
