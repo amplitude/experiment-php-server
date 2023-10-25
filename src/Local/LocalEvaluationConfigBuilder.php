@@ -4,34 +4,34 @@ namespace AmplitudeExperiment\Local;
 
 class LocalEvaluationConfigBuilder
 {
-    protected ?bool $debug = false;
-    protected ?string $serverUrl = 'https://api.lab.amplitude.com';
-    protected ?array $bootstrap = [];
-    protected ?int $flagConfigPollingIntervalMillis = 30000;
+    protected bool $debug = LocalEvaluationConfig::DEFAULTS['debug'];
+    protected string $serverUrl = LocalEvaluationConfig::DEFAULTS['serverUrl'];
+    protected array $bootstrap = LocalEvaluationConfig::DEFAULTS['bootstrap'];
+    protected int $flagConfigPollingIntervalMillis = LocalEvaluationConfig::DEFAULTS['flagConfigPollingIntervalMillis'];
 
     public function __construct()
     {
     }
 
-    public function debug(?bool $debug): LocalEvaluationConfigBuilder
+    public function debug(bool $debug): LocalEvaluationConfigBuilder
     {
         $this->debug = $debug;
         return $this;
     }
 
-    public function serverUrl(?string $serverUrl): LocalEvaluationConfigBuilder
+    public function serverUrl(string $serverUrl): LocalEvaluationConfigBuilder
     {
         $this->serverUrl = $serverUrl;
         return $this;
     }
 
-    public function bootstrap(?array $bootstrap): LocalEvaluationConfigBuilder
+    public function bootstrap(array $bootstrap): LocalEvaluationConfigBuilder
     {
         $this->bootstrap = $bootstrap;
         return $this;
     }
 
-    public function flagConfigPollingIntervalMillis(?int $flagConfigPollingIntervalMillis): LocalEvaluationConfigBuilder
+    public function flagConfigPollingIntervalMillis(int $flagConfigPollingIntervalMillis): LocalEvaluationConfigBuilder
     {
         $this->flagConfigPollingIntervalMillis = $flagConfigPollingIntervalMillis;
         return $this;
@@ -39,6 +39,11 @@ class LocalEvaluationConfigBuilder
 
     public function build(): LocalEvaluationConfig
     {
-        return new LocalEvaluationConfig($this);
+        return new LocalEvaluationConfig(
+            $this->debug,
+            $this->serverUrl,
+            $this->bootstrap,
+            $this->flagConfigPollingIntervalMillis
+        );
     }
 }

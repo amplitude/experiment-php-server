@@ -4,18 +4,17 @@ namespace AmplitudeExperiment\Remote;
 
 use AmplitudeExperiment\FetchOptions;
 use AmplitudeExperiment\User;
-use AmplitudeExperiment\Utils;
 use AmplitudeExperiment\Variant;
 use Exception;
 use GuzzleHttp\Client;
-use GuzzleHttp\Promise\Promise;
+use GuzzleHttp\Promise\Create;
 use GuzzleHttp\Promise\PromiseInterface;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
+use function AmplitudeExperiment\initializeLogger;
 
+include __DIR__ . '/../Utils.php';
 include __DIR__ . '/../Version.php';
 
 /**
@@ -40,7 +39,7 @@ class RemoteEvaluationClient
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
         $this->httpClient = new Client();
-        $this->logger = Utils::initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
+        $this->logger = initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
     }
 
     /**
@@ -125,9 +124,7 @@ class RemoteEvaluationClient
     private function retryFetch(User $user, ?FetchOptions $options = null): PromiseInterface
     {
         if ($this->config->fetchRetries == 0) {
-            $promise = new Promise();
-            $promise->resolve([]);
-            return $promise;
+            return Create::promiseFor([]);
         }
 
         $this->logger->debug('[Experiment] Retrying fetch');
@@ -177,8 +174,6 @@ class RemoteEvaluationClient
             $variant = new Variant($value, $data['payload'] ?? null);
             $variants[$key] = $variant;
         }
-        $promise = new Promise();
-        $promise->resolve($variants);
-        return $promise;
+        return Create::promiseFor($variants);
     }
 }
