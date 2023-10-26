@@ -11,7 +11,8 @@ use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
 use function AmplitudeExperiment\initializeLogger;
 
-include __DIR__ . '/../Utils.php';
+require_once __DIR__ . '/../Utils.php';
+require_once __DIR__ . '/../Version.php';
 
 const FLAG_CONFIG_TIMEOUT = 5000;
 
@@ -33,7 +34,7 @@ class FlagConfigFetcher
     // TODO add docs + check error thrown?
     public function fetch(): PromiseInterface
     {
-        $endpoint = $this->serverUrl . '/sdk/flags';
+        $endpoint = $this->serverUrl . '/sdk/v1/flags';
         $headers = [
             'Authorization' => 'Api-Key ' . $this->apiKey,
             'Accept' => 'application/json',
@@ -63,12 +64,11 @@ class FlagConfigFetcher
         );
     }
 
-    private function parse(string $flagConfigs): array
+    private function parse(array $flagConfigs): array
     {
-        $flagConfigsArray = json_decode($flagConfigs, true);
         $flagConfigsRecord = [];
-        if ($flagConfigsArray !== null) {
-            foreach ($flagConfigsArray as $flagConfig) {
+        if ($flagConfigs) {
+            foreach ($flagConfigs as $flagConfig) {
                 $flagConfigsRecord[$flagConfig['flagKey']] = $flagConfig;
             }
         }

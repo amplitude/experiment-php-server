@@ -5,25 +5,29 @@ namespace AmplitudeExperiment\Flag;
 use AmplitudeExperiment\BackoffPolicy;
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
 use Exception;
+use GuzzleHttp\Promise\PromiseInterface;
+use GuzzleHttp\Promise\Create;
 use Monolog\Logger;
 use React\EventLoop\Loop;
 use React\EventLoop\TimerInterface;
 use function AmplitudeExperiment\doWithBackoff;
 use function AmplitudeExperiment\initializeLogger;
 
+require_once __DIR__ . '/../Utils.php';
+require_once __DIR__ . '/../Backoff.php';
+
 class FlagConfigService
 {
     private Logger $logger;
     private int $pollingIntervalMillis;
-    private ?TimerInterface $poller;
+    private ?TimerInterface $poller = null;
 
     public FlagConfigFetcher $fetcher;
     public array $cache;
 
-    public function __construct($fetcher, $cache, $pollingIntervalMillis = LocalEvaluationConfig::DEFAULTS["flagConfigPollingIntervalMillis"], $debug = false)
+    public function __construct(FlagConfigFetcher $fetcher, int $pollingIntervalMillis = LocalEvaluationConfig::DEFAULTS["flagConfigPollingIntervalMillis"], bool $debug = false)
     {
         $this->fetcher = $fetcher;
-        $this->cache = $cache;
         $this->pollingIntervalMillis = $pollingIntervalMillis;
         $this->logger = initializeLogger($debug);
     }
@@ -38,7 +42,7 @@ class FlagConfigService
                 $this->pollingIntervalMillis / 1000, // Convert to seconds
                 function () {
                     try {
-                        $this->refresh();
+                        $this->refresh()->wait();
                     } catch (Exception $e) {
                         $this->logger->debug('[Experiment] flag config refresh failed: ' . $e->getMessage());
                     }
@@ -48,9 +52,9 @@ class FlagConfigService
             // Fetch initial flag configs and await the result.
             doWithBackoff(
                 function () {
-                    $this->refresh();
+                    return $this->refresh();
                 }
-                , new BackoffPolicy(5, 1, 1, 1));
+                , new BackoffPolicy(5, 1, 1, 1))->wait();
         }
     }
 
@@ -63,11 +67,10 @@ class FlagConfigService
         }
     }
 
-    public function refresh()
+    public function refresh(): PromiseInterface
     {
         $this->logger->debug('[Experiment] flag config update');
-        $flagConfigs = $this->fetcher->fetch()->wait();
-        $this->cache = $flagConfigs;
+        return Create::promiseFor($this->cache = $this->fetcher->fetch()->wait());
     }
 
     public function getFlagConfigs(): array

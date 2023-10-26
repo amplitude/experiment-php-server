@@ -3,7 +3,7 @@
 namespace AmplitudeExperiment;
 
 use Exception;
-use GuzzleHttp\Promise\Promise;
+use GuzzleHttp\Promise\Create;
 use GuzzleHttp\Promise\PromiseInterface;
 
 class BackoffPolicy {
@@ -30,6 +30,6 @@ function doWithBackoff(callable $action, BackoffPolicy $backoffPolicy) : Promise
             $delay = min($delay * $backoffPolicy->scalar, $backoffPolicy->max);
         }
     }
-    return new Promise();
+    return Create::promiseFor(null);
 }
 

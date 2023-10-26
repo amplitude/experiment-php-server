@@ -14,5 +14,4 @@ function initializeLogger(?bool $debug): Logger
     $handler->setFormatter($formatter);
     $logger->pushHandler($handler);
     return $logger;
-
 }

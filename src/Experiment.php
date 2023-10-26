@@ -2,13 +2,15 @@
 
 namespace AmplitudeExperiment;
 
+use AmplitudeExperiment\Local\LocalEvaluationClient;
+use AmplitudeExperiment\Local\LocalEvaluationConfig;
 use AmplitudeExperiment\Remote\RemoteEvaluationClient;
 use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
-use AmplitudeExperiment\Remote\RemoteEvaluationConfigBuilder;
 
 class Experiment
 {
     private array $remoteInstances = [];
+    private array $localInstances = [];
 
     /**
      * Initializes a [RemoteEvaluationClient] instance. If a RemoteEvaluationClient instance has already been
@@ -26,4 +28,14 @@ class Experiment
         }
         return $this->remoteInstances[$apiKey];
     }
+
+    public function initializeLocal(string $apiKey, ?LocalEvaluationConfig $config = null): LocalEvaluationClient
+    {
+        if (!isset($this->localInstances[$apiKey])) {
+            $config = $config ?? LocalEvaluationConfig::builder()->build();
+            $this->localInstances[$apiKey] = new LocalEvaluationClient($apiKey, $config);
+        }
+        return $this->localInstances[$apiKey];
+    }
+
 }
