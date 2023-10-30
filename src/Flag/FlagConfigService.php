@@ -2,14 +2,15 @@
 
 namespace AmplitudeExperiment\Flag;
 
+use Amp\CancellationToken;
+use Amp\CancellationTokenSource;
+use Amp\Deferred;
 use AmplitudeExperiment\BackoffPolicy;
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
-use Exception;
 use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Promise\Create;
 use Monolog\Logger;
 use React\EventLoop\Loop;
-use React\EventLoop\TimerInterface;
 use function AmplitudeExperiment\doWithBackoff;
 use function AmplitudeExperiment\initializeLogger;
 
@@ -20,8 +21,8 @@ class FlagConfigService
 {
     private Logger $logger;
     private int $pollingIntervalMillis;
-    private ?TimerInterface $poller = null;
-
+    private $poller = null;
+    private ?CancellationTokenSource $cancellationToken = null;
     public FlagConfigFetcher $fetcher;
     public array $cache;
 
@@ -37,35 +38,59 @@ class FlagConfigService
         if (!$this->poller) {
             $this->logger->debug('[Experiment] poller - start');
 
-            // Use a timer to repeatedly trigger the callback function
-            $this->poller = Loop::get()->addPeriodicTimer(
-                $this->pollingIntervalMillis / 1000, // Convert to seconds
-                function () {
-                    try {
-                        $this->refresh()->wait();
-                    } catch (Exception $e) {
-                        $this->logger->debug('[Experiment] flag config refresh failed: ' . $e->getMessage());
-                    }
+            $this->cancellationToken = new CancellationTokenSource();
+
+            // Create a coroutine for the poller
+            $coroutine = function () {
+                try {
+                    $this->cancellationToken->getToken()->throwIfRequested();
+
+                    $this->refresh()->then(function ($exception) {
+                        if ($exception instanceof \Exception) {
+                            $this->logger->debug('[Experiment] flag config refresh failed: ' . $exception->getMessage());
+                        }
+                    });
+
+                } catch (\Amp\CancelledException $e) {
+                    return;
                 }
-            );
+            };
+
+            Loop::repeat(1000, function () use ($coroutine) {
+                if ($this->cancellationToken->isCancelled()) {
+                    return; // Exit the loop if cancellation is requested
+                }
+
+                // Enqueue a task to be executed
+                \Amp\Loop::defer(function () use ($coroutine) {
+                    $coroutine();
+                });
+            });
+
+
+
+            $this->poller = true;
 
             // Fetch initial flag configs and await the result.
             doWithBackoff(
                 function () {
                     return $this->refresh();
-                }
-                , new BackoffPolicy(5, 1, 1, 1))->wait();
+                },
+                new BackoffPolicy(5, 1, 1, 1)
+            )->wait();
         }
     }
 
     public function stop()
     {
-        if ($this->poller) {
-            $this->logger->debug('[Experiment] poller - stop');
-            Loop::get()->cancelTimer($this->poller);
+        if ($this->poller && $this->cancellationToken) {
+            $this->cancellationToken->cancel(); // Signal the coroutine to stop
+            \Amp\Loop::stop(); // Stop the event loop
             $this->poller = null;
+            $this->cancellationToken = null;
         }
     }
+
 
     public function refresh(): PromiseInterface
     {

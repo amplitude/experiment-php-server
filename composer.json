@@ -20,6 +20,8 @@
   "prefer-stable": true,
   "require": {
     "php": "^7.4 || ^8",
+    "amphp/amp": "^2",
+    "amphp/parallel": "^1",
     "ext-json": "*",
     "guzzlehttp/guzzle": "^7",
     "monolog/monolog": "^2",
