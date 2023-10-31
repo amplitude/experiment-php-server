@@ -2,13 +2,15 @@
 
 namespace AmplitudeExperiment\EvaluationCore;
 
-class SemanticVersion {
+class SemanticVersion
+{
     public $major;
     public $minor;
     public $patch;
     public $preRelease;
 
-    public function __construct($major, $minor, $patch, $preRelease = null) {
+    public function __construct($major, $minor, $patch, $preRelease = null)
+    {
         $this->major = $major;
         $this->minor = $minor;
         $this->patch = $patch;
