@@ -25,7 +25,7 @@ class LocalEvaluationClientTest extends TestCase
         $config = LocalEvaluationConfig::builder()->debug(true)->build();
         $client = $experiment->initializeLocal($this->apiKey, $config);
         $client->start();
-        sleep(3);
+        sleep(2);
         $client->stop();
     }
 }
