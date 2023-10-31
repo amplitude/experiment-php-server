@@ -167,6 +167,9 @@ class TopologicalSortTest extends TestCase
         $this->topologicalSort($flags);
     }
 
+    /**
+     * @throws Exception
+     */
     function testComplexNoCycleStartingWithLeaf() {
         $flags = [
             $this->flag(1, [6, 3]),
@@ -202,6 +205,9 @@ class TopologicalSortTest extends TestCase
         $this->assertEquals($expectedResult, $result);
     }
 
+    /**
+     * @throws Exception
+     */
     function testComplexNoCycleStartingWithMiddle() {
         $flags = [
             $this->flag(6, [7, 4]),
@@ -237,6 +243,9 @@ class TopologicalSortTest extends TestCase
         $this->assertEquals($expectedResult, $result);
     }
 
+    /**
+     * @throws Exception
+     */
     function testComplexNoCycleStartingWithRoot() {
         $flags = [
             $this->flag(8),
