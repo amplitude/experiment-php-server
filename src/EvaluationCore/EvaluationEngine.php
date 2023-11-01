@@ -279,17 +279,19 @@ class EvaluationEngine
         });
 
         if ($propValueTransformed === null || empty($filterValuesTransformed)) {
-            return array_filter($filterValues, function($filterValue) use ($propValue, $op) {
-                return $this->comparator($propValue, $op, $filterValue);
-            }) !== [];
+            foreach ($filterValues as $filterValue) {
+                if ($this->comparator($propValue, $op, $filterValue)) {
+                    return true;
+                }
+            }
         } else {
             foreach ($filterValuesTransformed as $filterValueTransformed) {
                 if ($typeComparator($propValueTransformed, $op, $filterValueTransformed)) {
                     return true;
                 }
             }
-            return false;
         }
+        return false;
     }
 
     private function comparator($propValue, $op, $filterValue): bool
@@ -379,15 +381,13 @@ class EvaluationEngine
     private function coerceStringArray($value): ?array
     {
         if (is_array($value)) {
-            $anyArray = $value;
-            return array_filter(array_map([$this, 'coerceString'], $anyArray));
+            return array_filter(array_map([$this, 'coerceString'], $value));
         }
         $stringValue = strval($value);
         try {
             $parsedValue = json_decode($stringValue, true);
             if (is_array($parsedValue)) {
-                $anyArray = $value;
-                return array_filter(array_map([$this, 'coerceString'], $anyArray));
+                return array_filter(array_map([$this, 'coerceString'], $value));
             } else {
                 return null;
             }
@@ -411,9 +411,13 @@ class EvaluationEngine
 
     private function setEquals(array $xa, array $ya): bool
     {
-        $xs = array_flip($xa);
-        $ys = array_flip($ya);
-        return count($xs) === count($ys) && count(array_diff_key($ys, $xs)) === 0;
+        $uniqueXa = array_unique($xa);
+        $uniqueYa = array_unique($ya);
+
+        sort($uniqueXa);
+        sort($uniqueYa);
+
+        return $uniqueXa === $uniqueYa;
     }
 
     private function matchesSetContainsAll(array $propValues, array $filterValues): bool

@@ -20,6 +20,7 @@ class EvaluateIntegrationTest extends TestCase
     {
         $this->engine = new EvaluationEngine();
         $this->flags = $this->getFlags('server-NgJxxvg8OGwwBsWVXqyxQbdiflbhvugy');
+        echo json_encode($this->flags);
         // TODO remove unneeded filtering for debugging
 //        $final = [];
 //        foreach($this->getFlags('server-NgJxxvg8OGwwBsWVXqyxQbdiflbhvugy') as $flag) {
