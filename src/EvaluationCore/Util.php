@@ -24,7 +24,8 @@ class Util
             }
         }
 
-        if (!$selectable) {
+        // "0" is falsy in PHP, so we need to check for it explicitly
+        if (!$selectable && $selectable !== '0') {
             return null;
         } else {
             return $selectable;

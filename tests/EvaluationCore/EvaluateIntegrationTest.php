@@ -20,6 +20,14 @@ class EvaluateIntegrationTest extends TestCase
     {
         $this->engine = new EvaluationEngine();
         $this->flags = $this->getFlags('server-NgJxxvg8OGwwBsWVXqyxQbdiflbhvugy');
+        // TODO remove unneeded filtering for debugging
+//        $final = [];
+//        foreach($this->getFlags('server-NgJxxvg8OGwwBsWVXqyxQbdiflbhvugy') as $flag) {
+//            if ($flag['key'] === 'test-less-or-equal') {
+//                $this->flags = [$flag];
+//                return;
+//            }
+//        }
     }
 
     public function testTestOff()

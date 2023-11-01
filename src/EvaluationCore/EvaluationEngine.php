@@ -85,7 +85,7 @@ class EvaluationEngine
     {
         $propValue = Util::select($target, $condition['selector']);
 
-        if (!$propValue) {
+        if (!$propValue && $propValue !== '0') {
             return $this->matchNull($condition['op'], $condition['values']);
         } elseif ($this->isSetOperator($condition['op'])) {
             $propValueStringList = $this->coerceStringArray($propValue);
@@ -279,7 +279,9 @@ class EvaluationEngine
         });
 
         if ($propValueTransformed === null || empty($filterValuesTransformed)) {
-            return in_array($propValue, $filterValues);
+            return array_filter($filterValues, function($filterValue) use ($propValue, $op) {
+                return $this->comparator($propValue, $op, $filterValue);
+            }) !== [];
         } else {
             foreach ($filterValuesTransformed as $filterValueTransformed) {
                 if ($typeComparator($propValueTransformed, $op, $filterValueTransformed)) {
