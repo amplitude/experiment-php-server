@@ -6,6 +6,7 @@ use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
 use AmplitudeExperiment\Flag\FlagConfigFetcher;
 use AmplitudeExperiment\Flag\FlagConfigService;
 use AmplitudeExperiment\User;
+use AmplitudeExperiment\Variant;
 use Monolog\Logger;
 use function AmplitudeExperiment\initializeLogger;
 
@@ -26,6 +27,7 @@ class LocalEvaluationClient
         $fetcher = new FlagConfigFetcher($apiKey, $this->config->serverUrl, $this->config->debug);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->config->flagConfigPollingIntervalMillis, $this->config->debug);
         $this->logger = initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
+        $this->evaluation = new EvaluationEngine();
     }
 
     public function start()
@@ -49,10 +51,7 @@ class LocalEvaluationClient
         foreach ($results as $flagKey => $flagResult) {
             $included = !$filter || in_array($flagKey, $flagKeys);
             if ($included) {
-                $variants[$flagKey] = [
-                    'value' => $flagResult['value'],
-                    'payload' => $flagResult['payload'],
-                ];
+                $variants[$flagKey] = new Variant($flagResult['key'], $flagResult['payload'] ?? null);
             }
         }
 
@@ -62,6 +61,6 @@ class LocalEvaluationClient
 
     private function toUserContext(User $user): array
     {
-        return ["user" => get_object_vars($user)];
+        return ["user" => $user->toArray()];
     }
 }

@@ -26,6 +26,7 @@ function doWithBackoff(callable $action, BackoffPolicy $backoffPolicy) : Promise
         try {
             return $action();
         } catch (Exception $e) {
+            echo "exception $e\n";
             usleep($delay * 1000);
             $delay = min($delay * $backoffPolicy->scalar, $backoffPolicy->max);
         }

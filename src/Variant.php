@@ -11,12 +11,13 @@ class Variant
     /**
      * The attached payload, if any
      */
-    public ?string $payload;
+    public $payload;
 
     public function __construct(
         ?string $value = null,
-        ?string $payload = null
-    ) {
+                $payload = null
+    )
+    {
         $this->value = $value;
         $this->payload = $payload;
     }

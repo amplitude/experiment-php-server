@@ -34,7 +34,7 @@ class FlagConfigFetcher
     // TODO add docs + check error thrown?
     public function fetch(): PromiseInterface
     {
-        $endpoint = $this->serverUrl . '/sdk/v1/flags';
+        $endpoint = $this->serverUrl . '/sdk/v2/flags';
         $headers = [
             'Authorization' => 'Api-Key ' . $this->apiKey,
             'Accept' => 'application/json',
@@ -69,7 +69,7 @@ class FlagConfigFetcher
         $flagConfigsRecord = [];
         if ($flagConfigs) {
             foreach ($flagConfigs as $flagConfig) {
-                $flagConfigsRecord[$flagConfig['flagKey']] = $flagConfig;
+                $flagConfigsRecord[$flagConfig['key']] = $flagConfig;
             }
         }
         return $flagConfigsRecord;

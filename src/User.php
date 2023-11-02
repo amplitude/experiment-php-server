@@ -108,4 +108,25 @@ class User
             ->groups($this->groups)
             ->groupProperties($this->groupProperties);
     }
+
+    public function toArray(): array {
+        return array_filter(["device_id" => $this->deviceId,
+            "user_id" => $this->userId,
+            "country" => $this->country,
+            "city" => $this->city,
+            "region" => $this->region,
+            "dma" => $this->dma,
+            "language" => $this->language,
+            "platform" => $this->platform,
+            "version" => $this->version,
+            "os" => $this->os,
+            "device_manufacturer" => $this->deviceManufacturer,
+            "device_brand" => $this->deviceBrand,
+            "device_model" => $this->deviceModel,
+            "carrier" => $this->carrier,
+            "library" => $this->library,
+            "user_properties" => $this->userProperties,
+            "groups" => $this->groups,
+            "group_properties" => $this->groupProperties]);
+    }
 }

@@ -21,7 +21,7 @@ class FlagConfigService
     private Logger $logger;
     private int $pollingIntervalMillis;
     public FlagConfigFetcher $fetcher;
-    public array $cache;
+    public array $cache = [];
     private ?LoopInterface $loop = null;
     private ?TimerInterface $timer = null;
 
@@ -40,7 +40,7 @@ class FlagConfigService
             $this->loop = Loop::get();
 
             // Schedule the initial run of the task
-            $this->scheduleTask();
+            //$this->scheduleTask();
 
             // Fetch initial flag configs and await the result.
             doWithBackoff(
@@ -64,6 +64,7 @@ class FlagConfigService
     {
         if ($this->timer) {
             $this->loop->cancelTimer($this->timer);
+            $this->loop->stop();
             $this->loop = null;
         }
     }
