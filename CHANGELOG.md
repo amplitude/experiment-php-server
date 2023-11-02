@@ -1,3 +1,10 @@
+## [0.1.2](https://github.com/amplitude/experiment-php-server/compare/0.1.1...0.1.2) (2023-11-02)
+
+
+### Bug Fixes
+
+* Variant payload can be of any type ([#4](https://github.com/amplitude/experiment-php-server/issues/4)) ([c15b707](https://github.com/amplitude/experiment-php-server/commit/c15b7075d4d58c4107c97746809c0fbd6d131945))
+
 ## [0.1.1](https://github.com/amplitude/experiment-php-server/compare/v0.1.0...0.1.1) (2023-10-24)
 
 
