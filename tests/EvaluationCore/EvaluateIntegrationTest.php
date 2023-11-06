@@ -20,25 +20,24 @@ class EvaluateIntegrationTest extends TestCase
     {
         $this->engine = new EvaluationEngine();
         $this->flags = $this->getFlags('server-NgJxxvg8OGwwBsWVXqyxQbdiflbhvugy');
-        echo json_encode($this->flags) . "\n";
         // TODO remove unneeded filtering for debugging
-//        $final = [];
-//        foreach($this->getFlags('server-NgJxxvg8OGwwBsWVXqyxQbdiflbhvugy') as $flag) {
-//            if ($flag['key'] === 'test-less-or-equal') {
-//                $this->flags = [$flag];
-//                return;
-//            }
-//        }
+        $final = [];
+        foreach($this->getFlags('server-NgJxxvg8OGwwBsWVXqyxQbdiflbhvugy') as $flag) {
+            if ($flag['key'] === 'test-less-or-equal') {
+                $this->flags = [$flag];
+                return;
+            }
+        }
     }
 
-    public function testTestOff()
+    public function testOff()
     {
         $user = $this->userContext('user_id', 'device_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-off'];
         $this->assertEquals('off', $result['key']);
     }
 
-    public function testTestOn()
+    public function testOn()
     {
         $user = $this->userContext('user_id', 'device_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-on'];
@@ -47,7 +46,7 @@ class EvaluateIntegrationTest extends TestCase
 
     // Opinionated Segment Tests
 
-    public function testTestIndividualInclusionsMatchUserId()
+    public function testIndividualInclusionsMatchUserId()
     {
         $user = $this->userContext('user_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-individual-inclusions'];
@@ -55,7 +54,7 @@ class EvaluateIntegrationTest extends TestCase
         $this->assertEquals('individual-inclusions', $result['metadata']['segmentName']);
     }
 
-    public function testTestIndividualInclusionsMatchDeviceId()
+    public function testIndividualInclusionsMatchDeviceId()
     {
         $user = $this->userContext(null, 'device_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-individual-inclusions'];
@@ -63,28 +62,28 @@ class EvaluateIntegrationTest extends TestCase
         $this->assertEquals('individual-inclusions', $result['metadata']['segmentName']);
     }
 
-    public function testTestIndividualInclusionsNoMatchUserId()
+    public function testIndividualInclusionsNoMatchUserId()
     {
         $user = $this->userContext('not_user_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-individual-inclusions'];
         $this->assertEquals('off', $result['key']);
     }
 
-    public function testTestIndividualInclusionsNoMatchDeviceId()
+    public function testIndividualInclusionsNoMatchDeviceId()
     {
         $user = $this->userContext(null, 'not_device_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-individual-inclusions'];
         $this->assertEquals('off', $result['key']);
     }
 
-    public function testTestFlagDependenciesOn()
+    public function testFlagDependenciesOn()
     {
         $user = $this->userContext('user_id', 'device_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-flag-dependencies-on'];
         $this->assertEquals('on', $result['key']);
     }
 
-    public function testTestFlagDependenciesOff()
+    public function testFlagDependenciesOff()
     {
         $user = $this->userContext('user_id', 'device_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-flag-dependencies-off'];
@@ -92,7 +91,7 @@ class EvaluateIntegrationTest extends TestCase
         $this->assertEquals('flag-dependencies', $result['metadata']['segmentName']);
     }
 
-    public function testTestStickyBucketingOn()
+    public function testStickyBucketingOn()
     {
         $user = $this->userContext('user_id', 'device_id', null, ['[Experiment] test-sticky-bucketing' => 'on']);
         $result = $this->engine->evaluate($user, $this->flags)['test-sticky-bucketing'];
@@ -100,7 +99,7 @@ class EvaluateIntegrationTest extends TestCase
         $this->assertEquals('sticky-bucketing', $result['metadata']['segmentName']);
     }
 
-    public function testTestStickyBucketingOff()
+    public function testStickyBucketingOff()
     {
         $user = $this->userContext('user_id', 'device_id', null, ['[Experiment] test-sticky-bucketing' => 'off']);
         $result = $this->engine->evaluate($user, $this->flags)['test-sticky-bucketing'];
@@ -108,7 +107,7 @@ class EvaluateIntegrationTest extends TestCase
         $this->assertEquals('All Other Users', $result['metadata']['segmentName']);
     }
 
-    public function testTestStickyBucketingNonVariant()
+    public function testStickyBucketingNonVariant()
     {
         $user = $this->userContext('user_id', 'device_id', null, ['[Experiment] test-sticky-bucketing' => 'not-a-variant']);
         $result = $this->engine->evaluate($user, $this->flags)['test-sticky-bucketing'];
@@ -116,7 +115,7 @@ class EvaluateIntegrationTest extends TestCase
         $this->assertEquals('All Other Users', $result['metadata']['segmentName']);
     }
 
-    public function testTestExperiment()
+    public function testExperiment()
     {
         $user = $this->userContext('user_id', 'device_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-experiment'];
@@ -124,7 +123,7 @@ class EvaluateIntegrationTest extends TestCase
         $this->assertEquals('exp-1', $result['metadata']['experimentKey']);
     }
 
-    public function testTestFlag()
+    public function testFlag()
     {
         $user = $this->userContext('user_id', 'device_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-flag'];
@@ -132,7 +131,7 @@ class EvaluateIntegrationTest extends TestCase
         $this->assertArrayNotHasKey('experimentKey', $result['metadata']);
     }
 
-    public function testTestMultipleConditionsAndValuesAllMatch()
+    public function testMultipleConditionsAndValuesAllMatch()
     {
         $user = $this->userContext('user_id', 'device_id', null, [
             'key-1' => 'value-1',
@@ -143,7 +142,7 @@ class EvaluateIntegrationTest extends TestCase
         $this->assertEquals('on', $result['key']);
     }
 
-    public function testTestMultipleConditionsAndValuesSomeMatch()
+    public function testMultipleConditionsAndValuesSomeMatch()
     {
         $user = $this->userContext('user_id', 'device_id', null, [
             'key-1' => 'value-1',
@@ -153,63 +152,63 @@ class EvaluateIntegrationTest extends TestCase
         $this->assertEquals('off', $result['key']);
     }
 
-    public function testTestAmplitudePropertyTargeting()
+    public function testAmplitudePropertyTargeting()
     {
         $user = $this->userContext('user_id', 'device_id', null, ['key-1' => 'value-1']);
         $result = $this->engine->evaluate($user, $this->flags)['test-amplitude-property-targeting'];
         $this->assertEquals('on', $result['key']);
     }
 
-    public function testTestCohortTargetingOn()
+    public function testCohortTargetingOn()
     {
         $user = $this->userContext(null, null, null, null, ['u0qtvwla', '12345678']);
         $result = $this->engine->evaluate($user, $this->flags)['test-cohort-targeting'];
         $this->assertEquals('on', $result['key']);
     }
 
-    public function testTestCohortTargetingOff()
+    public function testCohortTargetingOff()
     {
         $user = $this->userContext(null, null, null, null, ['12345678', '87654321']);
         $result = $this->engine->evaluate($user, $this->flags)['test-cohort-targeting'];
         $this->assertEquals('off', $result['key']);
     }
 
-    public function testTestGroupNameTargeting()
+    public function testGroupNameTargeting()
     {
         $user = $this->groupContext('org name', 'amplitude');
         $result = $this->engine->evaluate($user, $this->flags)['test-group-name-targeting'];
         $this->assertEquals('on', $result['key']);
     }
 
-    public function testTestGroupPropertyTargeting()
+    public function testGroupPropertyTargeting()
     {
         $user = $this->groupContext('org name', 'amplitude', ['org plan' => 'enterprise2']);
         $result = $this->engine->evaluate($user, $this->flags)['test-group-property-targeting'];
         $this->assertEquals('on', $result['key']);
     }
 
-    public function testTestAmplitudeIdBucketing()
+    public function testAmplitudeIdBucketing()
     {
         $user = $this->userContext(null, null, '1234567890');
         $result = $this->engine->evaluate($user, $this->flags)['test-amplitude-id-bucketing'];
         $this->assertEquals('on', $result['key']);
     }
 
-    public function testTestUserIdBucketing()
+    public function testUserIdBucketing()
     {
         $user = $this->userContext('user_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-user-id-bucketing'];
         $this->assertEquals('on', $result['key']);
     }
 
-    public function testTestDeviceIdBucketing()
+    public function testDeviceIdBucketing()
     {
         $user = $this->userContext(null, 'device_id');
         $result = $this->engine->evaluate($user, $this->flags)['test-device-id-bucketing'];
         $this->assertEquals('on', $result['key']);
     }
 
-    public function testTestCustomUserPropertyBucketing()
+    public function testCustomUserPropertyBucketing()
     {
         $user = $this->userContext(null, null, null, ['key' => 'value']);
         $result = $this->engine->evaluate($user, $this->flags)['test-custom-user-property-bucketing'];

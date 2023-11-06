@@ -3,6 +3,7 @@
 namespace AmplitudeExperiment\Flag;
 
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
+use AmplitudeExperiment\Util;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Promise\PromiseInterface;
@@ -11,7 +12,6 @@ use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
 use function AmplitudeExperiment\initializeLogger;
 
-require_once __DIR__ . '/../Utils.php';
 require_once __DIR__ . '/../Version.php';
 
 const FLAG_CONFIG_TIMEOUT = 5000;
@@ -28,10 +28,15 @@ class FlagConfigFetcher
         $this->apiKey = $apiKey;
         $this->serverUrl = $serverUrl;
         $this->httpClient = new Client();
-        $this->logger = initializeLogger($debug);
+        $this->logger = Util::initializeLogger($debug);
     }
 
-    // TODO add docs + check error thrown?
+    /**
+     * Fetch local evaluation mode flag configs from the Experiment API server.
+     * These flag configs can be used to perform local evaluation.
+     *
+     * @return PromiseInterface
+     */
     public function fetch(): PromiseInterface
     {
         $endpoint = $this->serverUrl . '/sdk/v2/flags';

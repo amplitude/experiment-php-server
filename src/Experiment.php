@@ -29,6 +29,14 @@ class Experiment
         return $this->remoteInstances[$apiKey];
     }
 
+    /**
+     * Initializes a [LocalEvaluationClient] instance. If a LocalEvaluationClient instance has already been
+     * initialized with the same apiKey, the existing instance will be returned.
+     *
+     * @param string $apiKey apapiKey The API key. This can be found in the Experiment settings and should not
+     * be null or empty.
+     * @param ?LocalEvaluationConfig $config config see {@link LocalEvaluationConfig} for configuration options
+     */
     public function initializeLocal(string $apiKey, ?LocalEvaluationConfig $config = null): LocalEvaluationClient
     {
         if (!isset($this->localInstances[$apiKey])) {

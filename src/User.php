@@ -129,4 +129,44 @@ class User
             "groups" => $this->groups,
             "group_properties" => $this->groupProperties]);
     }
+
+    public function toEvaluationContext(): array
+    {
+
+        $user = $this->toArray();
+        $context = ['user' => $user];
+        $groups = [];
+
+        if (!isset($user['groups'])) {
+            return $context;
+        }
+
+        foreach (array_keys($user['groups']) as $groupType) {
+            $groupNames = $user['groups'][$groupType];
+
+            if (count($groupNames) > 0 && $groupNames[0]) {
+                $groupName = $groupNames[0];
+                $groupNameMap = ['group_name' => $groupName];
+
+                // Check for group properties
+                $groupProperties = $user['group_properties'][$groupType][$groupName] ?? [];
+
+                if (count($groupProperties) > 0) {
+                    $groupNameMap['group_properties'] = $groupProperties;
+                }
+
+                $groups[$groupType] = $groupNameMap;
+            }
+        }
+
+        if (count($groups) > 0) {
+            $context['groups'] = $groups;
+        }
+
+        unset($context['user']['groups']);
+        unset($context['user']['group_properties']);
+
+        return $context;
+    }
+
 }

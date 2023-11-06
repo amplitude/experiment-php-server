@@ -4,6 +4,7 @@ namespace AmplitudeExperiment\Remote;
 
 use AmplitudeExperiment\FetchOptions;
 use AmplitudeExperiment\User;
+use AmplitudeExperiment\Util;
 use AmplitudeExperiment\Variant;
 use Exception;
 use GuzzleHttp\Client;
@@ -14,7 +15,6 @@ use Psr\Http\Message\ResponseInterface;
 use Throwable;
 use function AmplitudeExperiment\initializeLogger;
 
-require_once __DIR__ . '/../Utils.php';
 require_once __DIR__ . '/../Version.php';
 
 /**
@@ -39,7 +39,7 @@ class RemoteEvaluationClient
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
         $this->httpClient = new Client();
-        $this->logger = initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
+        $this->logger = Util::initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
     }
 
     /**
@@ -87,7 +87,7 @@ class RemoteEvaluationClient
         $serializedUser = base64_encode(json_encode($libraryUser));
 
         // Define the request URL
-        $endpoint = $this->config->serverUrl . '/sdk/vardata';
+        $endpoint = $this->config->serverUrl . '/sdk/v2/vardata';
 
         // Define the request headers
         $headers = [
@@ -107,7 +107,11 @@ class RemoteEvaluationClient
 
         return $promise->then(
             function (ResponseInterface $response) {
-                $variants = $this->parseRemoteResponse(json_decode($response->getBody(), true));
+                $results = json_decode($response->getBody(), true);
+                $variants = [];
+                foreach ($results as $flagKey => $flagResult) {
+                    $variants[$flagKey] = Variant::convertEvaluationVariantToVariant($flagResult);
+                }
                 $this->logger->debug('[Experiment] Fetched variants: ' . $response->getBody());
                 return $variants;
             },

@@ -6,7 +6,7 @@ use Exception;
 use GuzzleHttp\Promise\Create;
 use GuzzleHttp\Promise\PromiseInterface;
 
-class BackoffPolicy {
+class Backoff {
     public int $attempts;
     public int $min;
     public int $max;
@@ -18,19 +18,18 @@ class BackoffPolicy {
         $this->max = $max;
         $this->scalar = $scalar;
     }
-}
 
-function doWithBackoff(callable $action, BackoffPolicy $backoffPolicy) : PromiseInterface {
-    $delay = $backoffPolicy->min;
-    for ($i = 0; $i < $backoffPolicy->attempts; $i++) {
-        try {
-            return $action();
-        } catch (Exception $e) {
-            echo "exception $e\n";
-            usleep($delay * 1000);
-            $delay = min($delay * $backoffPolicy->scalar, $backoffPolicy->max);
+    public static function doWithBackoff(callable $action, Backoff $backoffPolicy) : PromiseInterface {
+        $delay = $backoffPolicy->min;
+        for ($i = 0; $i < $backoffPolicy->attempts; $i++) {
+            try {
+                return $action();
+            } catch (Exception $e) {
+                echo "exception $e\n";
+                usleep($delay * 1000);
+                $delay = min($delay * $backoffPolicy->scalar, $backoffPolicy->max);
+            }
         }
+        return Create::promiseFor(null);
     }
-    return Create::promiseFor(null);
 }
-
