@@ -3,6 +3,7 @@
 namespace AmplitudeExperiment\EvaluationCore;
 use Exception;
 
+require_once __DIR__ . '/Util.php';
 class EvaluationEngine
 {
     public function evaluate(array $context, array $flags): array

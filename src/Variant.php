@@ -5,6 +5,10 @@ namespace AmplitudeExperiment;
 class Variant
 {
     /**
+     * The key of the variant.
+     */
+    public ?string $key;
+    /**
      * The value of the variant determined by the flag configuration
      */
     public ?string $value;
@@ -12,23 +16,29 @@ class Variant
      * The attached payload, if any
      */
     public $payload;
-    public ?array $metadata;
-    public ?string $key;
+    /**
+     * The experiment key. Used to distinguish two experiments associated with the same flag.
+     */
     public ?string $expKey;
+    /**
+     * Flag, segment, and variant metadata produced as a result of
+     * evaluation for the user. Used for system purposes.
+     */
+    public ?array $metadata;
 
     public function __construct(
+        ?string $key = null,
         ?string $value = null,
                 $payload = null,
-        ?array  $metadata = null,
-        ?string $key = null,
-        ?string $expKey = null
+        ?string $expKey = null,
+        ?array  $metadata = null
     )
     {
+        $this->key = $key;
         $this->value = $value;
         $this->payload = $payload;
-        $this->metadata = $metadata;
-        $this->key = $key;
         $this->expKey = $expKey;
+        $this->metadata = $metadata;
     }
 
     public static function convertEvaluationVariantToVariant(array $evaluationVariant): Variant

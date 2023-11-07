@@ -57,7 +57,7 @@ class RemoteEvaluationClient
         if ($user->userId == null && $user->deviceId == null) {
             $this->logger->warning('[Experiment] user id and device id are null; Amplitude may not resolve identity');
         }
-        $this->logger->debug('[Experiment] Fetching variants for user: ' . json_encode($user));
+        $this->logger->debug('[Experiment] Fetching variants for user: ' . json_encode($user->toArray()));
 
         return $this->doFetch($user, $this->config->fetchTimeoutMillis, $options)
             ->otherwise(function (Throwable $e) use ($user, $options) {
@@ -84,7 +84,7 @@ class RemoteEvaluationClient
     {
         // Define the request data
         $libraryUser = $user->copyToBuilder()->library('experiment-php-server/' . VERSION)->build();
-        $serializedUser = base64_encode(json_encode($libraryUser));
+        $serializedUser = base64_encode(json_encode($libraryUser->toArray()));
 
         // Define the request URL
         $endpoint = $this->config->serverUrl . '/sdk/v2/vardata';

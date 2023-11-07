@@ -21,16 +21,17 @@ class FlagConfigService
     private Logger $logger;
     private int $pollingIntervalMillis;
     public FlagConfigFetcher $fetcher;
-    public array $cache = [];
+    public array $cache;
     private ?int $lastRequested = null;
     private LoopInterface $loop;
 
-    public function __construct(FlagConfigFetcher $fetcher, int $pollingIntervalMillis = LocalEvaluationConfig::DEFAULTS["flagConfigPollingIntervalMillis"], bool $debug = false)
+    public function __construct(FlagConfigFetcher $fetcher, int $pollingIntervalMillis = LocalEvaluationConfig::DEFAULTS["flagConfigPollingIntervalMillis"], bool $debug = false, array $bootstrap = [])
     {
         $this->fetcher = $fetcher;
         $this->pollingIntervalMillis = $pollingIntervalMillis;
         $this->logger = initializeLogger($debug);
         $this->loop = Loop::get();
+        $this->cache = $bootstrap;
     }
 
     public function start(): PromiseInterface

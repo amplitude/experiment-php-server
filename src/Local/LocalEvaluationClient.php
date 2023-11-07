@@ -52,8 +52,8 @@ class LocalEvaluationClient
      * Locally evaluates flag variants for a user.
      *
      * This function will only evaluate flags for the keys specified in the
-     * {@link flagKeys} argument. If {@link flagKeys} is missing, all flags in the
-     * {@link FlagConfigCache} will be evaluated.
+     * flagKeys argument. If flagKeys is missing or empty, all flags in the
+     * {@link FlagConfigService} will be evaluated.
      *
      * @param $user User The user to evaluate
      * @param $flagKeys ?array The flags to evaluate with the user. If empty, all flags
@@ -67,9 +67,8 @@ class LocalEvaluationClient
             $flags = topologicalSort($flags, $flagKeys);
         } catch (\Exception $e) {
             $this->logger->error('[Experiment] evaluate - error sorting flags: ' . $e->getMessage());
-            return [];
         }
-        $this->logger->debug('[Experiment] evaluate - user: ' . json_encode($user) . 'flags: ' . json_encode($flags));
+        $this->logger->debug('[Experiment] evaluate - user: ' . json_encode($user->toArray()) . 'with flags: ' . json_encode($flags));
         $results = $this->evaluation->evaluate($user->toEvaluationContext(), $flags);
         $variants = [];
         $filter = !empty($flagKeys);

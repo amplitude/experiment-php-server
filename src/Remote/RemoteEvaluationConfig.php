@@ -45,6 +45,17 @@ class RemoteEvaluationConfig
      */
     public int $fetchRetryTimeoutMillis;
 
+    const DEFAULTS = [
+        'debug' => false,
+        'serverUrl' => 'https://api.lab.amplitude.com',
+        'fetchTimeoutMillis' => 10000,
+        'fetchRetries' => 8,
+        'fetchRetryBackoffMinMillis' => 500,
+        'fetchRetryBackoffMaxMillis' => 10000,
+        'fetchRetryBackoffScalar' => 1.5,
+        'fetchRetryTimeoutMillis' => 10000
+    ];
+
     public function __construct(
         bool   $debug,
         string $serverUrl,

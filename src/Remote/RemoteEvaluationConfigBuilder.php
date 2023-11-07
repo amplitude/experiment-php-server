@@ -4,14 +4,14 @@ namespace AmplitudeExperiment\Remote;
 
 class RemoteEvaluationConfigBuilder
 {
-    protected bool $debug = false;
-    protected string $serverUrl = 'https://api.lab.amplitude.com';
-    protected int $fetchTimeoutMillis = 10000;
-    protected int $fetchRetries = 8;
-    protected int $fetchRetryBackoffMinMillis = 500;
-    protected int $fetchRetryBackoffMaxMillis = 10000;
-    protected float $fetchRetryBackoffScalar = 1.5;
-    protected int $fetchRetryTimeoutMillis = 10000;
+    protected bool $debug = RemoteEvaluationConfig::DEFAULTS['debug'];
+    protected string $serverUrl = RemoteEvaluationConfig::DEFAULTS['serverUrl'];
+    protected int $fetchTimeoutMillis = RemoteEvaluationConfig::DEFAULTS['fetchTimeoutMillis'];
+    protected int $fetchRetries = RemoteEvaluationConfig::DEFAULTS['fetchRetries'];
+    protected int $fetchRetryBackoffMinMillis = RemoteEvaluationConfig::DEFAULTS['fetchRetryBackoffMinMillis'];
+    protected int $fetchRetryBackoffMaxMillis = RemoteEvaluationConfig::DEFAULTS['fetchRetryBackoffMaxMillis'];
+    protected float $fetchRetryBackoffScalar = RemoteEvaluationConfig::DEFAULTS['fetchRetryBackoffScalar'];
+    protected int $fetchRetryTimeoutMillis = RemoteEvaluationConfig::DEFAULTS['fetchRetryTimeoutMillis'];
 
     public function __construct()
     {
