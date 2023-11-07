@@ -7,7 +7,6 @@ use AmplitudeExperiment\FetchOptions;
 use AmplitudeExperiment\Remote\RemoteEvaluationClient;
 use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
 use AmplitudeExperiment\User;
-use AmplitudeExperiment\Variant;
 use Exception;
 use PHPUnit\Framework\TestCase;
 

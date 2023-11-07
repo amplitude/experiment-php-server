@@ -6,7 +6,6 @@ use AmplitudeExperiment\Experiment;
 use AmplitudeExperiment\Local\LocalEvaluationClient;
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
 use AmplitudeExperiment\User;
-use AmplitudeExperiment\Variant;
 use PHPUnit\Framework\TestCase;
 
 class LocalEvaluationClientTest extends TestCase
@@ -29,13 +28,18 @@ class LocalEvaluationClientTest extends TestCase
 
     public function setUp(): void
     {
-        $this->client->start();
+        $this->client->start()->wait();
     }
 
     public function tearDown(): void
     {
         // $this->client->stop();
     }
+
+//    public function testSmth()
+//    {
+//        sleep(5);
+//    }
 
     public function testEvaluateAllFlags()
     {

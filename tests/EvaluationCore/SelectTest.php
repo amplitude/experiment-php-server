@@ -3,7 +3,9 @@
 namespace AmplitudeExperiment\Test\EvaluationCore;
 
 use PHPUnit\Framework\TestCase;
-use AmplitudeExperiment\EvaluationCore\Util;
+use function AmplitudeExperiment\EvaluationCore\select;
+
+require_once __DIR__ . '/../../src/EvaluationCore/Util.php';
 
 class SelectTest extends TestCase {
     public function testSelectorEvaluationContextTypes() {
@@ -19,16 +21,16 @@ class SelectTest extends TestCase {
 
         $context = $nestedObject;
 
-        $this->assertNull(Util::select($context, ['does', 'not', 'exist']));
-        $this->assertNull(Util::select($context, ['null']));
-        $this->assertEquals('value', Util::select($context, ['string']));
-        $this->assertEquals(13, Util::select($context, ['number']));
-        $this->assertTrue(Util::select($context, ['boolean']));
-        $this->assertEquals($primitiveObject, Util::select($context, ['object']));
-        $this->assertNull(Util::select($context, ['object', 'does', 'not', 'exist']));
-        $this->assertNull(Util::select($context, ['object', 'null']));
-        $this->assertEquals('value', Util::select($context, ['object', 'string']));
-        $this->assertEquals(13, Util::select($context, ['object', 'number']));
-        $this->assertTrue(Util::select($context, ['object', 'boolean']));
+        $this->assertNull(select($context, ['does', 'not', 'exist']));
+        $this->assertNull(select($context, ['null']));
+        $this->assertEquals('value', select($context, ['string']));
+        $this->assertEquals(13, select($context, ['number']));
+        $this->assertTrue(select($context, ['boolean']));
+        $this->assertEquals($primitiveObject, select($context, ['object']));
+        $this->assertNull(select($context, ['object', 'does', 'not', 'exist']));
+        $this->assertNull(select($context, ['object', 'null']));
+        $this->assertEquals('value', select($context, ['object', 'string']));
+        $this->assertEquals(13, select($context, ['object', 'number']));
+        $this->assertTrue(select($context, ['object', 'boolean']));
     }
 }

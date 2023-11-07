@@ -4,7 +4,6 @@ namespace AmplitudeExperiment\Remote;
 
 use AmplitudeExperiment\FetchOptions;
 use AmplitudeExperiment\User;
-use AmplitudeExperiment\Util;
 use AmplitudeExperiment\Variant;
 use Exception;
 use GuzzleHttp\Client;
@@ -16,6 +15,7 @@ use Throwable;
 use function AmplitudeExperiment\initializeLogger;
 
 require_once __DIR__ . '/../Version.php';
+require_once __DIR__ . '/../Util.php';
 
 /**
  * Experiment client for fetching variants for a user remotely.
@@ -39,7 +39,7 @@ class RemoteEvaluationClient
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
         $this->httpClient = new Client();
-        $this->logger = Util::initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
+        $this->logger = initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
     }
 
     /**
@@ -165,19 +165,5 @@ class RemoteEvaluationClient
         }
 
         throw $err;
-    }
-
-    private function parseRemoteResponse(array $responseData): PromiseInterface
-    {
-        $variants = [];
-        foreach ($responseData as $key => $data) {
-            $value = $data['value'] ?? null;
-            if ($value == null) {
-                $value = $data['key'] ?? null;
-            }
-            $variant = new Variant($value, $data['payload'] ?? null);
-            $variants[$key] = $variant;
-        }
-        return Create::promiseFor($variants);
     }
 }

@@ -13,6 +13,7 @@ use RuntimeException;
 use function AmplitudeExperiment\initializeLogger;
 
 require_once __DIR__ . '/../Version.php';
+require_once __DIR__ . '/../Util.php';
 
 const FLAG_CONFIG_TIMEOUT = 5000;
 
@@ -28,7 +29,7 @@ class FlagConfigFetcher
         $this->apiKey = $apiKey;
         $this->serverUrl = $serverUrl;
         $this->httpClient = new Client();
-        $this->logger = Util::initializeLogger($debug);
+        $this->logger = initializeLogger($debug);
     }
 
     /**

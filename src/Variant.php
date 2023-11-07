@@ -31,7 +31,7 @@ class Variant
         $this->expKey = $expKey;
     }
 
-    public static function convertEvaluationVariantToVariant($evaluationVariant): Variant
+    public static function convertEvaluationVariantToVariant(array $evaluationVariant): Variant
     {
 
         $variant = new Variant();

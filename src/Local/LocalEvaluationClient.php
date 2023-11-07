@@ -8,8 +8,13 @@ use AmplitudeExperiment\Flag\FlagConfigService;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Util;
 use AmplitudeExperiment\Variant;
+use GuzzleHttp\Promise\PromiseInterface;
 use Monolog\Logger;
+use function AmplitudeExperiment\EvaluationCore\topologicalSort;
 use function AmplitudeExperiment\initializeLogger;
+
+require_once __DIR__ . '/../EvaluationCore/Util.php';
+require_once __DIR__ . '/../Util.php';
 
 /**
  * Experiment client for evaluating variants for a user locally.
@@ -29,13 +34,13 @@ class LocalEvaluationClient
         $this->config = $config ?? LocalEvaluationConfig::builder()->build();
         $fetcher = new FlagConfigFetcher($apiKey, $this->config->serverUrl, $this->config->debug);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->config->flagConfigPollingIntervalMillis, $this->config->debug);
-        $this->logger = Util::initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
+        $this->logger = initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
         $this->evaluation = new EvaluationEngine();
     }
 
-    public function start()
+    public function start(): PromiseInterface
     {
-        $this->flagConfigService->start();
+        return $this->flagConfigService->start();
     }
 
     public function stop()
@@ -59,8 +64,10 @@ class LocalEvaluationClient
     {
         $flags = $this->flagConfigService->getFlagConfigs();
         try {
-            $flags = \AmplitudeExperiment\EvaluationCore\Util::topologicalSort($flags, $flagKeys);
+            $flags = topologicalSort($flags, $flagKeys);
         } catch (\Exception $e) {
+            $this->logger->error('[Experiment] evaluate - error sorting flags: ' . $e->getMessage());
+            return [];
         }
         $this->logger->debug('[Experiment] evaluate - user: ' . json_encode($user) . 'flags: ' . json_encode($flags));
         $results = $this->evaluation->evaluate($user->toEvaluationContext(), $flags);

@@ -20,13 +20,11 @@
   "prefer-stable": true,
   "require": {
     "php": "^7.4 || ^8",
-    "react/async": "^1",
+    "react/async": "^3",
     "lastguest/murmurhash": "^1",
     "ext-json": "*",
     "guzzlehttp/guzzle": "^7",
-    "monolog/monolog": "^2",
-    "react/event-loop" : "^1",
-    "react/http": "^1"
+    "monolog/monolog": "^2"
   },
   "require-dev": {
     "phpunit/phpunit": "9.*"

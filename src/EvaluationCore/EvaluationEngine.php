@@ -1,7 +1,6 @@
 <?php
 
 namespace AmplitudeExperiment\EvaluationCore;
-
 use Exception;
 
 class EvaluationEngine
@@ -83,7 +82,7 @@ class EvaluationEngine
 
     private function matchCondition(array $target, array $condition): bool
     {
-        $propValue = Util::select($target, $condition['selector']);
+        $propValue = select($target, $condition['selector']);
 
         if (!$propValue && $propValue !== '0') {
             return $this->matchNull($condition['op'], $condition['values']);
@@ -121,7 +120,7 @@ class EvaluationEngine
             return $segment['variant'] ?? null;
         }
 
-        $bucketingValue = $this->coerceString(Util::select($target, $segment['bucket']['selector']));
+        $bucketingValue = $this->coerceString(select($target, $segment['bucket']['selector']));
 
         if ($bucketingValue === null || strlen($bucketingValue) === 0) {
             return $segment['variant'] ?? null;

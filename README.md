@@ -39,6 +39,38 @@ if ($variant) {
 }
 ```
 
+## Local Evaluation Quick Start
+
+```php
+<?php
+// (1) Initialize the experiment client
+$experiment = new \AmplitudeExperiment\Experiment();
+$client = $experiment->initializeLocal('<DEPLOYMENT_KEY>');
+
+// (2) Start the local evaluation client.
+$client->start()->wait();
+
+// (3) Evaluate a user.
+$user = \AmplitudeExperiment\User::builder()
+    ->deviceId('abcdefg')
+    ->userId('user@company.com')
+    ->userProperties(['premium' => true]) 
+    ->build();
+
+// (3) Evaluate a user
+$variants = $client->evaluate($user);
+
+// (4) Access a flag's variant
+$variant = $variants['FLAG_KEY']
+if ($variant) {
+    if ($variant->value == 'on') {
+        // Flag is on
+    } else {
+        // Flag is off
+    }
+}
+```
+
 ## More Information
 Please visit our :100:[Developer Center](https://www.docs.developers.amplitude.com/experiment/sdks/php-sdk/) for more instructions on using our the SDK.
 
