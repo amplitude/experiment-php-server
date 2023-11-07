@@ -6,7 +6,6 @@ class LocalEvaluationConfigBuilder
 {
     protected bool $debug = LocalEvaluationConfig::DEFAULTS['debug'];
     protected string $serverUrl = LocalEvaluationConfig::DEFAULTS['serverUrl'];
-    protected int $flagConfigPollingIntervalMillis = LocalEvaluationConfig::DEFAULTS['flagConfigPollingIntervalMillis'];
     protected array $bootstrap = LocalEvaluationConfig::DEFAULTS['bootstrap'];
 
     public function __construct()
@@ -25,12 +24,6 @@ class LocalEvaluationConfigBuilder
         return $this;
     }
 
-    public function flagConfigPollingIntervalMillis(int $flagConfigPollingIntervalMillis): LocalEvaluationConfigBuilder
-    {
-        $this->flagConfigPollingIntervalMillis = $flagConfigPollingIntervalMillis;
-        return $this;
-    }
-
     public function bootstrap(array $bootstrap): LocalEvaluationConfigBuilder
     {
         $this->bootstrap = $bootstrap;
@@ -42,7 +35,6 @@ class LocalEvaluationConfigBuilder
         return new LocalEvaluationConfig(
             $this->debug,
             $this->serverUrl,
-            $this->flagConfigPollingIntervalMillis,
             $this->bootstrap
         );
     }
