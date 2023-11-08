@@ -16,7 +16,7 @@ class FlagConfigService
     public FlagConfigFetcher $fetcher;
     public array $cache;
 
-    public function __construct(FlagConfigFetcher $fetcher, bool $debug = false, array $bootstrap = [])
+    public function __construct(FlagConfigFetcher $fetcher, bool $debug, array $bootstrap)
     {
         $this->fetcher = $fetcher;
         $this->logger = initializeLogger($debug);

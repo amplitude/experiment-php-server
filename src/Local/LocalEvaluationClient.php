@@ -38,6 +38,13 @@ class LocalEvaluationClient
         $this->evaluation = new EvaluationEngine();
     }
 
+    /**
+     * Fetch initial flag configurations.
+     *
+     * The promise returned by this function is resolved when the initial call
+     * to fetch the flag configuration completes.
+     *
+     */
     public function start(): PromiseInterface
     {
         return $this->flagConfigService->start();
@@ -51,11 +58,11 @@ class LocalEvaluationClient
      * {@link FlagConfigService} will be evaluated.
      *
      * @param $user User The user to evaluate
-     * @param $flagKeys ?array The flags to evaluate with the user. If empty, all flags
+     * @param $flagKeys array The flags to evaluate with the user. If empty, all flags
      * from the flag cache are evaluated.
      * @returns array evaluated variants
      */
-    public function evaluate(User $user, ?array $flagKeys = null): array
+    public function evaluate(User $user, array $flagKeys = []): array
     {
         $flags = $this->flagConfigService->getFlagConfigs();
         try {
