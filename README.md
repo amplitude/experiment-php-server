@@ -58,10 +58,17 @@ $user = \AmplitudeExperiment\User::builder()
     ->build();
 
 // (3) Evaluate a user
-$variants = $client->evaluate($user);
+// Evaluate all flag variants
+$allVariants = $client->evaluate($user);
+
+// Evaluate a specific subset of flag variants
+$specificVariants = $client->evaluate($user, [
+  'my-local-flag-1',
+  'my-local-flag-2',
+]);
 
 // (4) Access a flag's variant
-$variant = $variants['FLAG_KEY']
+$variant = $allVariants['FLAG_KEY']
 if ($variant) {
     if ($variant->value == 'on') {
         // Flag is on
