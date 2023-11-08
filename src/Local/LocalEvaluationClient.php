@@ -43,11 +43,6 @@ class LocalEvaluationClient
         return $this->flagConfigService->start();
     }
 
-    public function stop()
-    {
-        $this->flagConfigService->stop();
-    }
-
     /**
      * Locally evaluates flag variants for a user.
      *
@@ -66,9 +61,9 @@ class LocalEvaluationClient
         try {
             $flags = topologicalSort($flags, $flagKeys);
         } catch (\Exception $e) {
-            $this->logger->error('[Experiment] evaluate - error sorting flags: ' . $e->getMessage());
+            $this->logger->error('[Experiment] Evaluate - error sorting flags: ' . $e->getMessage());
         }
-        $this->logger->debug('[Experiment] evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode($flags));
+        $this->logger->debug('[Experiment] Evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode($flags));
         $results = $this->evaluation->evaluate($user->toEvaluationContext(), $flags);
         $variants = [];
         $filter = !empty($flagKeys);
@@ -80,7 +75,7 @@ class LocalEvaluationClient
             }
         }
 
-        $this->logger->debug('[Experiment] evaluate - variants:', $variants);
+        $this->logger->debug('[Experiment] Evaluate - variants:', $variants);
         return $variants;
     }
 }

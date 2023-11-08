@@ -5,7 +5,6 @@ namespace AmplitudeExperiment\Flag;
 use AmplitudeExperiment\Backoff;
 use AmplitudeExperiment\Util;
 use GuzzleHttp\Promise\PromiseInterface;
-use GuzzleHttp\Promise\Create;
 use Monolog\Logger;
 use function AmplitudeExperiment\initializeLogger;
 
@@ -26,7 +25,7 @@ class FlagConfigService
 
     public function start(): PromiseInterface
     {
-        $this->logger->debug('[Experiment] flag service - start');
+        $this->logger->debug('[Experiment] Flag service - start');
 
         // Fetch initial flag configs and await the result.
         return Backoff::doWithBackoff(
@@ -39,15 +38,14 @@ class FlagConfigService
 
     private function refresh(): PromiseInterface
     {
-        $this->logger->debug('[Experiment] flag config update');
+        $this->logger->debug('[Experiment] Flag config update');
         return $this->fetcher->fetch()->then(
             function (array $flagConfigs) {
-                $this->logger->debug('[Experiment] flag config update success');
                 $this->cache = $flagConfigs;
+                $this->logger->debug('[Experiment] Flag config update success');
             },
             function (string $error) {
-                $this->logger->debug('[Experiment] flag config update failed');
-                $this->logger->debug('[Experiment] ' . $error);
+                $this->logger->debug('[Experiment] Flag config update failed:' . $error);
             }
         );
     }

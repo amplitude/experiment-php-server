@@ -64,7 +64,7 @@ class FlagConfigFetcher
                 return $this->parse(json_decode($response->getBody(), true));
             },
             function (Exception $reason) {
-                $this->logger->error('[Experiment] flagConfigs - received error response: ' . $reason->getMessage());
+                $this->logger->error('[Experiment] Flag config - received error response: ' . $reason->getMessage());
                 throw $reason;
             }
         );
