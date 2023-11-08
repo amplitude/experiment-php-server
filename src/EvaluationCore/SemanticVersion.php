@@ -4,12 +4,12 @@ namespace AmplitudeExperiment\EvaluationCore;
 
 class SemanticVersion
 {
-    public $major;
-    public $minor;
-    public $patch;
-    public $preRelease;
+    public ?string $major;
+    public ?string $minor;
+    public ?string $patch;
+    public ?string $preRelease;
 
-    public function __construct($major, $minor, $patch, $preRelease = null)
+    public function __construct(?string $major, ?string $minor, ?string $patch, ?string $preRelease = null)
     {
         $this->major = $major;
         $this->minor = $minor;
@@ -17,7 +17,7 @@ class SemanticVersion
         $this->preRelease = $preRelease;
     }
 
-    public static function parse($version): ?SemanticVersion
+    public static function parse(?string $version): ?SemanticVersion
     {
         if (!$version) {
             return null;
@@ -41,7 +41,7 @@ class SemanticVersion
         return new SemanticVersion($major, $minor, $patch, $preRelease);
     }
 
-    public function compareTo($other): int
+    public function compareTo(?SemanticVersion $other): int
     {
         if ($this->major > $other->major) return 1;
         if ($this->major < $other->major) return -1;
