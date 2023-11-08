@@ -72,7 +72,7 @@ if ($variant) {
 ```
 
 ## More Information
-Please visit our :100:[Developer Center](https://www.docs.developers.amplitude.com/experiment/sdks/php-sdk/) for more instructions on using our the SDK.
+Please visit our [Developer Center](https://www.docs.developers.amplitude.com/experiment/sdks/php-sdk/) for more instructions on using our the SDK.
 
 ## Need Help?
 If you have any problems or issues over our SDK, feel free to [create a GitHub issue](https://github.com/amplitude/experiment-php-server/issues/new) or submit a request on [Amplitude Help](https://help.amplitude.com/hc/en-us/requests/new).

@@ -68,7 +68,7 @@ class LocalEvaluationClient
         } catch (\Exception $e) {
             $this->logger->error('[Experiment] evaluate - error sorting flags: ' . $e->getMessage());
         }
-        $this->logger->debug('[Experiment] evaluate - user: ' . json_encode($user->toArray()) . 'with flags: ' . json_encode($flags));
+        $this->logger->debug('[Experiment] evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode($flags));
         $results = $this->evaluation->evaluate($user->toEvaluationContext(), $flags);
         $variants = [];
         $filter = !empty($flagKeys);
@@ -80,7 +80,7 @@ class LocalEvaluationClient
             }
         }
 
-        $this->logger->debug('[Experiment] evaluate - variants: ', $variants);
+        $this->logger->debug('[Experiment] evaluate - variants:', $variants);
         return $variants;
     }
 }

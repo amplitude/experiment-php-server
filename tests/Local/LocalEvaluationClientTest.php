@@ -31,16 +31,6 @@ class LocalEvaluationClientTest extends TestCase
         $this->client->start()->wait();
     }
 
-    public function tearDown(): void
-    {
-        // $this->client->stop();
-    }
-
-//    public function testSmth()
-//    {
-//        sleep(5);
-//    }
-
     public function testEvaluateAllFlags()
     {
         $variants = $this->client->evaluate($this->testUser);
