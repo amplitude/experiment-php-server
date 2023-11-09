@@ -44,8 +44,9 @@ class FlagConfigService
                 $this->cache = $flagConfigs;
                 $this->logger->debug('[Experiment] Flag config update success');
             },
-            function (string $error) {
-                $this->logger->debug('[Experiment] Flag config update failed:' . $error);
+            function (\Exception $error) {
+                $this->logger->debug('[Experiment] Flag config update failed: ' . $error);
+                throw $error;
             }
         );
     }

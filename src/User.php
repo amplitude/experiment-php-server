@@ -4,7 +4,7 @@ namespace AmplitudeExperiment;
 
 /**
  * The user to fetch experiment/flag variants for. This is an immutable object
- * that can be created using an {@link UserBuilder}. Example usage:
+ * that can be created using a {@link UserBuilder}. Example usage:
  *
  * ```
  * User::builder()->userId("user@company.com")->build()
