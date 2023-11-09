@@ -28,7 +28,7 @@ class LocalEvaluationClient
     private EvaluationEngine $evaluation;
     private Logger $logger;
 
-    public function __construct(string $apiKey, ?LocalEvaluationConfig $config)
+    public function __construct(string $apiKey, ?LocalEvaluationConfig $config = null)
     {
         $this->apiKey = $apiKey;
         $this->config = $config ?? LocalEvaluationConfig::builder()->build();
