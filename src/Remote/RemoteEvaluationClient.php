@@ -62,7 +62,7 @@ class RemoteEvaluationClient
         return $this->doFetch($user, $this->config->fetchTimeoutMillis, $options)
             ->otherwise(function (Throwable $e) use ($user, $options) {
                 // Handle the exception
-                $this->logger->error('[Experiment] Fetch failed: ' . $e->getMessage());
+                $this->logger->error('[Experiment] Fetch variant failed: ' . $e->getMessage());
 
                 // Retry the fetch
                 return $this->retryFetch($user, $options)
@@ -72,7 +72,7 @@ class RemoteEvaluationClient
                     })
                     ->otherwise(function (Throwable $retryException) use ($e) {
                         // Handle the exception for the retry attempt
-                        $this->logger->error('[Experiment] Retry failed: ' . $retryException->getMessage());
+                        $this->logger->error('[Experiment] Fetch variant retry failed: ' . $retryException->getMessage());
 
                         // Re-throw the original exception if needed
                         throw $e;
@@ -131,7 +131,7 @@ class RemoteEvaluationClient
             return Create::promiseFor([]);
         }
 
-        $this->logger->debug('[Experiment] Retrying fetch');
+        $this->logger->debug('[Experiment] Retrying fetch variant');
 
         $err = null;
         $delayMillis = $this->config->fetchRetryBackoffMinMillis;
@@ -149,12 +149,12 @@ class RemoteEvaluationClient
                         return $result;
                     },
                     function ($e) use (&$err) {
-                        $this->logger->error('[Experiment] Retry failed: ' . $e->getMessage());
+                        $this->logger->error('[Experiment] Fetch variant retry failed: ' . $e->getMessage());
                         $err = $e;
                     }
                 );
             } catch (Exception $e) {
-                $this->logger->error('[Experiment] Retry failed: ' . $e->getMessage());
+                $this->logger->error('[Experiment]  Fetch variant retry failed: ' . $e->getMessage());
                 $err = $e;
             }
 

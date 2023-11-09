@@ -47,7 +47,7 @@ class FlagConfigFetcher
             'Content-Type' => 'application/json;charset=utf-8',
             'X-Amp-Exp-Library' => 'experiment-php-server/' . VERSION,
         ];
-        $this->logger->debug('[Experiment] Get flag configs');
+        $this->logger->debug('[Experiment] Fetch flag configs');
         $promise = $this->httpClient->requestAsync('GET', $endpoint, [
             'headers' => $headers,
             'timeout' => FLAG_CONFIG_TIMEOUT / 1000,
@@ -57,14 +57,14 @@ class FlagConfigFetcher
             function (ResponseInterface $response) {
                 // Check if the HTTP status code is not 200
                 if ($response->getStatusCode() !== 200) {
-                    $errorMessage = 'flagConfigs - received error response: ' . $response->getStatusCode() . ': ' . $response->getBody();
+                    $errorMessage = '[Experiment] Fetch flag configs - received error response: ' . $response->getStatusCode() . ': ' . $response->getBody();
                     throw new RuntimeException($errorMessage);
                 }
                 $this->logger->debug('[Experiment] Got flag configs: ' . $response->getBody());
                 return $this->parse(json_decode($response->getBody(), true));
             },
             function (Exception $reason) {
-                $this->logger->error('[Experiment] Flag config - received error response: ' . $reason->getMessage());
+                $this->logger->error('[Experiment] Fetch flag configs - received error response: ' . $reason->getMessage());
                 throw $reason;
             }
         );
