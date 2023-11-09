@@ -29,7 +29,7 @@ $user = \AmplitudeExperiment\User::builder()
 $variants = experiment.fetch($user);
 
 // (3) Access a flag's variant
-$variant = $variants['FLAG_KEY'];
+$variant = $variants['FLAG_KEY'] ?? null;
 if ($variant) {
     if ($variant->value == 'on') {
         // Flag is on
@@ -67,7 +67,7 @@ $specificVariants = $client->evaluate($user, [
 ]);
 
 // (4) Access a flag's variant
-$variant = $allVariants['FLAG_KEY'];
+$variant = $allVariants['FLAG_KEY'] ?? null;
 if ($variant) {
     if ($variant->value == 'on') {
         // Flag is on

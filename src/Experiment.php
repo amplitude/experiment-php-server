@@ -16,9 +16,9 @@ class Experiment
      * Initializes a {@link RemoteEvaluationClient} instance. If a RemoteEvaluationClient instance has already been
      * initialized with the same apiKey, the existing instance will be returned.
      *
-     * @param string $apiKey apiKey The API key. This can be found in the Experiment settings and should not
+     * @param string $apiKey The API key. This can be found in the Experiment settings and should not
      * be null or empty.
-     * @param ?RemoteEvaluationConfig $config config see {@link RemoteEvaluationConfig} for configuration options
+     * @param ?RemoteEvaluationConfig $config see {@link RemoteEvaluationConfig} for configuration options
      * @return RemoteEvaluationClient
      */
     public function initializeRemote(string $apiKey, ?RemoteEvaluationConfig $config = null): RemoteEvaluationClient
@@ -34,9 +34,9 @@ class Experiment
      * Initializes a {@link LocalEvaluationClient} instance. If a LocalEvaluationClient instance has already been
      * initialized with the same apiKey, the existing instance will be returned.
      *
-     * @param string $apiKey apapiKey The API key. This can be found in the Experiment settings and should not
+     * @param string $apiKey The API key. This can be found in the Experiment settings and should not
      * be null or empty.
-     * @param ?LocalEvaluationConfig $config config see {@link LocalEvaluationConfig} for configuration options
+     * @param ?LocalEvaluationConfig $config see {@link LocalEvaluationConfig} for configuration options
      * @return LocalEvaluationClient
      */
     public function initializeLocal(string $apiKey, ?LocalEvaluationConfig $config = null): LocalEvaluationClient
