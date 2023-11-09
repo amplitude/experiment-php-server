@@ -57,7 +57,6 @@ $user = \AmplitudeExperiment\User::builder()
     ->userProperties(['premium' => true]) 
     ->build();
 
-// (3) Evaluate a user
 // Evaluate all flag variants
 $allVariants = $client->evaluate($user);
 
