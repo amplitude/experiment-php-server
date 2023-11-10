@@ -7,7 +7,6 @@ use AmplitudeExperiment\FetchOptions;
 use AmplitudeExperiment\Remote\RemoteEvaluationClient;
 use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
 use AmplitudeExperiment\User;
-use AmplitudeExperiment\Variant;
 use Exception;
 use PHPUnit\Framework\TestCase;
 
@@ -32,7 +31,8 @@ class RemoteEvaluationClientTest extends TestCase
         $client = new RemoteEvaluationClient($this->apiKey);
         $variants = $client->fetch($this->testUser)->wait();
         $variant = $variants['sdk-ci-test'];
-        $this->assertEquals(new Variant('on', 'payload'), $variant);
+        self::assertEquals("on", $variant->key);
+        self::assertEquals("payload", $variant->payload);
     }
 
     /**
@@ -61,7 +61,8 @@ class RemoteEvaluationClientTest extends TestCase
         $client = new RemoteEvaluationClient($this->apiKey, $config);
         $variants = $client->fetch($this->testUser)->wait();
         $variant = $variants['sdk-ci-test'];
-        $this->assertEquals(new Variant('on', 'payload'), $variant);
+        self::assertEquals("on", $variant->key);
+        self::assertEquals("payload", $variant->payload);
     }
 
     /**
@@ -78,7 +79,8 @@ class RemoteEvaluationClientTest extends TestCase
         $client = new RemoteEvaluationClient($this->apiKey, $config);
         $variants = $client->fetch($this->testUser)->wait();
         $variant = $variants['sdk-ci-test'];
-        $this->assertEquals(new Variant('on', 'payload'), $variant);
+        self::assertEquals("on", $variant->key);
+        self::assertEquals("payload", $variant->payload);
     }
 
     /**
@@ -90,7 +92,8 @@ class RemoteEvaluationClientTest extends TestCase
         $variants = $client->fetch($this->testUser, new FetchOptions(['sdk-ci-test']))->wait();
         $variant = $variants['sdk-ci-test'];
         $this->assertEquals(1, sizeof($variants));
-        $this->assertEquals(new Variant('on', 'payload'), $variant);
+        self::assertEquals("on", $variant->key);
+        self::assertEquals("payload", $variant->payload);
     }
 
     public function testExperimentInitializeRemote()

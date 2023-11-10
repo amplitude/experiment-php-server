@@ -2,21 +2,24 @@
 
 namespace AmplitudeExperiment;
 
+use AmplitudeExperiment\Local\LocalEvaluationClient;
+use AmplitudeExperiment\Local\LocalEvaluationConfig;
 use AmplitudeExperiment\Remote\RemoteEvaluationClient;
 use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
-use AmplitudeExperiment\Remote\RemoteEvaluationConfigBuilder;
 
 class Experiment
 {
     private array $remoteInstances = [];
+    private array $localInstances = [];
 
     /**
-     * Initializes a [RemoteEvaluationClient] instance. If a RemoteEvaluationClient instance has already been
+     * Initializes a {@link RemoteEvaluationClient} instance. If a RemoteEvaluationClient instance has already been
      * initialized with the same apiKey, the existing instance will be returned.
      *
-     * @param string $apiKey apiKey The API key. This can be found in the Experiment settings and should not
+     * @param $apiKey string The API key. This can be found in the Experiment settings and should not
      * be null or empty.
-     * @param ?RemoteEvaluationConfig $config config see {@link RemoteEvaluationConfig} for configuration options
+     * @param $config ?RemoteEvaluationConfig see {@link RemoteEvaluationConfig} for configuration options
+     * @return RemoteEvaluationClient
      */
     public function initializeRemote(string $apiKey, ?RemoteEvaluationConfig $config = null): RemoteEvaluationClient
     {
@@ -26,4 +29,23 @@ class Experiment
         }
         return $this->remoteInstances[$apiKey];
     }
+
+    /**
+     * Initializes a {@link LocalEvaluationClient} instance. If a LocalEvaluationClient instance has already been
+     * initialized with the same apiKey, the existing instance will be returned.
+     *
+     * @param $apiKey string The API key. This can be found in the Experiment settings and should not
+     * be null or empty.
+     * @param $config ?LocalEvaluationConfig see {@link LocalEvaluationConfig} for configuration options
+     * @return LocalEvaluationClient
+     */
+    public function initializeLocal(string $apiKey, ?LocalEvaluationConfig $config = null): LocalEvaluationClient
+    {
+        if (!isset($this->localInstances[$apiKey])) {
+            $config = $config ?? LocalEvaluationConfig::builder()->build();
+            $this->localInstances[$apiKey] = new LocalEvaluationClient($apiKey, $config);
+        }
+        return $this->localInstances[$apiKey];
+    }
+
 }

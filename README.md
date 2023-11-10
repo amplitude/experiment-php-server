@@ -29,7 +29,45 @@ $user = \AmplitudeExperiment\User::builder()
 $variants = experiment.fetch($user);
 
 // (3) Access a flag's variant
-$variant = $variants['FLAG_KEY']
+$variant = $variants['FLAG_KEY'] ?? null;
+if ($variant) {
+    if ($variant->value == 'on') {
+        // Flag is on
+    } else {
+        // Flag is off
+    }
+}
+```
+
+## Local Evaluation Quick Start
+
+```php
+<?php
+// (1) Initialize the experiment client
+$experiment = new \AmplitudeExperiment\Experiment();
+$client = $experiment->initializeLocal('<DEPLOYMENT_KEY>');
+
+// (2) Start the local evaluation client.
+$client->start()->wait();
+
+// (3) Evaluate a user.
+$user = \AmplitudeExperiment\User::builder()
+    ->deviceId('abcdefg')
+    ->userId('user@company.com')
+    ->userProperties(['premium' => true]) 
+    ->build();
+
+// Evaluate all flag variants
+$allVariants = $client->evaluate($user);
+
+// Evaluate a specific subset of flag variants
+$specificVariants = $client->evaluate($user, [
+  'my-local-flag-1',
+  'my-local-flag-2',
+]);
+
+// (4) Access a flag's variant
+$variant = $allVariants['FLAG_KEY'] ?? null;
 if ($variant) {
     if ($variant->value == 'on') {
         // Flag is on
@@ -40,7 +78,7 @@ if ($variant) {
 ```
 
 ## More Information
-Please visit our :100:[Developer Center](https://www.docs.developers.amplitude.com/experiment/sdks/php-sdk/) for more instructions on using our the SDK.
+Please visit our [Developer Center](https://www.docs.developers.amplitude.com/experiment/sdks/php-sdk/) for more instructions on using our the SDK.
 
 ## Need Help?
 If you have any problems or issues over our SDK, feel free to [create a GitHub issue](https://github.com/amplitude/experiment-php-server/issues/new) or submit a request on [Amplitude Help](https://help.amplitude.com/hc/en-us/requests/new).

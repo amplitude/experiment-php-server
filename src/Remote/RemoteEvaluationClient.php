@@ -7,15 +7,15 @@ use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use Exception;
 use GuzzleHttp\Client;
-use GuzzleHttp\Promise\Promise;
+use GuzzleHttp\Promise\Create;
 use GuzzleHttp\Promise\PromiseInterface;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
+use function AmplitudeExperiment\initializeLogger;
 
-include __DIR__ . '/../Version.php';
+require_once __DIR__ . '/../Version.php';
+require_once __DIR__ . '/../Util.php';
 
 /**
  * Experiment client for fetching variants for a user remotely.
@@ -39,7 +39,7 @@ class RemoteEvaluationClient
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
         $this->httpClient = new Client();
-        $this->logger = $this->initializeLogger();
+        $this->logger = initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
     }
 
     /**
@@ -57,12 +57,12 @@ class RemoteEvaluationClient
         if ($user->userId == null && $user->deviceId == null) {
             $this->logger->warning('[Experiment] user id and device id are null; Amplitude may not resolve identity');
         }
-        $this->logger->debug('[Experiment] Fetching variants for user: ' . json_encode($user));
+        $this->logger->debug('[Experiment] Fetching variants for user: ' . json_encode($user->toArray()));
 
         return $this->doFetch($user, $this->config->fetchTimeoutMillis, $options)
             ->otherwise(function (Throwable $e) use ($user, $options) {
                 // Handle the exception
-                $this->logger->error('[Experiment] Fetch failed: ' . $e->getMessage());
+                $this->logger->error('[Experiment] Fetch variant failed: ' . $e->getMessage());
 
                 // Retry the fetch
                 return $this->retryFetch($user, $options)
@@ -72,7 +72,7 @@ class RemoteEvaluationClient
                     })
                     ->otherwise(function (Throwable $retryException) use ($e) {
                         // Handle the exception for the retry attempt
-                        $this->logger->error('[Experiment] Retry failed: ' . $retryException->getMessage());
+                        $this->logger->error('[Experiment] Fetch variant retry failed: ' . $retryException->getMessage());
 
                         // Re-throw the original exception if needed
                         throw $e;
@@ -84,10 +84,10 @@ class RemoteEvaluationClient
     {
         // Define the request data
         $libraryUser = $user->copyToBuilder()->library('experiment-php-server/' . VERSION)->build();
-        $serializedUser = base64_encode(json_encode($libraryUser));
+        $serializedUser = base64_encode(json_encode($libraryUser->toArray()));
 
         // Define the request URL
-        $endpoint = $this->config->serverUrl . '/sdk/vardata';
+        $endpoint = $this->config->serverUrl . '/sdk/v2/vardata';
 
         // Define the request headers
         $headers = [
@@ -107,7 +107,11 @@ class RemoteEvaluationClient
 
         return $promise->then(
             function (ResponseInterface $response) {
-                $variants = $this->parseRemoteResponse(json_decode($response->getBody(), true));
+                $results = json_decode($response->getBody(), true);
+                $variants = [];
+                foreach ($results as $flagKey => $flagResult) {
+                    $variants[$flagKey] = Variant::convertEvaluationVariantToVariant($flagResult);
+                }
                 $this->logger->debug('[Experiment] Fetched variants: ' . $response->getBody());
                 return $variants;
             },
@@ -124,12 +128,10 @@ class RemoteEvaluationClient
     private function retryFetch(User $user, ?FetchOptions $options = null): PromiseInterface
     {
         if ($this->config->fetchRetries == 0) {
-            $promise = new Promise();
-            $promise->resolve([]);
-            return $promise;
+            return Create::promiseFor([]);
         }
 
-        $this->logger->debug('[Experiment] Retrying fetch');
+        $this->logger->debug('[Experiment] Retrying fetch variant');
 
         $err = null;
         $delayMillis = $this->config->fetchRetryBackoffMinMillis;
@@ -147,12 +149,12 @@ class RemoteEvaluationClient
                         return $result;
                     },
                     function ($e) use (&$err) {
-                        $this->logger->error('[Experiment] Retry failed: ' . $e->getMessage());
+                        $this->logger->error('[Experiment] Fetch variant retry failed: ' . $e->getMessage());
                         $err = $e;
                     }
                 );
             } catch (Exception $e) {
-                $this->logger->error('[Experiment] Retry failed: ' . $e->getMessage());
+                $this->logger->error('[Experiment]  Fetch variant retry failed: ' . $e->getMessage());
                 $err = $e;
             }
 
@@ -163,31 +165,5 @@ class RemoteEvaluationClient
         }
 
         throw $err;
-    }
-
-    private function parseRemoteResponse(array $responseData): PromiseInterface
-    {
-        $variants = [];
-        foreach ($responseData as $key => $data) {
-            $value = $data['value'] ?? null;
-            if ($value == null) {
-                $value = $data['key'] ?? null;
-            }
-            $variant = new Variant($value, $data['payload'] ?? null);
-            $variants[$key] = $variant;
-        }
-        $promise = new Promise();
-        $promise->resolve($variants);
-        return $promise;
-    }
-
-    private function initializeLogger(): Logger
-    {
-        $logger = new Logger('AmplitudeExperiment');
-        $handler = new StreamHandler('php://stdout', $this->config->debug ? Logger::DEBUG : Logger::INFO);
-        $formatter = new LineFormatter(null, null, false, true);
-        $handler->setFormatter($formatter);
-        $logger->pushHandler($handler);
-        return $logger;
     }
 }
