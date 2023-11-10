@@ -1,3 +1,10 @@
+# [0.2.0](https://github.com/amplitude/experiment-php-server/compare/0.1.2...0.2.0) (2023-11-10)
+
+
+### Features
+
+* Local evaluation and core evaluation package ([#5](https://github.com/amplitude/experiment-php-server/issues/5)) ([aa4dc79](https://github.com/amplitude/experiment-php-server/commit/aa4dc795228d00bab005bc8233315ad7510f5500))
+
 ## [0.1.2](https://github.com/amplitude/experiment-php-server/compare/0.1.1...0.1.2) (2023-11-02)
 
 
