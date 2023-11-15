@@ -2,6 +2,8 @@
 
 namespace AmplitudeExperiment\Local;
 
+use AmplitudeExperiment\Assignment\AssignmentConfig;
+
 class LocalEvaluationConfig
 {
     /**
@@ -18,18 +20,21 @@ class LocalEvaluationConfig
      * Useful if you are managing the flag configurations separately.
      */
     public array $bootstrap;
+    public ?AssignmentConfig $assignmentConfig;
 
     const DEFAULTS = [
         'debug' => false,
         'serverUrl' => 'https://api.lab.amplitude.com',
-        'bootstrap' => []
+        'bootstrap' => [],
+        'assignmentConfig' => null
     ];
 
-    public function __construct(bool $debug, string $serverUrl, array $bootstrap)
+    public function __construct(bool $debug, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig)
     {
         $this->debug = $debug;
         $this->serverUrl = $serverUrl;
         $this->bootstrap = $bootstrap;
+        $this->assignmentConfig = $assignmentConfig;
     }
 
     public static function builder(): LocalEvaluationConfigBuilder

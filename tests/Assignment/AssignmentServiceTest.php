@@ -7,7 +7,7 @@ use AmplitudeExperiment\Assignment\Assignment;
 use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\User;
 use PHPUnit\Framework\TestCase;
-use const AmplitudeExperiment\Assignment\DAY_SECS;
+use const AmplitudeExperiment\Assignment\DAY_MILLIS;
 use function AmplitudeExperiment\hashCode;
 
 require_once __DIR__ . '/../../src/Util.php';
@@ -52,7 +52,7 @@ class AssignmentServiceTest extends TestCase
         $this->assertCount(1, $userProperties['$unset']);
 
         $canonicalization = 'user device flag-key-1 on flag-key-2 control';
-        $expected = 'user device ' . hashCode($canonicalization) . ' ' . floor($assignment->timestamp / DAY_SECS);
+        $expected = 'user device ' . hashCode($canonicalization) . ' ' . floor($assignment->timestamp / DAY_MILLIS);
         $this->assertEquals($expected, $event->insertId);
     }
 }

@@ -2,6 +2,10 @@
 
 namespace AmplitudeExperiment\Local;
 
+use AmplitudeExperiment\Amplitude\Amplitude;
+use AmplitudeExperiment\Assignment\Assignment;
+use AmplitudeExperiment\Assignment\AssignmentFilter;
+use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
 use AmplitudeExperiment\Flag\FlagConfigFetcher;
 use AmplitudeExperiment\Flag\FlagConfigService;
@@ -12,9 +16,12 @@ use GuzzleHttp\Promise\PromiseInterface;
 use Monolog\Logger;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
 use function AmplitudeExperiment\initializeLogger;
+use const AmplitudeExperiment\Assignment\FLAG_TYPE_HOLDOUT_GROUP;
+use const AmplitudeExperiment\Assignment\FLAG_TYPE_MUTUAL_EXCLUSION_GROUP;
 
 require_once __DIR__ . '/../EvaluationCore/Util.php';
 require_once __DIR__ . '/../Util.php';
+require_once __DIR__ . '/../Assignment/AssignmentService.php';
 
 /**
  * Experiment client for evaluating variants for a user locally.
@@ -27,6 +34,7 @@ class LocalEvaluationClient
     private FlagConfigService $flagConfigService;
     private EvaluationEngine $evaluation;
     private Logger $logger;
+    private ?AssignmentService $assignmentService = null;
 
     public function __construct(string $apiKey, ?LocalEvaluationConfig $config = null)
     {
@@ -36,6 +44,9 @@ class LocalEvaluationClient
         $this->flagConfigService = new FlagConfigService($fetcher, $this->config->debug, $this->config->bootstrap);
         $this->logger = initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
         $this->evaluation = new EvaluationEngine();
+        if ($config->assignmentConfig) {
+            $this->assignmentService = new AssignmentService(new Amplitude($config->assignmentConfig->apiKey), new AssignmentFilter($config->assignmentConfig->cacheCapacity));
+        }
     }
 
     /**
@@ -73,6 +84,7 @@ class LocalEvaluationClient
         $this->logger->debug('[Experiment] Evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode($flags));
         $results = $this->evaluation->evaluate($user->toEvaluationContext(), $flags);
         $variants = [];
+        $assignmentResults = [];
         $filter = !empty($flagKeys);
 
         foreach ($results as $flagKey => $flagResult) {
@@ -80,9 +92,16 @@ class LocalEvaluationClient
             if ($included) {
                 $variants[$flagKey] = Variant::convertEvaluationVariantToVariant($flagResult);
             }
+            if ($included || $flagResult['metadata']['flagType'] == FLAG_TYPE_HOLDOUT_GROUP || $flagResult['metadata']['flagType'] == FLAG_TYPE_MUTUAL_EXCLUSION_GROUP) {
+                $assignmentResults[$flagKey] = $flagResult;
+            }
         }
 
         $this->logger->debug('[Experiment] Evaluate - variants:', $variants);
+        if ($this->assignmentService) {
+            echo "Tracking assignment\n";
+            $this->assignmentService->track(new Assignment($user, $assignmentResults));
+        }
         return $variants;
     }
 }

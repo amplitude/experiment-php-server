@@ -2,21 +2,22 @@
 
 namespace AmplitudeExperiment\Assignment;
 
-use AmplitudeExperiment\Analytics\Client;
-use AmplitudeExperiment\Analytics\BaseEvent;
+use AmplitudeExperiment\Amplitude\Amplitude;
+use AmplitudeExperiment\Amplitude\Event;
 use function AmplitudeExperiment\hashCode;
 
 require_once __DIR__ . '/../Util.php';
 
-const FLAG_TYPE_MUTUAL_EXCLUSION_GROUP = "mutual-exclusion-group";
-const DAY_SECS = 24 * 60 * 60;
+const FLAG_TYPE_MUTUAL_EXCLUSION_GROUP = 'mutual-exclusion-group';
+const FLAG_TYPE_HOLDOUT_GROUP = 'holdout-group';;
+const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
 class AssignmentService
 {
-    private Client $amplitude;
+    private Amplitude $amplitude;
     private AssignmentFilter $assignmentFilter;
 
-    public function __construct(Client $amplitude, AssignmentFilter $assignmentFilter)
+    public function __construct(Amplitude $amplitude, AssignmentFilter $assignmentFilter)
     {
         $this->amplitude = $amplitude;
         $this->assignmentFilter = $assignmentFilter;
@@ -29,16 +30,16 @@ class AssignmentService
         }
     }
 
-    public static function toEvent(Assignment $assignment): BaseEvent
+    public static function toEvent(Assignment $assignment): Event
     {
-        $event = new BaseEvent('[Experiment] Assignment');
+        $event = new Event('[Experiment] Assignment');
         $event->userId = $assignment->user->userId;
         $event->deviceId = $assignment->user->deviceId;
         $event->eventProperties = [];
         $event->userProperties = [];
 
         foreach ($assignment->results as $resultsKey => $result) {
-            $event->eventProperties["{$resultsKey}.variant"] = $result['value'];
+            $event->eventProperties["{$resultsKey}.variant"] = $result['key'];
         }
 
         $set = [];
@@ -61,7 +62,7 @@ class AssignmentService
         $hash = hashCode($assignment->canonicalize());
 
         $event->insertId = "{$event->userId} {$event->deviceId} {$hash} " .
-            floor($assignment->timestamp / DAY_SECS);
+            floor($assignment->timestamp / DAY_MILLIS);
 
         return $event;
     }

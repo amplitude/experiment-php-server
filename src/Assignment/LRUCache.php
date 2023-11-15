@@ -22,7 +22,7 @@ class CacheItem {
     public function __construct($key, $value) {
         $this->key = $key;
         $this->value = $value;
-        $this->createdAt = time();
+        $this->createdAt = floor(microtime(true) * 1000);
     }
 }
 
@@ -57,7 +57,7 @@ class LRUCache {
     public function get($key) {
         if (isset($this->cache[$key])) {
             $node = $this->cache[$key];
-            $timeElapsed = time() - $node->data->createdAt;
+            $timeElapsed = floor(microtime(true) * 1000) - $node->data->createdAt;
 
             if ($timeElapsed > $this->ttlMillis) {
                 $this->remove($key);

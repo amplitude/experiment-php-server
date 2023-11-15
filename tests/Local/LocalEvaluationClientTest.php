@@ -2,6 +2,7 @@
 
 namespace AmplitudeExperiment\Test\Local;
 
+use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Experiment;
 use AmplitudeExperiment\Local\LocalEvaluationClient;
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
@@ -68,5 +69,15 @@ class LocalEvaluationClientTest extends TestCase
         self::assertEquals("off", $variant->key);
         self::assertEquals(null, $variant->payload);
         self::assertTrue($variant->metadata["default"]);
+    }
+
+    public function testAssignment()
+    {
+        $aConfig = new AssignmentConfig('a6dd847b9d2f03c816d4f3f8458cdc1d');
+        $config = LocalEvaluationConfig::builder()->debug(true)->assignmentConfig($aConfig)->build();
+        $client = new LocalEvaluationClient($this->apiKey, $config);
+        $client->start()->wait();
+        $user = User::builder()->userId('tim.yiu@amplitude.com')->build();
+        $client->evaluate($user);
     }
 }
