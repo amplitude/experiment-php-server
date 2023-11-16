@@ -23,7 +23,7 @@ class LocalEvaluationClientTest extends TestCase
             ->deviceId('test_device')
             ->build();
         $experiment = new Experiment();
-        $config = LocalEvaluationConfig::builder()->debug(true)->build();
+        $config = LocalEvaluationConfig::builder()->debug(false)->build();
         $this->client = $experiment->initializeLocal($this->apiKey, $config);
     }
 
@@ -74,7 +74,7 @@ class LocalEvaluationClientTest extends TestCase
     public function testAssignment()
     {
         $aConfig = new AssignmentConfig('a6dd847b9d2f03c816d4f3f8458cdc1d');
-        $config = LocalEvaluationConfig::builder()->debug(true)->assignmentConfig($aConfig)->build();
+        $config = LocalEvaluationConfig::builder()->debug(false)->assignmentConfig($aConfig)->build();
         $client = new LocalEvaluationClient($this->apiKey, $config);
         $client->start()->wait();
         $user = User::builder()->userId('tim.yiu@amplitude.com')->build();

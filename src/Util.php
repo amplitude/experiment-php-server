@@ -6,8 +6,9 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
-function initializeLogger(?bool $debug): Logger
+function initializeLogger(bool $debug): Logger
 {
+    echo "Initializing logger " . $debug . " \n";
     $logger = new Logger('AmplitudeExperiment');
     $handler = new StreamHandler('php://stdout', $debug ? Logger::DEBUG : Logger::INFO);
     $formatter = new LineFormatter(null, null, false, true);

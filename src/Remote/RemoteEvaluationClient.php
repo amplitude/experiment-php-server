@@ -39,7 +39,7 @@ class RemoteEvaluationClient
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
         $this->httpClient = new Client();
-        $this->logger = initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
+        $this->logger = initializeLogger($this->config->debug);
     }
 
     /**

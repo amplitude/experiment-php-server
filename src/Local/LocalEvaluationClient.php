@@ -4,6 +4,7 @@ namespace AmplitudeExperiment\Local;
 
 use AmplitudeExperiment\Amplitude\Amplitude;
 use AmplitudeExperiment\Assignment\Assignment;
+use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Assignment\AssignmentFilter;
 use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
@@ -40,13 +41,11 @@ class LocalEvaluationClient
     {
         $this->apiKey = $apiKey;
         $this->config = $config ?? LocalEvaluationConfig::builder()->build();
-        $fetcher = new FlagConfigFetcher($apiKey, $this->config->serverUrl, $this->config->debug);
+        $fetcher = new FlagConfigFetcher($apiKey, $this->config->debug, $this->config->serverUrl);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->config->debug, $this->config->bootstrap);
-        $this->logger = initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
+        $this->logger = initializeLogger($this->config->debug);
+        $this->initializeAssignmentService($config->assignmentConfig);
         $this->evaluation = new EvaluationEngine();
-        if ($config->assignmentConfig) {
-            $this->assignmentService = new AssignmentService(new Amplitude($config->assignmentConfig->apiKey), new AssignmentFilter($config->assignmentConfig->cacheCapacity));
-        }
     }
 
     /**
@@ -99,9 +98,19 @@ class LocalEvaluationClient
 
         $this->logger->debug('[Experiment] Evaluate - variants:', $variants);
         if ($this->assignmentService) {
-            echo "Tracking assignment\n";
             $this->assignmentService->track(new Assignment($user, $assignmentResults));
         }
         return $variants;
+    }
+
+    private function initializeAssignmentService(?AssignmentConfig $config): void
+    {
+        if ($config) {
+            $this->assignmentService = new AssignmentService(
+                new Amplitude($config->apiKey,
+                    $this->config->debug,
+                    $config->amplitudeConfig),
+                new AssignmentFilter($config->cacheCapacity));
+        }
     }
 }

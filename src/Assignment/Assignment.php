@@ -26,7 +26,6 @@ class Assignment
             $value = $this->results[$key];
             $canonical .= " " . trim($key) . " " . trim($value['key']);
         }
-        echo $canonical . "\n";
         return $canonical;
     }
 }

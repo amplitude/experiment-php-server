@@ -17,17 +17,16 @@ class Amplitude
     private array $queue = [];
     private Client $httpClient;
     private Logger $logger;
+    private ?AmplitudeConfig $config;
 
-    public function __construct(string $apiKey, bool $debug = false)
+    public function __construct(string $apiKey, bool $debug, AmplitudeConfig $config = null)
     {
         $this->apiKey = $apiKey;
         $this->httpClient = new Client();
         $this->logger = initializeLogger($debug);
+        $this->config = $config ?? AmplitudeConfig::builder()->build();
     }
 
-    /**
-     * @throws GuzzleException
-     */
     public function flush(): PromiseInterface
     {
         $payload = ["api_key" => $this->apiKey, "events" => $this->queue];
@@ -35,51 +34,30 @@ class Amplitude
         // Fetch initial flag configs and await the result.
         return Backoff::doWithBackoff(
             function () use ($payload) {
-                return $this->post('https://api2.amplitude.com/batch', $payload)->then(
+                return $this->post($this->config->serverUrl, $payload)->then(
                     function () {
                         $this->queue = [];
                     }
                 );
             },
-            new Backoff(5, 1, 1, 1)
+            new Backoff($this->config->flushMaxRetries, 1, 1, 1)
         );
     }
 
     public function logEvent(Event $event)
     {
         $this->queue[] = $event->toArray();
+        if (count($this->queue) >= $this->config->flushQueueSize) {
+            $this->flush()->wait();
+        }
     }
 
-    /**
-     * @throws GuzzleException
-     */
     public function __destruct()
     {
         if (count($this->queue) > 0) {
             $this->flush()->wait();
         }
     }
-
-//    private function handleResponse(int $code): bool
-//    {
-//        if ($code >= 200 && $code < 300) {
-//            $this->logger->debug("[Experiment] Event sent successfully");
-//            return true;
-//        } elseif ($code == 429) {
-//            $this->logger->error("[Experiment] Event could not be sent - Exceeded daily quota");
-//        } elseif ($code == 413) {
-//            $this->logger->error("[Experiment] Event could not be sent - Payload too large");
-//        } elseif ($code == 408) {
-//            $this->logger->error("[Experiment] Event could not be sent - Timed out");
-//        } elseif ($code >= 400 && $code < 500) {
-//            $this->logger->error("[Experiment] Event could not be sent - Invalid request");
-//        } elseif ($code >= 500) {
-//            $this->logger->error("[Experiment] Event could not be sent - Http request failed");
-//        } else {
-//            $this->logger->error("[Experiment] Event could not be sent - Http request status unknown");
-//        }
-//        return false;
-//    }
 
     /**
      * @throws GuzzleException
@@ -92,12 +70,9 @@ class Amplitude
         ]);
 
         return $promise->then(
-            function ($response) {
+            function ($response) use ($payload) {
                 // Process the successful response if needed
-                $this->logger->debug("[Amplitude] Event sent successfully");
-                $responseData = json_decode($response->getBody(), true);
-
-                return $responseData;
+                $this->logger->debug("[Amplitude] Event sent successfully: " . json_encode($payload));
             },
             function (\Exception $exception) use ($payload) {
                 // Handle the exception for async request
