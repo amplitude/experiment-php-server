@@ -32,9 +32,9 @@ class LocalEvaluationClient
     {
         $this->apiKey = $apiKey;
         $this->config = $config ?? LocalEvaluationConfig::builder()->build();
-        $fetcher = new FlagConfigFetcher($apiKey, $this->config->serverUrl, $this->config->debug);
+        $fetcher = new FlagConfigFetcher($apiKey, $this->config->debug, $this->config->serverUrl);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->config->debug, $this->config->bootstrap);
-        $this->logger = initializeLogger($this->config->debug ? Logger::DEBUG : Logger::INFO);
+        $this->logger = initializeLogger($this->config->debug);
         $this->evaluation = new EvaluationEngine();
     }
 
