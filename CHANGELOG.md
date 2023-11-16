@@ -1,3 +1,10 @@
+## [0.2.1](https://github.com/amplitude/experiment-php-server/compare/0.2.0...0.2.1) (2023-11-16)
+
+
+### Bug Fixes
+
+* Incorrect initialization of logger ([#6](https://github.com/amplitude/experiment-php-server/issues/6)) ([b41598d](https://github.com/amplitude/experiment-php-server/commit/b41598d468b7afc47805daacad14ef37a63fdcdb))
+
 # [0.2.0](https://github.com/amplitude/experiment-php-server/compare/0.1.2...0.2.0) (2023-11-10)
 
 
