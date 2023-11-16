@@ -24,7 +24,7 @@ class FlagConfigFetcher
     private string $serverUrl;
     private Client $httpClient;
 
-    public function __construct(string $apiKey, bool $debug,string $serverUrl = LocalEvaluationConfig::DEFAULTS["serverUrl"])
+    public function __construct(string $apiKey, bool $debug, string $serverUrl = LocalEvaluationConfig::DEFAULTS["serverUrl"])
     {
         $this->apiKey = $apiKey;
         $this->serverUrl = $serverUrl;
