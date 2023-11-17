@@ -14,8 +14,8 @@ require_once __DIR__ . '/../Util.php';
 class Amplitude
 {
     private string $apiKey;
-    private array $queue = [];
-    private Client $httpClient;
+    protected array $queue = [];
+    protected Client $httpClient;
     private Logger $logger;
     private ?AmplitudeConfig $config;
 
@@ -46,6 +46,7 @@ class Amplitude
 
     public function logEvent(Event $event)
     {
+        print_r($event->toArray());
         $this->queue[] = $event->toArray();
         if (count($this->queue) >= $this->config->flushQueueSize) {
             $this->flush()->wait();
@@ -59,9 +60,6 @@ class Amplitude
         }
     }
 
-    /**
-     * @throws GuzzleException
-     */
     private function post(string $url, array $payload): PromiseInterface
     {
         // Using sendAsync to make an asynchronous request
@@ -72,6 +70,7 @@ class Amplitude
         return $promise->then(
             function ($response) use ($payload) {
                 // Process the successful response if needed
+                echo $response->getBody();
                 $this->logger->debug("[Amplitude] Event sent successfully: " . json_encode($payload));
             },
             function (\Exception $exception) use ($payload) {

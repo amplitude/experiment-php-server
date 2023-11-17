@@ -1,6 +1,6 @@
 <?php
 
-namespace AmplitudeExperiment;
+namespace AmplitudeExperiment\Remote;
 
 /**
  * Options to modify the behavior of a remote evaluation fetch request.

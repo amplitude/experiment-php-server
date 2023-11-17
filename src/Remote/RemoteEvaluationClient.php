@@ -2,7 +2,6 @@
 
 namespace AmplitudeExperiment\Remote;
 
-use AmplitudeExperiment\FetchOptions;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use Exception;

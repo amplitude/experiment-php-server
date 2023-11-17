@@ -3,7 +3,7 @@
 namespace AmplitudeExperiment\Test\Remote;
 
 use AmplitudeExperiment\Experiment;
-use AmplitudeExperiment\FetchOptions;
+use AmplitudeExperiment\Remote\FetchOptions;
 use AmplitudeExperiment\Remote\RemoteEvaluationClient;
 use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
 use AmplitudeExperiment\User;
