@@ -14,7 +14,7 @@ class AssignmentFilter
 
     public function shouldTrack(Assignment $assignment): bool
     {
-        if (count($assignment->results) === 0) {
+        if (count($assignment->variants) === 0) {
             return false;
         }
 

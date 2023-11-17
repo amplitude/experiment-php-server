@@ -92,7 +92,7 @@ class LocalEvaluationClient
                 $variants[$flagKey] = Variant::convertEvaluationVariantToVariant($flagResult);
             }
             if ($included || $flagResult['metadata']['flagType'] == FLAG_TYPE_HOLDOUT_GROUP || $flagResult['metadata']['flagType'] == FLAG_TYPE_MUTUAL_EXCLUSION_GROUP) {
-                $assignmentResults[$flagKey] = $flagResult;
+                $assignmentResults[$flagKey] = Variant::convertEvaluationVariantToVariant($flagResult);
             }
         }
 

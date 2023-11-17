@@ -40,7 +40,7 @@ class FlagConfigFetcher
      */
     public function fetch(): PromiseInterface
     {
-        $endpoint = $this->serverUrl . '/sdk/v2/flags';
+        $endpoint = $this->serverUrl . '/sdk/v2/flags?v=0';
         $headers = [
             'Authorization' => 'Api-Key ' . $this->apiKey,
             'Accept' => 'application/json',

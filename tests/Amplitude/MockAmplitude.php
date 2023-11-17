@@ -8,8 +8,6 @@ use GuzzleHttp\Client;
 
 class MockAmplitude extends Amplitude
 {
-    private int $retries = 0;
-
     public function __construct(string $apiKey, bool $debug, AmplitudeConfig $config = null)
     {
         parent::__construct($apiKey, $debug, $config);

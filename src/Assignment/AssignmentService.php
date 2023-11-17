@@ -38,21 +38,27 @@ class AssignmentService
         $event->eventProperties = [];
         $event->userProperties = [];
 
-        foreach ($assignment->results as $resultsKey => $result) {
-            $event->eventProperties["{$resultsKey}.variant"] = $result['key'];
-        }
-
         $set = [];
         $unset = [];
-        foreach ($assignment->results as $resultsKey => $result) {
-            $flagType = $result['metadata']['flagType'] ?? null;
-            $default = $result['metadata']['default'] ?? false;
+        foreach ($assignment->variants as $flagKey => $variant) {
+            if (!$variant->key) {
+                echo $flagKey . "\n";
+                continue;
+            }
+            $event->eventProperties["{$flagKey}.variant"] = $variant->key;
+            $version = $variant->metadata['flagVersion'] ?? null;
+            $segmentName = $variant->metadata['segmentName'] ?? null;
+            if ($version && $segmentName) {
+                $event->eventProperties["{$flagKey}.details"] = "v{$version} rule:{$segmentName}";
+            }
+            $flagType = $variant->metadata['flagType'] ?? null;
+            $default = $variant->metadata['default'] ?? false;
             if ($flagType == FLAG_TYPE_MUTUAL_EXCLUSION_GROUP) {
                 continue;
             } elseif ($default) {
-                $unset["[Experiment] {$resultsKey}"] = '-';
+                $unset["[Experiment] {$flagKey}"] = '-';
             } else {
-                $set["[Experiment] {$resultsKey}"] = $result['value'];
+                $set["[Experiment] {$flagKey}"] = $variant->key;
             }
         }
 

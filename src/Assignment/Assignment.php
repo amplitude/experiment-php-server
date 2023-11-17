@@ -7,24 +7,27 @@ use AmplitudeExperiment\User;
 class Assignment
 {
     public User $user;
-    public array $results;
+    public array $variants;
     public int $timestamp;
 
-    public function __construct(User $user, array $results)
+    public function __construct(User $user, array $variants)
     {
         $this->user = $user;
-        $this->results = $results;
+        $this->variants = $variants;
         $this->timestamp = floor(microtime(true) * 1000);
     }
 
     public function canonicalize(): string
     {
-        $canonical = trim("{$this->user->userId} {$this->user->deviceId}");
-        $sortedKeys = array_keys($this->results);
+        $canonical = trim("{$this->user->userId} {$this->user->deviceId}") . ' ';
+        $sortedKeys = array_keys($this->variants);
         sort($sortedKeys);
         foreach ($sortedKeys as $key) {
-            $value = $this->results[$key];
-            $canonical .= " " . trim($key) . " " . trim($value['key']);
+            $variant = $this->variants[$key];
+            if (!$variant->key) {
+                continue;
+            }
+            $canonical .= trim($key) . ' ' . trim($variant->key) . ' ';
         }
         return $canonical;
     }

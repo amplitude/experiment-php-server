@@ -6,6 +6,7 @@ namespace AmplitudeExperiment\Test\Assignment;
 use AmplitudeExperiment\Assignment\Assignment;
 use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\User;
+use AmplitudeExperiment\Variant;
 use PHPUnit\Framework\TestCase;
 use const AmplitudeExperiment\Assignment\DAY_MILLIS;
 use function AmplitudeExperiment\hashCode;
@@ -16,24 +17,35 @@ class AssignmentServiceTest extends TestCase
 {
     public function testAssignmentToEventAsExpected()
     {
-        // Mock ExperimentUser and results
         $user = User::builder()->userId('user')->deviceId('device')->build();
         $results = [
-            'flag-key-1' => [
-                'value' => 'on',
-            ],
-            'flag-key-2' => [
-                'value' => 'control',
-                'metadata' => [
-                    'default' => true,
-                ],
-            ],
+            'basic' => new Variant(
+                'control', 'control', null, null,
+                ['segmentName' => 'All Other Users', 'flagType' => 'experiment', 'flagVersion' => 10, 'default' => false]
+            ),
+            'different_value' => new Variant(
+                'on', 'control', null, null,
+                ['segmentName' => 'All Other Users', 'flagType' => 'experiment', 'flagVersion' => 10, 'default' => false]
+            ),
+            'default' => new Variant(
+                'off', null, null, null,
+                ['segmentName' => 'All Other Users', 'flagType' => 'experiment', 'flagVersion' => 10, 'default' => true]
+            ),
+            'mutex' => new Variant(
+                'slot-1', 'slot-1', null, null,
+                ['segmentName' => 'All Other Users', 'flagType' => 'mutual-exclusion-group', 'flagVersion' => 10, 'default' => false]
+            ),
+            'holdout' => new Variant('holdout', 'holdout', null, null,
+                ['segmentName' => 'All Other Users', 'flagType' => 'holdout-group', 'flagVersion' => 10, 'default' => false]
+            ),
+            'partial_metadata' => new Variant('on', 'on', null, null,
+                ['segmentName' => 'All Other Users', 'flagType' => 'release']
+            ),
+            'empty_metadata' => new Variant('on', 'on'),
+            'empty_variant' => new Variant()
         ];
 
-        // Create Assignment object
         $assignment = new Assignment($user, $results);
-
-        // Convert Assignment to Event
         $event = AssignmentService::toEvent($assignment);
 
         // Assertions
@@ -42,17 +54,32 @@ class AssignmentServiceTest extends TestCase
         $this->assertEquals('[Experiment] Assignment', $event->eventType);
 
         $eventProperties = $event->eventProperties;
-        $this->assertCount(2, $eventProperties);
-        $this->assertEquals('on', $eventProperties['flag-key-1.variant']);
-        $this->assertEquals('control', $eventProperties['flag-key-2.variant']);
+        $this->assertEquals('control', $eventProperties['basic.variant']);
+        $this->assertEquals('v10 rule:All Other Users', $eventProperties['basic.details']);
+        $this->assertEquals('on', $eventProperties['different_value.variant']);
+        $this->assertEquals('v10 rule:All Other Users', $eventProperties['different_value.details']);
+        $this->assertEquals('off', $eventProperties['default.variant']);
+        $this->assertEquals('v10 rule:All Other Users', $eventProperties['default.details']);
+        $this->assertEquals('slot-1', $eventProperties['mutex.variant']);
+        $this->assertEquals('v10 rule:All Other Users', $eventProperties['mutex.details']);
+        $this->assertEquals('holdout', $eventProperties['holdout.variant']);
+        $this->assertEquals('v10 rule:All Other Users', $eventProperties['holdout.details']);
+        $this->assertEquals('on', $eventProperties['partial_metadata.variant']);
+        $this->assertEquals('on', $eventProperties['empty_metadata.variant']);
 
         $userProperties = $event->userProperties;
-        $this->assertCount(2, $userProperties);
-        $this->assertCount(1, $userProperties['$set']);
-        $this->assertCount(1, $userProperties['$unset']);
+        $setProperties = $userProperties['$set'];
+        $this->assertEquals('control', $setProperties['[Experiment] basic']);
+        $this->assertEquals('on', $setProperties['[Experiment] different_value']);
+        $this->assertEquals('holdout', $setProperties['[Experiment] holdout']);
+        $this->assertEquals('on', $setProperties['[Experiment] partial_metadata']);
+        $this->assertEquals('on', $setProperties['[Experiment] empty_metadata']);
+        $unsetProperties = $userProperties['$unset'];
+        $this->assertEquals('-', $unsetProperties['[Experiment] default']);
 
-        $canonicalization = 'user device flag-key-1 on flag-key-2 control';
-        $expected = 'user device ' . hashCode($canonicalization) . ' ' . floor($assignment->timestamp / DAY_MILLIS);
+        $canonicalization = 'user device basic control default off different_value on empty_metadata on holdout ' .
+            'holdout mutex slot-1 partial_metadata on ';
+        $expected = "user device " . hashCode($canonicalization) . ' ' . floor($assignment->timestamp / DAY_MILLIS);
         $this->assertEquals($expected, $event->insertId);
     }
 }
