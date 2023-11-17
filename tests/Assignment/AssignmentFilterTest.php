@@ -5,6 +5,7 @@ namespace AmplitudeExperiment\Test\Assignment;
 use AmplitudeExperiment\Assignment\Assignment;
 use AmplitudeExperiment\Assignment\AssignmentFilter;
 use AmplitudeExperiment\User;
+use AmplitudeExperiment\Variant;
 use PHPUnit\Framework\TestCase;
 use function AmplitudeExperiment\sleep;
 
@@ -16,15 +17,8 @@ class AssignmentFilterTest extends TestCase
     {
         $user = User::builder()->userId('user')->build();
         $results = [
-            'flag-key-1' => [
-                'value' => 'on',
-            ],
-            'flag-key-2' => [
-                'value' => 'control',
-                'metadata' => [
-                    'default' => true,
-                ],
-            ],
+            'flag-key-1' => new Variant('on'),
+            'flag-key-2' => new Variant('control', null, null, null, ['default' => true])
         ];
 
         $filter = new AssignmentFilter(100);
@@ -36,15 +30,8 @@ class AssignmentFilterTest extends TestCase
     {
         $user = User::builder()->userId('user')->build();
         $results = [
-            'flag-key-1' => [
-                'value' => 'on',
-            ],
-            'flag-key-2' => [
-                'value' => 'control',
-                'metadata' => [
-                    'default' => true,
-                ],
-            ],
+            'flag-key-1' => new Variant('on'),
+            'flag-key-2' => new Variant('control', null, null, null, ['default' => true])
         ];
 
         $filter = new AssignmentFilter(100);
@@ -58,24 +45,13 @@ class AssignmentFilterTest extends TestCase
     {
         $user = User::builder()->userId('user')->build();
         $results1 = [
-            'flag-key-1' => [
-                'value' => 'on',
-            ],
-            'flag-key-2' => [
-                'value' => 'control',
-                'metadata' => [
-                    'default' => true,
-                ],
-            ],
+            'flag-key-1' => new Variant('on'),
+            'flag-key-2' => new Variant('control', null, null, null, ['default' => true])
         ];
 
         $results2 = [
-            'flag-key-1' => [
-                'value' => 'control',
-            ],
-            'flag-key-2' => [
-                'value' => 'on',
-            ],
+            'flag-key-1' => new Variant('control'),
+            'flag-key-2' => new Variant('on')
         ];
 
         $filter = new AssignmentFilter(100);
@@ -90,15 +66,8 @@ class AssignmentFilterTest extends TestCase
         $user1 = User::builder()->userId('user')->build();
         $user2 = User::builder()->userId('different-user')->build();
         $results = [
-            'flag-key-1' => [
-                'value' => 'on',
-            ],
-            'flag-key-2' => [
-                'value' => 'control',
-                'metadata' => [
-                    'default' => true,
-                ],
-            ],
+            'flag-key-1' => new Variant('on'),
+            'flag-key-2' => new Variant('control', null, null, null, ['default' => true])
         ];
 
         $filter = new AssignmentFilter(100);
@@ -125,16 +94,10 @@ class AssignmentFilterTest extends TestCase
     public function testDuplicateAssignmentsDifferentResultOrdering()
     {
         $user = User::builder()->userId('user')->build();
-        $result1 = [
-            'value' => 'on',
-        ];
+        $result1 = new Variant('on');
 
-        $result2 = [
-            'value' => 'control',
-            'metadata' => [
-                'default' => true,
-            ]
-        ];
+        $result2 =
+            new Variant('control', null, null, null, ['default' => true]);
 
         $results1 = [
             'flag-key-1' => $result1,
@@ -159,15 +122,8 @@ class AssignmentFilterTest extends TestCase
         $user2 = User::builder()->userId('user2')->build();
         $user3 = User::builder()->userId('user3')->build();
         $results = [
-            'flag-key-1' => [
-                'value' => 'on',
-            ],
-            'flag-key-2' => [
-                'value' => 'control',
-                'metadata' => [
-                    'default' => true,
-                ]
-            ],
+            'flag-key-1' => new Variant('on'),
+            'flag-key-2' => new Variant('control', null, null, null, ['default' => true])
         ];
 
         $filter = new AssignmentFilter(2);
@@ -185,15 +141,8 @@ class AssignmentFilterTest extends TestCase
         $user1 = User::builder()->userId('user')->build();
         $user2 = User::builder()->userId('different-user')->build();
         $results = [
-            'flag-key-1' => [
-                'value' => 'on',
-            ],
-            'flag-key-2' => [
-                'value' => 'control',
-                'metadata' => [
-                    'default' => true,
-                ]
-            ],
+            'flag-key-1' => new Variant('on'),
+            'flag-key-2' => new Variant('control', null, null, null, ['default' => true])
         ];
 
         $filter = new AssignmentFilter(100, 1000);
