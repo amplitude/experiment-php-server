@@ -2,8 +2,9 @@
 
 namespace AmplitudeExperiment\Test\Assignment;
 
-
+use AmplitudeExperiment\Amplitude\Amplitude;
 use AmplitudeExperiment\Assignment\Assignment;
+use AmplitudeExperiment\Assignment\AssignmentFilter;
 use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
@@ -48,7 +49,6 @@ class AssignmentServiceTest extends TestCase
         $assignment = new Assignment($user, $results);
         $event = AssignmentService::toEvent($assignment);
 
-        // Assertions
         $this->assertEquals($user->userId, $event->userId);
         $this->assertEquals($user->deviceId, $event->deviceId);
         $this->assertEquals('[Experiment] Assignment', $event->eventType);
@@ -77,10 +77,23 @@ class AssignmentServiceTest extends TestCase
         $unsetProperties = $userProperties['$unset'];
         $this->assertEquals('-', $unsetProperties['[Experiment] default']);
 
-        $canonicalization = 'user device basic control default off different_value on empty_metadata on holdout ' .
-            'holdout mutex slot-1 partial_metadata on ';
+        $canonicalization = 'user device basic control default off different_value on empty_metadata on holdout holdout mutex slot-1 partial_metadata on ';
         $expected = "user device " . hashCode($canonicalization) . ' ' . floor($assignment->timestamp / DAY_MILLIS);
         $this->assertEquals($expected, $event->insertId);
+    }
+
+    public function testlogEventCalledInAmplitude() {
+        $assignmentFilter = new AssignmentFilter(1);
+        $mockAmp = $this->getMockBuilder(Amplitude::class)
+            ->setConstructorArgs(['', false])
+            ->onlyMethods(['logEvent'])
+            ->getMock();
+        $results = [
+            'flag-key-1' => new Variant('on')
+        ];
+        $service = new AssignmentService($mockAmp, $assignmentFilter);
+        $mockAmp->expects($this->once())->method('logEvent');
+        $service->track(new Assignment(User::builder()->userId('user')->build(), $results));
     }
 }
 
