@@ -82,6 +82,8 @@ class LocalEvaluationClient
         }
         $this->logger->debug('[Experiment] Evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode($flags));
         $results = $this->evaluation->evaluate($user->toEvaluationContext(), $flags);
+        print(json_encode($results) . "\n");
+
         $variants = [];
         $assignmentResults = [];
         $filter = !empty($flagKeys);
@@ -100,6 +102,7 @@ class LocalEvaluationClient
         if ($this->assignmentService) {
             $this->assignmentService->track(new Assignment($user, $assignmentResults));
         }
+        print_r(count($variants) . "\n");
         return $variants;
     }
 

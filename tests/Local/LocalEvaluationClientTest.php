@@ -73,7 +73,7 @@ class LocalEvaluationClientTest extends TestCase
 
     public function testAssignment()
     {
-        $aConfig = new AssignmentConfig('a6dd847b9d2f03c816d4f3f8458cdc1d');
+        $aConfig = AssignmentConfig::builder('a6dd847b9d2f03c816d4f3f8458cdc1d')->flushMaxRetries(4)->build();
         $config = LocalEvaluationConfig::builder()->debug(true)->assignmentConfig($aConfig)->build();
         $client = new LocalEvaluationClient($this->apiKey, $config);
         $client->start()->wait();

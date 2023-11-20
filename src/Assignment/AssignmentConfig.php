@@ -8,12 +8,21 @@ class AssignmentConfig
 {
     public string $apiKey;
     public int $cacheCapacity;
-    public ?AmplitudeConfig $amplitudeConfig;
+    public AmplitudeConfig $amplitudeConfig;
 
-    public function __construct(string $apiKey, int $cacheCapacity = 65536, ?AmplitudeConfig $amplitudeConfig = null)
+    const DEFAULTS = [
+        'cacheCapacity' => 65536,
+    ];
+
+    public function __construct(string $apiKey, int $cacheCapacity, AmplitudeConfig $amplitudeConfig)
     {
         $this->apiKey = $apiKey;
         $this->cacheCapacity = $cacheCapacity;
-        $this->amplitudeConfig = $amplitudeConfig ?? AmplitudeConfig::builder()->build();
+        $this->amplitudeConfig = $amplitudeConfig;
+    }
+
+    public static function builder(string $apiKey): AssignmentConfigBuilder
+    {
+        return new AssignmentConfigBuilder($apiKey);
     }
 }

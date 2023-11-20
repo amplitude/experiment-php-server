@@ -44,7 +44,7 @@ class AmplitudeConfigBuilder
         return $this;
     }
 
-    public function build(): AmplitudeConfig
+    public function build()
     {
         if (!$this->serverUrl) {
             if ($this->useBatch) {
