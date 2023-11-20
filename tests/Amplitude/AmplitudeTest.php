@@ -16,22 +16,12 @@ use Monolog\Test\TestCase;
 class AmplitudeTest extends TestCase
 {
     private array $postContainer;
-    const API_KEY = 'a6dd847b9d2f03c816d4f3f8458cdc1d';
+    const API_KEY = 'test';
 
     public function setUp(): void
     {
         $this->postContainer = [];
     }
-
-//    public function testAmplitude()
-//    {
-//        $client = new MockAmplitude(self::API_KEY, true);
-//        $event1 = new Event('test1');
-//        $event1->userId = 'tim.yiu@amplitude.com';
-//        $client->logEvent($event1);
-//        $client->flush()->wait();
-//        $this->assertTrue(true);
-//    }
 
     public function testAmplitudeConfigServerUrl()
     {
@@ -51,6 +41,11 @@ class AmplitudeTest extends TestCase
             ->useBatch(true)
             ->build();
         $this->assertEquals('https://api.eu.amplitude.com/batch', $config->serverUrl);
+        $config = AmplitudeConfig::builder()
+            ->serverUrl('test')
+            ->useBatch(true)
+            ->build();
+        $this->assertEquals('test', $config->serverUrl);
     }
 
     public function testEmptyQueueAfterFlushSuccess()
@@ -125,6 +120,7 @@ class AmplitudeTest extends TestCase
         $client->logEvent($event1);
         $client->flush()->wait();
         $this->assertEquals(5, $this->countPostRequests());
+        $this->assertEquals(1, $client->getQueueSize());
     }
 
     public function testBackoffRetriesThenSuccess()
@@ -150,6 +146,7 @@ class AmplitudeTest extends TestCase
         $client->logEvent($event1);
         $client->flush()->wait();
         $this->assertEquals(3, $this->countPostRequests());
+        $this->assertEquals(0, $client->getQueueSize());
     }
 
     private function countPostRequests(): int
