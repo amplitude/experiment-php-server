@@ -46,7 +46,6 @@ class Amplitude
 
     public function logEvent(Event $event)
     {
-        print_r($event->toArray());
         $this->queue[] = $event->toArray();
         if (count($this->queue) >= $this->config->flushQueueSize) {
             $this->flush()->wait();
@@ -70,7 +69,6 @@ class Amplitude
         return $promise->then(
             function ($response) use ($payload) {
                 // Process the successful response if needed
-                echo $response->getBody();
                 $this->logger->debug("[Amplitude] Event sent successfully: " . json_encode($payload));
             },
             function (\Exception $exception) use ($payload) {

@@ -42,7 +42,6 @@ class AssignmentService
         $unset = [];
         foreach ($assignment->variants as $flagKey => $variant) {
             if (!$variant->key) {
-                echo $flagKey . "\n";
                 continue;
             }
             $event->eventProperties["{$flagKey}.variant"] = $variant->key;
