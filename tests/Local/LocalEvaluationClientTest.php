@@ -73,11 +73,11 @@ class LocalEvaluationClientTest extends TestCase
 
     public function testAssignment()
     {
-        $aConfig = AssignmentConfig::builder('a6dd847b9d2f03c816d4f3f8458cdc1d')->flushMaxRetries(4)->build();
+        $aConfig = AssignmentConfig::builder('a6dd847b9d2f03c816d4f3f8458cdc1d')->minIdLength(2)->build();
         $config = LocalEvaluationConfig::builder()->debug(true)->assignmentConfig($aConfig)->build();
         $client = new LocalEvaluationClient($this->apiKey, $config);
         $client->start()->wait();
-        $user = User::builder()->userId('tim.yiu@amplitude.com')->build();
+        $user = User::builder()->userId('tim.yiu@amplitude.com')->deviceId('d0')->build();
         $client->evaluate($user);
         $this->assertTrue(true);
     }

@@ -6,6 +6,7 @@ class AmplitudeConfig
 {
     public int $flushQueueSize;
     public int $flushMaxRetries;
+    public int $minIdLength;
     public string $serverZone;
     public string $serverUrl;
     public string $useBatch;
@@ -23,6 +24,7 @@ class AmplitudeConfig
             ]
         ],
         'useBatch' => false,
+        'minIdLength' => 5,
         'flushQueueSize' => 200,
         'flushMaxRetries' => 12,
     ];
@@ -30,6 +32,7 @@ class AmplitudeConfig
     public function __construct(
         int    $flushQueueSize,
         int    $flushMaxRetries,
+        int    $minIdLength,
         string $serverZone,
         string $serverUrl,
         bool   $useBatch
@@ -37,6 +40,7 @@ class AmplitudeConfig
     {
         $this->flushQueueSize = $flushQueueSize;
         $this->flushMaxRetries = $flushMaxRetries;
+        $this->minIdLength = $minIdLength;
         $this->serverZone = $serverZone;
         $this->serverUrl = $serverUrl;
         $this->useBatch = $useBatch;

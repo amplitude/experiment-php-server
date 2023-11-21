@@ -29,7 +29,7 @@ class Amplitude
 
     public function flush(): PromiseInterface
     {
-        $payload = ["api_key" => $this->apiKey, "events" => $this->queue];
+        $payload = ["api_key" => $this->apiKey, "events" => $this->queue, "options" => ["min_id_length" => $this->config->minIdLength]];
 
         // Fetch initial flag configs and await the result.
         return Backoff::doWithBackoff(

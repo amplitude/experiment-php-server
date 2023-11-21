@@ -6,6 +6,7 @@ class AmplitudeConfigBuilder
 {
     protected int $flushQueueSize = AmplitudeConfig::DEFAULTS['flushQueueSize'];
     protected int $flushMaxRetries = AmplitudeConfig::DEFAULTS['flushMaxRetries'];
+    protected int $minIdLength = AmplitudeConfig::DEFAULTS['minIdLength'];
     protected string $serverZone = AmplitudeConfig::DEFAULTS['serverZone'];
     protected ?string $serverUrl = null;
     protected bool $useBatch = AmplitudeConfig::DEFAULTS['useBatch'];
@@ -23,6 +24,12 @@ class AmplitudeConfigBuilder
     public function flushMaxRetries(int $flushMaxRetries): AmplitudeConfigBuilder
     {
         $this->flushMaxRetries = $flushMaxRetries;
+        return $this;
+    }
+
+    public function minIdLength(int $minIdLength): AmplitudeConfigBuilder
+    {
+        $this->minIdLength = $minIdLength;
         return $this;
     }
 
@@ -56,6 +63,7 @@ class AmplitudeConfigBuilder
         return new AmplitudeConfig(
             $this->flushQueueSize,
             $this->flushMaxRetries,
+            $this->minIdLength,
             $this->serverZone,
             $this->serverUrl,
             $this->useBatch
