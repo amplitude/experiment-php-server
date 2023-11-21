@@ -3,7 +3,6 @@
 namespace AmplitudeExperiment;
 
 use Exception;
-use function AmplitudeExperiment\initializeLogger;
 
 require_once __DIR__ . '/Util.php';
 
@@ -50,8 +49,8 @@ class AmplitudeCookie
                     'userId' => $userSession['userId'] ?? null,
                 ];
             } catch (\Exception $e) {
-                $logger = initializeLogger(true);
-                $logger->error('Error parsing the Amplitude cookie: ' . $e->getMessage());
+                $logger = initializeLogger(false);
+                $logger->error("Error parsing the Amplitude cookie: '{$amplitudeCookie}'. " . $e->getMessage());
                 return [];
             }
         }
@@ -74,10 +73,10 @@ class AmplitudeCookie
     }
 
     /**
-     * Generates a cookie string to set for the Amplitude Javascript SDK
+     * Generates a cookie string to set for the Amplitude Browser SDK
      * @param string $deviceId A device id to set
      * @param bool $newFormat True if the cookie is in the Browser SDK 2.0 format
-     * @return string A cookie string to set for the Amplitude Javascript SDK to read
+     * @return string A cookie string to set for the Amplitude Browser SDK to read
      */
     public static function generate(string $deviceId, bool $newFormat = false): string
     {
