@@ -1,3 +1,10 @@
+## [0.2.2](https://github.com/amplitude/experiment-php-server/compare/0.2.1...0.2.2) (2023-11-21)
+
+
+### Bug Fixes
+
+* AmplitudeCookie util class to interact with Amplitude identity cookie ([#7](https://github.com/amplitude/experiment-php-server/issues/7)) ([2a3c460](https://github.com/amplitude/experiment-php-server/commit/2a3c460e13bb2846d49d01aa2e216632af78b529))
+
 ## [0.2.1](https://github.com/amplitude/experiment-php-server/compare/0.2.0...0.2.1) (2023-11-16)
 
 
