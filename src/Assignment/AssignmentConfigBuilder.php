@@ -4,6 +4,10 @@ namespace AmplitudeExperiment\Assignment;
 
 use AmplitudeExperiment\Amplitude\AmplitudeConfigBuilder;
 
+/**
+ * Extends AmplitudeConfigBuilder to allow configuration {@link AmplitudeConfig} of underlying {@link Amplitude} client.
+ */
+
 class AssignmentConfigBuilder extends AmplitudeConfigBuilder
 {
     protected string $apiKey;

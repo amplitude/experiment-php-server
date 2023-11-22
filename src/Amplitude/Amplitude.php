@@ -4,13 +4,15 @@ namespace AmplitudeExperiment\Amplitude;
 
 use AmplitudeExperiment\Backoff;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Promise\PromiseInterface;
 use Monolog\Logger;
 use function AmplitudeExperiment\initializeLogger;
 
 require_once __DIR__ . '/../Util.php';
 
+/**
+ * Amplitude client for sending events to Amplitude.
+ */
 class Amplitude
 {
     private string $apiKey;
@@ -52,6 +54,9 @@ class Amplitude
         }
     }
 
+    /**
+     * Flush the queue when the client is destructed.
+     */
     public function __destruct()
     {
         if (count($this->queue) > 0) {

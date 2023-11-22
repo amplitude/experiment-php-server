@@ -4,6 +4,13 @@ namespace AmplitudeExperiment\Assignment;
 
 use AmplitudeExperiment\Amplitude\AmplitudeConfig;
 
+/**
+ * Configuration options for assignment tracking. This is an object that can be created using
+ * a {@link AssignmentConfigBuilder}. Example usage:
+ *
+ * AssignmentConfigBuilder::builder('api-key')->build()
+ */
+
 class AssignmentConfig
 {
     public string $apiKey;

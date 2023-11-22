@@ -9,7 +9,6 @@ use function AmplitudeExperiment\hashCode;
 require_once __DIR__ . '/../Util.php';
 
 const FLAG_TYPE_MUTUAL_EXCLUSION_GROUP = 'mutual-exclusion-group';
-const FLAG_TYPE_HOLDOUT_GROUP = 'holdout-group';;
 const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
 class AssignmentService
