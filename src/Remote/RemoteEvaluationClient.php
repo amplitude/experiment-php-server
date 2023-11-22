@@ -12,7 +12,6 @@ use Monolog\Logger;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 use function AmplitudeExperiment\initializeLogger;
-use function PHPUnit\Framework\isEmpty;
 
 require_once __DIR__ . '/../Version.php';
 require_once __DIR__ . '/../Util.php';
