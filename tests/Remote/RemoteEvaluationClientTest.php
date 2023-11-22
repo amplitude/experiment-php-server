@@ -3,7 +3,7 @@
 namespace AmplitudeExperiment\Test\Remote;
 
 use AmplitudeExperiment\Experiment;
-use AmplitudeExperiment\FetchOptions;
+use AmplitudeExperiment\Remote\FetchOptions;
 use AmplitudeExperiment\Remote\RemoteEvaluationClient;
 use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
 use AmplitudeExperiment\User;
@@ -31,8 +31,8 @@ class RemoteEvaluationClientTest extends TestCase
         $client = new RemoteEvaluationClient($this->apiKey);
         $variants = $client->fetch($this->testUser)->wait();
         $variant = $variants['sdk-ci-test'];
-        self::assertEquals("on", $variant->key);
-        self::assertEquals("payload", $variant->payload);
+        $this->assertEquals("on", $variant->key);
+        $this->assertEquals("payload", $variant->payload);
     }
 
     /**
@@ -61,8 +61,8 @@ class RemoteEvaluationClientTest extends TestCase
         $client = new RemoteEvaluationClient($this->apiKey, $config);
         $variants = $client->fetch($this->testUser)->wait();
         $variant = $variants['sdk-ci-test'];
-        self::assertEquals("on", $variant->key);
-        self::assertEquals("payload", $variant->payload);
+        $this->assertEquals("on", $variant->key);
+        $this->assertEquals("payload", $variant->payload);
     }
 
     /**
@@ -79,8 +79,8 @@ class RemoteEvaluationClientTest extends TestCase
         $client = new RemoteEvaluationClient($this->apiKey, $config);
         $variants = $client->fetch($this->testUser)->wait();
         $variant = $variants['sdk-ci-test'];
-        self::assertEquals("on", $variant->key);
-        self::assertEquals("payload", $variant->payload);
+        $this->assertEquals("on", $variant->key);
+        $this->assertEquals("payload", $variant->payload);
     }
 
     /**
@@ -92,8 +92,8 @@ class RemoteEvaluationClientTest extends TestCase
         $variants = $client->fetch($this->testUser, new FetchOptions(['sdk-ci-test']))->wait();
         $variant = $variants['sdk-ci-test'];
         $this->assertEquals(1, sizeof($variants));
-        self::assertEquals("on", $variant->key);
-        self::assertEquals("payload", $variant->payload);
+        $this->assertEquals("on", $variant->key);
+        $this->assertEquals("payload", $variant->payload);
     }
 
     public function testExperimentInitializeRemote()

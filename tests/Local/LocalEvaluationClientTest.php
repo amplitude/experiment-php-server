@@ -35,38 +35,38 @@ class LocalEvaluationClientTest extends TestCase
     {
         $variants = $this->client->evaluate($this->testUser);
         $variant = $variants['sdk-local-evaluation-ci-test'];
-        self::assertEquals("on", $variant->key);
-        self::assertEquals("payload", $variant->payload);
+        $this->assertEquals("on", $variant->key);
+        $this->assertEquals("payload", $variant->payload);
     }
 
     public function testEvaluateOneFlagSuccess()
     {
         $variants = $this->client->evaluate($this->testUser, ["sdk-local-evaluation-ci-test"]);
         $variant = $variants['sdk-local-evaluation-ci-test'];
-        self::assertEquals("on", $variant->key);
-        self::assertEquals("payload", $variant->payload);
+        $this->assertEquals("on", $variant->key);
+        $this->assertEquals("payload", $variant->payload);
     }
 
     public function testEvaluateWithDependenciesWithFlagKeysSuccess()
     {
         $variants = $this->client->evaluate($this->testUser, ['sdk-ci-local-dependencies-test']);
         $variant = $variants['sdk-ci-local-dependencies-test'];
-        self::assertEquals("control", $variant->key);
-        self::assertEquals(null, $variant->payload);
+        $this->assertEquals("control", $variant->key);
+        $this->assertEquals(null, $variant->payload);
     }
 
     public function testEvaluateWithDependenciesWithUnknownFlagKeysNoVariant()
     {
         $variants = $this->client->evaluate($this->testUser, ['does-not-exist']);
-        self::assertFalse(isset($variants['sdk-ci-local-dependencies-test']));
+        $this->assertFalse(isset($variants['sdk-ci-local-dependencies-test']));
     }
 
     public function testEvaluateWithDependenciesVariantHeldOut()
     {
         $variants = $this->client->evaluate($this->testUser);
         $variant = $variants['sdk-ci-local-dependencies-test-holdout'];
-        self::assertEquals("off", $variant->key);
-        self::assertEquals(null, $variant->payload);
-        self::assertTrue($variant->metadata["default"]);
+        $this->assertEquals("off", $variant->key);
+        $this->assertEquals(null, $variant->payload);
+        $this->assertTrue($variant->metadata["default"]);
     }
 }

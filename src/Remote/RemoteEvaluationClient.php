@@ -2,7 +2,6 @@
 
 namespace AmplitudeExperiment\Remote;
 
-use AmplitudeExperiment\FetchOptions;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use Exception;
@@ -87,7 +86,7 @@ class RemoteEvaluationClient
         $serializedUser = base64_encode(json_encode($libraryUser->toArray()));
 
         // Define the request URL
-        $endpoint = $this->config->serverUrl . '/sdk/v2/vardata';
+        $endpoint = $this->config->serverUrl . '/sdk/v2/vardata?v=0';
 
         // Define the request headers
         $headers = [
