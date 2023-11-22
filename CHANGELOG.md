@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/amplitude/experiment-php-server/compare/0.2.2...0.3.0) (2023-11-22)
+
+
+### Features
+
+* Automatic assignment tracking ([#8](https://github.com/amplitude/experiment-php-server/issues/8)) ([4520bfc](https://github.com/amplitude/experiment-php-server/commit/4520bfce8886a9cbdd0b7692480f6a22d915adc0))
+
 ## [0.2.2](https://github.com/amplitude/experiment-php-server/compare/0.2.1...0.2.2) (2023-11-21)
 
 
