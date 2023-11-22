@@ -2,7 +2,6 @@
 
 namespace AmplitudeExperiment\Remote;
 
-use AmplitudeExperiment\FetchOptions;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use Exception;
@@ -13,6 +12,7 @@ use Monolog\Logger;
 use Psr\Http\Message\ResponseInterface;
 use Throwable;
 use function AmplitudeExperiment\initializeLogger;
+use function PHPUnit\Framework\isEmpty;
 
 require_once __DIR__ . '/../Version.php';
 require_once __DIR__ . '/../Util.php';
@@ -48,24 +48,24 @@ class RemoteEvaluationClient
      * This method will automatically retry if configured (default).
      *
      * @param $user User The {@link User} context
-     * @param $options ?FetchOptions The {@link FetchOptions} for this specific fetch request.
+     * @param $flagKeys array The flags to evaluate for this specific fetch request.
      * @return PromiseInterface A {@link Variant} array for the user on success, empty array on error.
      * @throws Exception
      */
-    public function fetch(User $user, ?FetchOptions $options = null): PromiseInterface
+    public function fetch(User $user, array $flagKeys = []): PromiseInterface
     {
         if ($user->userId == null && $user->deviceId == null) {
             $this->logger->warning('[Experiment] user id and device id are null; Amplitude may not resolve identity');
         }
         $this->logger->debug('[Experiment] Fetching variants for user: ' . json_encode($user->toArray()));
 
-        return $this->doFetch($user, $this->config->fetchTimeoutMillis, $options)
-            ->otherwise(function (Throwable $e) use ($user, $options) {
+        return $this->doFetch($user, $this->config->fetchTimeoutMillis, $flagKeys)
+            ->otherwise(function (Throwable $e) use ($user, $flagKeys) {
                 // Handle the exception
                 $this->logger->error('[Experiment] Fetch variant failed: ' . $e->getMessage());
 
                 // Retry the fetch
-                return $this->retryFetch($user, $options)
+                return $this->retryFetch($user, $flagKeys)
                     ->then(function ($result) {
                         // Process the result if retry is successful
                         return $result;
@@ -80,7 +80,7 @@ class RemoteEvaluationClient
             });
     }
 
-    public function doFetch(User $user, int $timeoutMillis, ?FetchOptions $options = null): PromiseInterface
+    public function doFetch(User $user, int $timeoutMillis, array $flagKeys = []): PromiseInterface
     {
         // Define the request data
         $libraryUser = $user->copyToBuilder()->library('experiment-php-server/' . VERSION)->build();
@@ -96,8 +96,8 @@ class RemoteEvaluationClient
             'X-Amp-Exp-User' => $serializedUser,
         ];
 
-        if ($options && $options->flagKeys) {
-            $headers['X-Amp-Exp-Flag-Keys'] = base64_encode(json_encode($options->flagKeys));
+        if (!empty($flagKeys)) {
+            $headers['X-Amp-Exp-Flag-Keys'] = base64_encode(json_encode($flagKeys));
         }
 
         $promise = $this->httpClient->requestAsync('GET', $endpoint, [
@@ -125,7 +125,7 @@ class RemoteEvaluationClient
     /**
      * @throws Exception
      */
-    private function retryFetch(User $user, ?FetchOptions $options = null): PromiseInterface
+    private function retryFetch(User $user, array $flagKeys = []): PromiseInterface
     {
         if ($this->config->fetchRetries == 0) {
             return Create::promiseFor([]);
@@ -143,7 +143,7 @@ class RemoteEvaluationClient
                 return $this->doFetch(
                     $user,
                     $this->config->fetchRetryTimeoutMillis,
-                    $options
+                    $flagKeys
                 )->then(
                     function ($result) {
                         return $result;
