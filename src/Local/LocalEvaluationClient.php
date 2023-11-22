@@ -12,17 +12,13 @@ use AmplitudeExperiment\Flag\FlagConfigFetcher;
 use AmplitudeExperiment\Flag\FlagConfigService;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Util;
-use AmplitudeExperiment\Variant;
 use GuzzleHttp\Promise\PromiseInterface;
 use Monolog\Logger;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
 use function AmplitudeExperiment\initializeLogger;
-use const AmplitudeExperiment\Assignment\FLAG_TYPE_HOLDOUT_GROUP;
-use const AmplitudeExperiment\Assignment\FLAG_TYPE_MUTUAL_EXCLUSION_GROUP;
 
 require_once __DIR__ . '/../EvaluationCore/Util.php';
 require_once __DIR__ . '/../Util.php';
-require_once __DIR__ . '/../Assignment/AssignmentService.php';
 
 /**
  * Experiment client for evaluating variants for a user locally.
@@ -81,27 +77,12 @@ class LocalEvaluationClient
             $this->logger->error('[Experiment] Evaluate - error sorting flags: ' . $e->getMessage());
         }
         $this->logger->debug('[Experiment] Evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode($flags));
-        $results = $this->evaluation->evaluate($user->toEvaluationContext(), $flags);
-
-        $variants = [];
-        $assignmentResults = [];
-        $filter = !empty($flagKeys);
-
-        foreach ($results as $flagKey => $flagResult) {
-            $included = !$filter || in_array($flagKey, $flagKeys);
-            if ($included) {
-                $variants[$flagKey] = Variant::convertEvaluationVariantToVariant($flagResult);
-            }
-            if ($included || $flagResult['metadata']['flagType'] == FLAG_TYPE_HOLDOUT_GROUP || $flagResult['metadata']['flagType'] == FLAG_TYPE_MUTUAL_EXCLUSION_GROUP) {
-                $assignmentResults[$flagKey] = Variant::convertEvaluationVariantToVariant($flagResult);
-            }
-        }
-
-        $this->logger->debug('[Experiment] Evaluate - variants:', $variants);
+        $results = array_map('AmplitudeExperiment\Variant::convertEvaluationVariantToVariant',$this->evaluation->evaluate($user->toEvaluationContext(), $flags));
+        $this->logger->debug('[Experiment] Evaluate - variants:', $results);
         if ($this->assignmentService) {
-            $this->assignmentService->track(new Assignment($user, $assignmentResults));
+            $this->assignmentService->track(new Assignment($user, $results));
         }
-        return $variants;
+        return $results;
     }
 
     private function initializeAssignmentService(?AssignmentConfig $config): void
