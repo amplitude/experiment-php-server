@@ -22,7 +22,7 @@ class LocalEvaluationClientTest extends TestCase
             ->deviceId('test_device')
             ->build();
         $experiment = new Experiment();
-        $config = LocalEvaluationConfig::builder()->debug(false)->build();
+        $config = LocalEvaluationConfig::builder()->debug(true)->build();
         $this->client = $experiment->initializeLocal($this->apiKey, $config);
     }
 
