@@ -2,12 +2,16 @@
 
 namespace AmplitudeExperiment\Local;
 
+use AmplitudeExperiment\Amplitude\Amplitude;
+use AmplitudeExperiment\Assignment\Assignment;
+use AmplitudeExperiment\Assignment\AssignmentConfig;
+use AmplitudeExperiment\Assignment\AssignmentFilter;
+use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
 use AmplitudeExperiment\Flag\FlagConfigFetcher;
 use AmplitudeExperiment\Flag\FlagConfigService;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Util;
-use AmplitudeExperiment\Variant;
 use GuzzleHttp\Promise\PromiseInterface;
 use Monolog\Logger;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
@@ -27,6 +31,7 @@ class LocalEvaluationClient
     private FlagConfigService $flagConfigService;
     private EvaluationEngine $evaluation;
     private Logger $logger;
+    private ?AssignmentService $assignmentService = null;
 
     public function __construct(string $apiKey, ?LocalEvaluationConfig $config = null)
     {
@@ -35,6 +40,7 @@ class LocalEvaluationClient
         $fetcher = new FlagConfigFetcher($apiKey, $this->config->debug, $this->config->serverUrl);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->config->debug, $this->config->bootstrap);
         $this->logger = initializeLogger($this->config->debug);
+        $this->initializeAssignmentService($config->assignmentConfig);
         $this->evaluation = new EvaluationEngine();
     }
 
@@ -71,18 +77,22 @@ class LocalEvaluationClient
             $this->logger->error('[Experiment] Evaluate - error sorting flags: ' . $e->getMessage());
         }
         $this->logger->debug('[Experiment] Evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode($flags));
-        $results = $this->evaluation->evaluate($user->toEvaluationContext(), $flags);
-        $variants = [];
-        $filter = !empty($flagKeys);
-
-        foreach ($results as $flagKey => $flagResult) {
-            $included = !$filter || in_array($flagKey, $flagKeys);
-            if ($included) {
-                $variants[$flagKey] = Variant::convertEvaluationVariantToVariant($flagResult);
-            }
+        $results = array_map('AmplitudeExperiment\Variant::convertEvaluationVariantToVariant',$this->evaluation->evaluate($user->toEvaluationContext(), $flags));
+        $this->logger->debug('[Experiment] Evaluate - variants:', $results);
+        if ($this->assignmentService) {
+            $this->assignmentService->track(new Assignment($user, $results));
         }
+        return $results;
+    }
 
-        $this->logger->debug('[Experiment] Evaluate - variants:', $variants);
-        return $variants;
+    private function initializeAssignmentService(?AssignmentConfig $config): void
+    {
+        if ($config) {
+            $this->assignmentService = new AssignmentService(
+                new Amplitude($config->apiKey,
+                    $this->config->debug,
+                    $config->amplitudeConfig),
+                new AssignmentFilter($config->cacheCapacity));
+        }
     }
 }
