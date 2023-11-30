@@ -3,7 +3,6 @@
 namespace AmplitudeExperiment\Test\Remote;
 
 use AmplitudeExperiment\Experiment;
-use AmplitudeExperiment\Remote\FetchOptions;
 use AmplitudeExperiment\Remote\RemoteEvaluationClient;
 use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
 use AmplitudeExperiment\User;
@@ -89,7 +88,7 @@ class RemoteEvaluationClientTest extends TestCase
     public function testFetchWithFlagKeysOptionsSuccess()
     {
         $client = new RemoteEvaluationClient($this->apiKey);
-        $variants = $client->fetch($this->testUser, new FetchOptions(['sdk-ci-test']))->wait();
+        $variants = $client->fetch($this->testUser, ['sdk-ci-test'])->wait();
         $variant = $variants['sdk-ci-test'];
         $this->assertEquals(1, sizeof($variants));
         $this->assertEquals("on", $variant->key);
