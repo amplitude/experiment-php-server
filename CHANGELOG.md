@@ -1,3 +1,10 @@
+## [0.3.1](https://github.com/amplitude/experiment-php-server/compare/0.3.0...0.3.1) (2023-11-30)
+
+
+### Bug Fixes
+
+* Update Remote fetch variants to use flag keys array ([#9](https://github.com/amplitude/experiment-php-server/issues/9)) ([b5337c6](https://github.com/amplitude/experiment-php-server/commit/b5337c6b8c495783f63f984a3dba497d04eb9d38))
+
 # [0.3.0](https://github.com/amplitude/experiment-php-server/compare/0.2.2...0.3.0) (2023-11-22)
 
 
