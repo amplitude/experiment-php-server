@@ -26,7 +26,8 @@ $user = \AmplitudeExperiment\User::builder()
     ->userId('user@company.com')
     ->userProperties(['premium' => True])
     ->build();
-$variants = experiment.fetch($user);
+
+$variants = $client->fetch($user)->wait();
 
 // (3) Access a flag's variant
 $variant = $variants['FLAG_KEY'] ?? null;
