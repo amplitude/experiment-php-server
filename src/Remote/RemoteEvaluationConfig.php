@@ -2,6 +2,11 @@
 
 namespace AmplitudeExperiment\Remote;
 
+use AmplitudeExperiment\Http\FetchClientInterface;
+use AmplitudeExperiment\Logger\DefaultLogger;
+use AmplitudeExperiment\Logger\LogLevel;
+use Psr\Log\LoggerInterface;
+
 /**
  * Configuration options. This is an object that can be created using
  * a {@link RemoteEvaluationConfigBuilder}. Example usage:
@@ -11,70 +16,49 @@ namespace AmplitudeExperiment\Remote;
 class RemoteEvaluationConfig
 {
     /**
-     * Set to true to log some extra information to the console.
+     * Set to use custom logger. If not set, a {@link DefaultLogger} is used.
      */
-    public bool $debug;
+    public ?LoggerInterface $logger;
+    /**
+     * The log level to use for the logger.
+     */
+    public int $logLevel;
     /**
      * The server endpoint from which to request variants.
      */
     public string $serverUrl;
     /**
-     * The request socket timeout, in milliseconds.
+     * The underlying HTTP client to use for requests.
      */
-    public int $fetchTimeoutMillis;
+    public ?FetchClientInterface $fetchClient;
     /**
-     * The number of retries to attempt before failing
+     * The configuration for the underlying default Guzzle client.
      */
-    public int $fetchRetries;
-    /**
-     * Retry backoff minimum (starting backoff delay) in milliseconds. The minimum backoff is scaled by
-     * `fetchRetryBackoffScalar` after each retry failure.
-     */
-    public int $fetchRetryBackoffMinMillis;
-    /**
-     * Retry backoff maximum in milliseconds. If the scaled backoff is greater than the max, the max is
-     * used for all subsequent retries.
-     */
-    public int $fetchRetryBackoffMaxMillis;
-    /**
-     * Scales the minimum backoff exponentially.
-     */
-    public float $fetchRetryBackoffScalar;
-    /**
-     * The request timeout for retrying fetch requests.
-     */
-    public int $fetchRetryTimeoutMillis;
+    public array $guzzleClientConfig;
 
     const DEFAULTS = [
+        'logger' => null,
+        'logLevel' => LogLevel::INFO,
         'debug' => false,
         'serverUrl' => 'https://api.lab.amplitude.com',
-        'fetchTimeoutMillis' => 10000,
-        'fetchRetries' => 8,
-        'fetchRetryBackoffMinMillis' => 500,
-        'fetchRetryBackoffMaxMillis' => 10000,
-        'fetchRetryBackoffScalar' => 1.5,
-        'fetchRetryTimeoutMillis' => 10000
+        'fetchClient' => null,
+        'guzzleClientConfig' => []
     ];
 
+
     public function __construct(
-        bool   $debug,
-        string $serverUrl,
-        int    $fetchTimeoutMillis,
-        int    $fetchRetries,
-        int    $fetchRetryBackoffMinMillis,
-        int    $fetchRetryBackoffMaxMillis,
-        float  $fetchRetryBackoffScalar,
-        int    $fetchRetryTimeoutMillis
+        ?LoggerInterface      $logger,
+        int                   $logLevel,
+        string                $serverUrl,
+        ?FetchClientInterface $fetchClient,
+        array                 $guzzleClientConfig
     )
     {
-        $this->debug = $debug;
+        $this->logger = $logger;
+        $this->logLevel = $logLevel;
         $this->serverUrl = $serverUrl;
-        $this->fetchTimeoutMillis = $fetchTimeoutMillis;
-        $this->fetchRetries = $fetchRetries;
-        $this->fetchRetryBackoffMinMillis = $fetchRetryBackoffMinMillis;
-        $this->fetchRetryBackoffMaxMillis = $fetchRetryBackoffMaxMillis;
-        $this->fetchRetryBackoffScalar = $fetchRetryBackoffScalar;
-        $this->fetchRetryTimeoutMillis = $fetchRetryTimeoutMillis;
+        $this->fetchClient = $fetchClient;
+        $this->guzzleClientConfig = $guzzleClientConfig;
     }
 
     public static function builder(): RemoteEvaluationConfigBuilder

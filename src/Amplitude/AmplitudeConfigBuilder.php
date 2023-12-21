@@ -2,14 +2,17 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
+use AmplitudeExperiment\Http\FetchClientInterface;
+
 class AmplitudeConfigBuilder
 {
     protected int $flushQueueSize = AmplitudeConfig::DEFAULTS['flushQueueSize'];
-    protected int $flushMaxRetries = AmplitudeConfig::DEFAULTS['flushMaxRetries'];
     protected int $minIdLength = AmplitudeConfig::DEFAULTS['minIdLength'];
     protected string $serverZone = AmplitudeConfig::DEFAULTS['serverZone'];
     protected ?string $serverUrl = null;
     protected bool $useBatch = AmplitudeConfig::DEFAULTS['useBatch'];
+    protected ?FetchClientInterface $fetchClient = AmplitudeConfig::DEFAULTS['fetchClient'];
+    protected array $guzzleClientConfig = AmplitudeConfig::DEFAULTS['guzzleClientConfig'];
 
     public function __construct()
     {
@@ -18,12 +21,6 @@ class AmplitudeConfigBuilder
     public function flushQueueSize(int $flushQueueSize): AmplitudeConfigBuilder
     {
         $this->flushQueueSize = $flushQueueSize;
-        return $this;
-    }
-
-    public function flushMaxRetries(int $flushMaxRetries): AmplitudeConfigBuilder
-    {
-        $this->flushMaxRetries = $flushMaxRetries;
         return $this;
     }
 
@@ -51,6 +48,18 @@ class AmplitudeConfigBuilder
         return $this;
     }
 
+    public function fetchClient(FetchClientInterface $fetchClient): AmplitudeConfigBuilder
+    {
+        $this->fetchClient = $fetchClient;
+        return $this;
+    }
+
+    public function guzzleClientConfig(array $guzzleClientConfig): AmplitudeConfigBuilder
+    {
+        $this->guzzleClientConfig = $guzzleClientConfig;
+        return $this;
+    }
+
     public function build()
     {
         if (!$this->serverUrl) {
@@ -62,11 +71,12 @@ class AmplitudeConfigBuilder
         }
         return new AmplitudeConfig(
             $this->flushQueueSize,
-            $this->flushMaxRetries,
             $this->minIdLength,
             $this->serverZone,
             $this->serverUrl,
-            $this->useBatch
+            $this->useBatch,
+            $this->fetchClient,
+            $this->guzzleClientConfig
         );
     }
 }

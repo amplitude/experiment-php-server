@@ -3,13 +3,20 @@
 namespace AmplitudeExperiment\Local;
 
 use AmplitudeExperiment\Assignment\AssignmentConfig;
+use AmplitudeExperiment\Http\FetchClientInterface;
+use AmplitudeExperiment\Logger\LogLevel;
+use Psr\Log\LoggerInterface;
 
 class LocalEvaluationConfig
 {
     /**
-     * Set to true to log some extra information to the console.
+     * Set to use custom logger. If not set, a {@link DefaultLogger} is used.
      */
-    public bool $debug;
+    public ?LoggerInterface $logger;
+    /**
+     * The log level to use for the logger.
+     */
+    public int $logLevel;
     /**
      * The server endpoint from which to request variants.
      */
@@ -21,20 +28,33 @@ class LocalEvaluationConfig
      */
     public array $bootstrap;
     public ?AssignmentConfig $assignmentConfig;
+    /**
+     * The underlying HTTP client to use for requests.
+     */
+    public ?FetchClientInterface $fetchClient;
+    /**
+     * The configuration for the underlying default Guzzle client.
+     */
+    public array $guzzleClientConfig;
 
     const DEFAULTS = [
-        'debug' => false,
+        'logger' => null,
+        'logLevel' => LogLevel::INFO,
         'serverUrl' => 'https://api.lab.amplitude.com',
         'bootstrap' => [],
-        'assignmentConfig' => null
+        'assignmentConfig' => null,
+        'fetchClient' => null,
+        'guzzleClientConfig' => []
     ];
 
-    public function __construct(bool $debug, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig)
-    {
-        $this->debug = $debug;
+    public function __construct(?LoggerInterface $logger, int $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?FetchClientInterface $fetchClient, array $guzzleClientConfig){
+        $this->logger = $logger;
+        $this->logLevel = $logLevel;
         $this->serverUrl = $serverUrl;
         $this->bootstrap = $bootstrap;
         $this->assignmentConfig = $assignmentConfig;
+        $this->fetchClient = $fetchClient;
+        $this->guzzleClientConfig = $guzzleClientConfig;
     }
 
     public static function builder(): LocalEvaluationConfigBuilder

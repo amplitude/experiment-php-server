@@ -2,6 +2,9 @@
 
 namespace AmplitudeExperiment;
 
+use AmplitudeExperiment\Logger\DefaultLogger;
+use AmplitudeExperiment\Logger\InternalLogger;
+use AmplitudeExperiment\Logger\LogLevel;
 use Exception;
 
 require_once __DIR__ . '/Util.php';
@@ -49,7 +52,7 @@ class AmplitudeCookie
                     'userId' => $userSession['userId'] ?? null,
                 ];
             } catch (\Exception $e) {
-                $logger = initializeLogger(false);
+                $logger = new InternalLogger(new DefaultLogger(), LogLevel::INFO);
                 $logger->error("Error parsing the Amplitude cookie: '{$amplitudeCookie}'. " . $e->getMessage());
                 return [];
             }

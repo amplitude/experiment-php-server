@@ -2,6 +2,8 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
+use AmplitudeExperiment\Http\FetchClientInterface;
+
 /**
  * Configuration options for Amplitude. This is an object that can be created using
  * a {@link AmplitudeConfigBuilder}. Example usage:
@@ -18,10 +20,6 @@ class AmplitudeConfig
     /**
      * The maximum retry attempts for an event when receiving error response.
      */
-    public int $flushMaxRetries;
-    /**
-     * The minimum length of user_id and device_id for events. Default to 5.
-     */
     public int $minIdLength;
     /**
      * The server zone of project. Default to 'US'. Support 'EU'.
@@ -35,6 +33,8 @@ class AmplitudeConfig
      * True to use batch API endpoint, False to use HTTP V2 API endpoint.
      */
     public string $useBatch;
+    public ?FetchClientInterface $fetchClient;
+    public array $guzzleClientConfig;
 
     const DEFAULTS = [
         'serverZone' => 'US',
@@ -52,23 +52,27 @@ class AmplitudeConfig
         'minIdLength' => 5,
         'flushQueueSize' => 200,
         'flushMaxRetries' => 12,
+        'fetchClient' => null,
+        'guzzleClientConfig' => []
     ];
 
     public function __construct(
         int    $flushQueueSize,
-        int    $flushMaxRetries,
         int    $minIdLength,
         string $serverZone,
         string $serverUrl,
-        bool   $useBatch
+        bool   $useBatch,
+        ?FetchClientInterface $fetchClient,
+        array  $guzzleClientConfig
     )
     {
         $this->flushQueueSize = $flushQueueSize;
-        $this->flushMaxRetries = $flushMaxRetries;
         $this->minIdLength = $minIdLength;
         $this->serverZone = $serverZone;
         $this->serverUrl = $serverUrl;
         $this->useBatch = $useBatch;
+        $this->fetchClient = $fetchClient;
+        $this->guzzleClientConfig = $guzzleClientConfig;
     }
 
     public static function builder(): AmplitudeConfigBuilder

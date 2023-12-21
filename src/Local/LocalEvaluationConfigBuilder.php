@@ -3,21 +3,32 @@
 namespace AmplitudeExperiment\Local;
 
 use AmplitudeExperiment\Assignment\AssignmentConfig;
+use AmplitudeExperiment\Http\FetchClientInterface;
+use Psr\Log\LoggerInterface;
 
 class LocalEvaluationConfigBuilder
 {
-    protected bool $debug = LocalEvaluationConfig::DEFAULTS['debug'];
+    protected ?LoggerInterface $logger = LocalEvaluationConfig::DEFAULTS['logger'];
+    protected int $logLevel = LocalEvaluationConfig::DEFAULTS['logLevel'];
     protected string $serverUrl = LocalEvaluationConfig::DEFAULTS['serverUrl'];
     protected array $bootstrap = LocalEvaluationConfig::DEFAULTS['bootstrap'];
     protected ?AssignmentConfig $assignmentConfig = LocalEvaluationConfig::DEFAULTS['assignmentConfig'];
+    protected ?FetchClientInterface $fetchClient = LocalEvaluationConfig::DEFAULTS['fetchClient'];
+    protected array $guzzleClientConfig = LocalEvaluationConfig::DEFAULTS['guzzleClientConfig'];
 
     public function __construct()
     {
     }
 
-    public function debug(bool $debug): LocalEvaluationConfigBuilder
+    public function logger(LoggerInterface $logger): LocalEvaluationConfigBuilder
     {
-        $this->debug = $debug;
+        $this->logger = $logger;
+        return $this;
+    }
+
+    public function logLevel(int $logLevel): LocalEvaluationConfigBuilder
+    {
+        $this->logLevel = $logLevel;
         return $this;
     }
 
@@ -39,13 +50,28 @@ class LocalEvaluationConfigBuilder
         return $this;
     }
 
+    public function fetchClient(FetchClientInterface $fetchClient): LocalEvaluationConfigBuilder
+    {
+        $this->fetchClient = $fetchClient;
+        return $this;
+    }
+
+    public function guzzleClientConfig(array $guzzleClientConfig): LocalEvaluationConfigBuilder
+    {
+        $this->guzzleClientConfig = $guzzleClientConfig;
+        return $this;
+    }
+
     public function build(): LocalEvaluationConfig
     {
         return new LocalEvaluationConfig(
-            $this->debug,
+            $this->logger,
+            $this->logLevel,
             $this->serverUrl,
             $this->bootstrap,
-            $this->assignmentConfig
+            $this->assignmentConfig,
+            $this->fetchClient,
+            $this->guzzleClientConfig
         );
     }
 }

@@ -2,24 +2,32 @@
 
 namespace AmplitudeExperiment\Remote;
 
+use AmplitudeExperiment\Http\FetchClientInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
+
 class RemoteEvaluationConfigBuilder
 {
+    protected ?LoggerInterface $logger = RemoteEvaluationConfig::DEFAULTS['logger'];
+    protected int $logLevel = RemoteEvaluationConfig::DEFAULTS['logLevel'];
     protected bool $debug = RemoteEvaluationConfig::DEFAULTS['debug'];
     protected string $serverUrl = RemoteEvaluationConfig::DEFAULTS['serverUrl'];
-    protected int $fetchTimeoutMillis = RemoteEvaluationConfig::DEFAULTS['fetchTimeoutMillis'];
-    protected int $fetchRetries = RemoteEvaluationConfig::DEFAULTS['fetchRetries'];
-    protected int $fetchRetryBackoffMinMillis = RemoteEvaluationConfig::DEFAULTS['fetchRetryBackoffMinMillis'];
-    protected int $fetchRetryBackoffMaxMillis = RemoteEvaluationConfig::DEFAULTS['fetchRetryBackoffMaxMillis'];
-    protected float $fetchRetryBackoffScalar = RemoteEvaluationConfig::DEFAULTS['fetchRetryBackoffScalar'];
-    protected int $fetchRetryTimeoutMillis = RemoteEvaluationConfig::DEFAULTS['fetchRetryTimeoutMillis'];
+    protected ?FetchClientInterface $fetchClient = RemoteEvaluationConfig::DEFAULTS['fetchClient'];
+    protected array $guzzleClientConfig = RemoteEvaluationConfig::DEFAULTS['guzzleClientConfig'];
 
     public function __construct()
     {
     }
 
-    public function debug(bool $debug): RemoteEvaluationConfigBuilder
+    public function logger(LoggerInterface $logger): RemoteEvaluationConfigBuilder
     {
-        $this->debug = $debug;
+        $this->logger = $logger;
+        return $this;
+    }
+
+    public function logLevel(int $logLevel): RemoteEvaluationConfigBuilder
+    {
+        $this->logLevel = $logLevel;
         return $this;
     }
 
@@ -29,53 +37,26 @@ class RemoteEvaluationConfigBuilder
         return $this;
     }
 
-    public function fetchTimeoutMillis(int $fetchTimeoutMillis): RemoteEvaluationConfigBuilder
+    public function fetchClient(FetchClientInterface $fetchClient): RemoteEvaluationConfigBuilder
     {
-        $this->fetchTimeoutMillis = $fetchTimeoutMillis;
+        $this->fetchClient = $fetchClient;
         return $this;
     }
 
-    public function fetchRetries(int $fetchRetries): RemoteEvaluationConfigBuilder
+    public function guzzleClientConfig(array $guzzleClientConfig): RemoteEvaluationConfigBuilder
     {
-        $this->fetchRetries = $fetchRetries;
-        return $this;
-    }
-
-    public function fetchRetryBackoffMinMillis(int $fetchRetryBackoffMinMillis): RemoteEvaluationConfigBuilder
-    {
-        $this->fetchRetryBackoffMinMillis = $fetchRetryBackoffMinMillis;
-        return $this;
-    }
-
-    public function fetchRetryBackoffMaxMillis(int $fetchRetryBackoffMaxMillis): RemoteEvaluationConfigBuilder
-    {
-        $this->fetchRetryBackoffMaxMillis = $fetchRetryBackoffMaxMillis;
-        return $this;
-    }
-
-    public function fetchRetryBackoffScalar(float $fetchRetryBackoffScalar): RemoteEvaluationConfigBuilder
-    {
-        $this->fetchRetryBackoffScalar = $fetchRetryBackoffScalar;
-        return $this;
-    }
-
-    public function fetchRetryTimeoutMillis(int $fetchRetryTimeoutMillis): RemoteEvaluationConfigBuilder
-    {
-        $this->fetchRetryTimeoutMillis = $fetchRetryTimeoutMillis;
+        $this->guzzleClientConfig = $guzzleClientConfig;
         return $this;
     }
 
     public function build(): RemoteEvaluationConfig
     {
         return new RemoteEvaluationConfig(
-            $this->debug,
+            $this->logger,
+            $this->logLevel,
             $this->serverUrl,
-            $this->fetchTimeoutMillis,
-            $this->fetchRetries,
-            $this->fetchRetryBackoffMinMillis,
-            $this->fetchRetryBackoffMaxMillis,
-            $this->fetchRetryBackoffScalar,
-            $this->fetchRetryTimeoutMillis,
+            $this->fetchClient,
+            $this->guzzleClientConfig
         );
     }
 }
