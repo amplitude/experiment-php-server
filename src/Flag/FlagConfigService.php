@@ -9,8 +9,15 @@ class FlagConfigService
 {
     private LoggerInterface $logger;
     public FlagConfigFetcher $fetcher;
+
+    /**
+     * @var array<string, mixed>
+     */
     public array $cache;
 
+    /**
+     * @param array<string, mixed> $bootstrap
+     */
     public function __construct(FlagConfigFetcher $fetcher, LoggerInterface $logger, array $bootstrap)
     {
         $this->fetcher = $fetcher;
@@ -18,7 +25,7 @@ class FlagConfigService
         $this->cache = $bootstrap;
     }
 
-    public function start()
+    public function start(): void
     {
         $this->logger->debug('[Experiment] Flag service - start');
 
@@ -26,7 +33,7 @@ class FlagConfigService
         $this->refresh();
     }
 
-    private function refresh()
+    private function refresh(): void
     {
         $this->logger->debug('[Experiment] Flag config update');
         try {
@@ -37,6 +44,9 @@ class FlagConfigService
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getFlagConfigs(): array
     {
         return $this->cache;

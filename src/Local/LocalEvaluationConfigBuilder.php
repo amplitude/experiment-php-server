@@ -11,9 +11,15 @@ class LocalEvaluationConfigBuilder
     protected ?LoggerInterface $logger = LocalEvaluationConfig::DEFAULTS['logger'];
     protected int $logLevel = LocalEvaluationConfig::DEFAULTS['logLevel'];
     protected string $serverUrl = LocalEvaluationConfig::DEFAULTS['serverUrl'];
+    /**
+     * @var array<string, mixed>
+     */
     protected array $bootstrap = LocalEvaluationConfig::DEFAULTS['bootstrap'];
     protected ?AssignmentConfig $assignmentConfig = LocalEvaluationConfig::DEFAULTS['assignmentConfig'];
     protected ?FetchClientInterface $fetchClient = LocalEvaluationConfig::DEFAULTS['fetchClient'];
+    /**
+     * @var array<string, mixed>
+     */
     protected array $guzzleClientConfig = LocalEvaluationConfig::DEFAULTS['guzzleClientConfig'];
 
     public function __construct()
@@ -38,6 +44,9 @@ class LocalEvaluationConfigBuilder
         return $this;
     }
 
+    /**
+     * @param array<string, mixed> $bootstrap
+     */
     public function bootstrap(array $bootstrap): LocalEvaluationConfigBuilder
     {
         $this->bootstrap = $bootstrap;
@@ -56,6 +65,9 @@ class LocalEvaluationConfigBuilder
         return $this;
     }
 
+    /**
+     * @param array<string, mixed> $guzzleClientConfig
+     */
     public function guzzleClientConfig(array $guzzleClientConfig): LocalEvaluationConfigBuilder
     {
         $this->guzzleClientConfig = $guzzleClientConfig;

@@ -32,8 +32,11 @@ class AmplitudeConfig
     /**
      * True to use batch API endpoint, False to use HTTP V2 API endpoint.
      */
-    public string $useBatch;
+    public bool $useBatch;
     public ?FetchClientInterface $fetchClient;
+    /**
+     * @var array<string, mixed>
+     */
     public array $guzzleClientConfig;
 
     const DEFAULTS = [
@@ -56,6 +59,9 @@ class AmplitudeConfig
         'guzzleClientConfig' => []
     ];
 
+    /**
+     * @param array<string, mixed> $guzzleClientConfig
+     */
     public function __construct(
         int    $flushQueueSize,
         int    $minIdLength,

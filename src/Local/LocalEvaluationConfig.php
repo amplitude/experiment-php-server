@@ -22,8 +22,8 @@ class LocalEvaluationConfig
      */
     public string $serverUrl;
     /**
+     * @var array<string, mixed>
      * Bootstrap the client with a pre-fetched flag configurations.
-     *
      * Useful if you are managing the flag configurations separately.
      */
     public array $bootstrap;
@@ -33,6 +33,7 @@ class LocalEvaluationConfig
      */
     public ?FetchClientInterface $fetchClient;
     /**
+     * @var array<string, mixed>
      * The configuration for the underlying default Guzzle client.
      */
     public array $guzzleClientConfig;
@@ -47,7 +48,12 @@ class LocalEvaluationConfig
         'guzzleClientConfig' => []
     ];
 
-    public function __construct(?LoggerInterface $logger, int $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?FetchClientInterface $fetchClient, array $guzzleClientConfig){
+    /**
+     * @param array<string, mixed> $guzzleClientConfig
+     * @param array<string, mixed> $bootstrap
+     */
+    public function __construct(?LoggerInterface $logger, int $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?FetchClientInterface $fetchClient, array $guzzleClientConfig)
+    {
         $this->logger = $logger;
         $this->logLevel = $logLevel;
         $this->serverUrl = $serverUrl;

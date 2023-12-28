@@ -41,8 +41,14 @@ const GUZZLE_DEFAULTS = [
 class GuzzleFetchClient implements FetchClientInterface
 {
     private Client $client;
+    /**
+     * @var array<string, mixed>
+     */
     private array $config;
 
+    /**
+     * @param array<string, mixed> $config
+     */
     public function __construct(array $config)
     {
         $handlerStack = HandlerStack::create();
@@ -75,7 +81,7 @@ class GuzzleFetchClient implements FetchClientInterface
     }
 
 
-    protected function calculateDelayMillis($iteration): int
+    protected function calculateDelayMillis(int $iteration): int
     {
         $delayMillis = $this->config['fetchRetryBackoffMinMillis'];
 

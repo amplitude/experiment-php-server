@@ -76,7 +76,7 @@ class InternalLogger implements LoggerInterface
         // Do nothing
     }
 
-    private function shouldLog($level): bool
+    private function shouldLog(int $level): bool
     {
         return $level >= $this->logLevel;
     }

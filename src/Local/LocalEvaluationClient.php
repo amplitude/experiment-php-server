@@ -14,6 +14,7 @@ use AmplitudeExperiment\Http\GuzzleFetchClient;
 use AmplitudeExperiment\Logger\DefaultLogger;
 use AmplitudeExperiment\Logger\InternalLogger;
 use AmplitudeExperiment\User;
+use AmplitudeExperiment\Variant;
 use Psr\Log\LoggerInterface;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
 
@@ -38,14 +39,14 @@ class LocalEvaluationClient
         $httpClient = $config->fetchClient ?? $this->config->fetchClient ?? new GuzzleFetchClient($this->config->guzzleClientConfig);
         $fetcher = new FlagConfigFetcher($apiKey, $this->logger, $httpClient, $this->config->serverUrl);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->logger, $this->config->bootstrap);
-        $this->initializeAssignmentService($config->assignmentConfig);
+        $this->initializeAssignmentService($this->config->assignmentConfig);
         $this->evaluation = new EvaluationEngine();
     }
 
     /**
      * Fetch initial flag configurations.
      */
-    public function start()
+    public function start(): void
     {
         $this->flagConfigService->start();
     }
@@ -57,10 +58,10 @@ class LocalEvaluationClient
      * flagKeys argument. If flagKeys is missing or empty, all flags in the
      * {@link FlagConfigService} will be evaluated.
      *
-     * @param $user User The user to evaluate
-     * @param $flagKeys array The flags to evaluate with the user. If empty, all flags
+     * @param User $user The user to evaluate
+     * @param array<string> $flagKeys The flags to evaluate with the user. If empty, all flags
      * from the flag cache are evaluated.
-     * @returns array evaluated variants
+     * @return array<Variant> evaluated variants
      */
     public function evaluate(User $user, array $flagKeys = []): array
     {

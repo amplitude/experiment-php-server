@@ -3,18 +3,25 @@
 namespace AmplitudeExperiment\Assignment;
 
 use AmplitudeExperiment\User;
+use AmplitudeExperiment\Variant;
 
 class Assignment
 {
     public User $user;
+    /**
+     * @var array<string, Variant>
+     */
     public array $variants;
     public int $timestamp;
 
+    /**
+     * @param array<string, Variant> $variants
+     */
     public function __construct(User $user, array $variants)
     {
         $this->user = $user;
         $this->variants = $variants;
-        $this->timestamp = floor(microtime(true) * 1000);
+        $this->timestamp = (int) floor(microtime(true) * 1000);
     }
 
     public function canonicalize(): string

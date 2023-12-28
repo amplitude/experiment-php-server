@@ -13,26 +13,29 @@ use Psr\Log\LoggerInterface;
 class Amplitude
 {
     private string $apiKey;
+    /**
+     * @var array<array<string,mixed>>
+     */
     protected array $queue = [];
     protected FetchClientInterface $httpClient;
     private LoggerInterface $logger;
-    private ?AmplitudeConfig $config;
+    private AmplitudeConfig $config;
 
     public function __construct(string $apiKey, LoggerInterface $logger, AmplitudeConfig $config = null)
     {
         $this->apiKey = $apiKey;
         $this->logger = $logger;
         $this->config = $config ?? AmplitudeConfig::builder()->build();
-        $this->httpClient = $config->fetchClient ?? $this->config->fetchClient ?? new GuzzleFetchClient($this->config->guzzleClientConfig);
+        $this->httpClient = $this->config->fetchClient ?? $this->config->fetchClient ?? new GuzzleFetchClient($this->config->guzzleClientConfig);
     }
 
-    public function flush()
+    public function flush(): void
     {
         $payload = ["api_key" => $this->apiKey, "events" => $this->queue, "options" => ["min_id_length" => $this->config->minIdLength]];
         $this->post($this->config->serverUrl, $payload);
     }
 
-    public function logEvent(Event $event)
+    public function logEvent(Event $event): void
     {
         $this->queue[] = $event->toArray();
         if (count($this->queue) >= $this->config->flushQueueSize) {
@@ -50,10 +53,17 @@ class Amplitude
         }
     }
 
-    private function post(string $url, array $payload)
+    /**
+     * @param array<string,mixed> $payload
+     */
+    private function post(string $url, array $payload): void
     {
         $fetchClient = $this->httpClient->getClient();
         $payloadJson = json_encode($payload);
+        if ($payloadJson === false) {
+            $this->logger->error('[Amplitude] Failed to encode payload: ' . json_last_error());
+            return;
+        }
         $request = $this->httpClient->createRequest('POST', $url)->withHeader('json', $payloadJson);
         try {
             $response = $fetchClient->sendRequest($request);

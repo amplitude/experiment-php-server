@@ -32,6 +32,7 @@ class RemoteEvaluationConfig
      */
     public ?FetchClientInterface $fetchClient;
     /**
+     * @var array<string, mixed>
      * The configuration for the underlying default Guzzle client.
      */
     public array $guzzleClientConfig;
@@ -46,6 +47,9 @@ class RemoteEvaluationConfig
     ];
 
 
+    /**
+     * @param array<string, mixed> $guzzleClientConfig
+     */
     public function __construct(
         ?LoggerInterface      $logger,
         int                   $logLevel,

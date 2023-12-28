@@ -37,7 +37,7 @@ class AmplitudeCookie
     /**
      * @param string $amplitudeCookie A string from the amplitude cookie
      * @param bool $newFormat True if the cookie is in the Browser SDK 2.0 format
-     * @return array An array containing device_id and user_id (if available)
+     * @return array<mixed> An array containing device_id and user_id (if available)
      */
     public static function parse(string $amplitudeCookie, bool $newFormat = false): array
     {
@@ -45,17 +45,16 @@ class AmplitudeCookie
             $decoding = base64_decode($amplitudeCookie);
             $decoded = urldecode($decoding);
 
-            try {
-                $userSession = json_decode($decoded, true);
-                return [
-                    'deviceId' => $userSession['deviceId'],
-                    'userId' => $userSession['userId'] ?? null,
-                ];
-            } catch (\Exception $e) {
+            $userSession = json_decode($decoded, true);
+            if ($userSession === null) {
                 $logger = new InternalLogger(new DefaultLogger(), LogLevel::INFO);
-                $logger->error("Error parsing the Amplitude cookie: '{$amplitudeCookie}'. " . $e->getMessage());
+                $logger->error("Error parsing the Amplitude cookie: '{$amplitudeCookie}'.");
                 return [];
             }
+            return [
+                'deviceId' => $userSession['deviceId'],
+                'userId' => $userSession['userId'] ?? null,
+            ];
         }
 
         $values = explode('.', $amplitudeCookie);
@@ -92,6 +91,9 @@ class AmplitudeCookie
         ];
 
         $json_data = json_encode($userSessionHash);
+        if ($json_data === false) {
+            return '';
+        }
         $encoded_json = urlencode($json_data);
         return base64_encode($encoded_json);
     }

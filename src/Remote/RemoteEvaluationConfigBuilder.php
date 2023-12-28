@@ -13,6 +13,9 @@ class RemoteEvaluationConfigBuilder
     protected bool $debug = RemoteEvaluationConfig::DEFAULTS['debug'];
     protected string $serverUrl = RemoteEvaluationConfig::DEFAULTS['serverUrl'];
     protected ?FetchClientInterface $fetchClient = RemoteEvaluationConfig::DEFAULTS['fetchClient'];
+    /**
+     * @var array<string, mixed>
+     */
     protected array $guzzleClientConfig = RemoteEvaluationConfig::DEFAULTS['guzzleClientConfig'];
 
     public function __construct()
@@ -43,6 +46,10 @@ class RemoteEvaluationConfigBuilder
         return $this;
     }
 
+
+    /**
+     * @param array<string, mixed> $guzzleClientConfig
+     */
     public function guzzleClientConfig(array $guzzleClientConfig): RemoteEvaluationConfigBuilder
     {
         $this->guzzleClientConfig = $guzzleClientConfig;

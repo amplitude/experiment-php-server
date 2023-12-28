@@ -28,8 +28,8 @@ class RemoteEvaluationClient
     /**
      * Creates a new RemoteEvaluationClient instance.
      *
-     * @param $apiKey string The environment API Key
-     * @param $config ?RemoteEvaluationConfig See {@link RemoteEvaluationConfig} for config options
+     * @param string $apiKey The environment API Key
+     * @param ?RemoteEvaluationConfig $config See {@link RemoteEvaluationConfig} for config options
      */
     public function __construct(string $apiKey, ?RemoteEvaluationConfig $config = null)
     {
@@ -44,9 +44,9 @@ class RemoteEvaluationClient
      *
      * This method will automatically retry if configured (default).
      *
-     * @param $user User The {@link User} context
-     * @param $flagKeys array The flags to evaluate for this specific fetch request.
-     * @return array A {@link Variant} array for the user on success, empty array on error. d
+     * @param User $user The {@link User} context
+     * @param array<string> $flagKeys The flags to evaluate for this specific fetch request.
+     * @return array<Variant> A {@link Variant} array for the user on success, empty array on error.
      */
     public function fetch(User $user, array $flagKeys = []): array
     {
@@ -57,7 +57,12 @@ class RemoteEvaluationClient
 
         // Define the request data
         $libraryUser = $user->copyToBuilder()->library('experiment-php-server/' . VERSION)->build();
-        $serializedUser = base64_encode(json_encode($libraryUser->toArray()));
+        $userJson = json_encode($libraryUser->toArray());
+        if ($userJson === false) {
+            $this->logger->error('[Experiment] Failed to fetch variants: ' . json_last_error_msg());
+            return [];
+        }
+        $serializedUser = base64_encode($userJson);
 
         // Define the request URL
         $endpoint = $this->config->serverUrl . '/sdk/v2/vardata?v=0';
@@ -67,7 +72,12 @@ class RemoteEvaluationClient
             ->withHeader('X-Amp-Exp-User', $serializedUser);
 
         if (!empty($flagKeys)) {
-            $request = $request->withHeader('X-Amp-Exp-Flag-Keys', base64_encode(json_encode($flagKeys)));
+            $flagKeysJson = json_encode($flagKeys);
+            if ($flagKeysJson === false) {
+                $this->logger->error('[Experiment] Failed to fetch variants: ' . json_last_error_msg());
+                return [];
+            }
+            $request = $request->withHeader('X-Amp-Exp-Flag-Keys', base64_encode($flagKeysJson));
         }
 
         $fetchClient = $this->httpClient->getClient();

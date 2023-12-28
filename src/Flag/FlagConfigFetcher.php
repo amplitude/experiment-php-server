@@ -28,6 +28,7 @@ class FlagConfigFetcher
      * Fetch local evaluation mode flag configs from the Experiment API server.
      * These flag configs can be used to perform local evaluation.
      *
+     * @return array<array<mixed>> The flag configs
      * @throws ClientExceptionInterface
      */
     public function fetch(): array
@@ -51,6 +52,10 @@ class FlagConfigFetcher
 
     }
 
+    /**
+     * @param array<array<mixed>> $flagConfigs
+     * @return array<array<mixed>>
+     */
     private function parse(array $flagConfigs): array
     {
         $flagConfigsRecord = [];

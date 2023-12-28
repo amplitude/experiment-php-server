@@ -54,6 +54,9 @@ class DefaultLogger implements LoggerInterface
         // Do nothing, only the leveled methods should be used.
     }
 
+    /**
+     * @param array<string, mixed> $context
+     */
     private static function logMessage(int $level, string $message, array $context = []): void
     {
         $date = new DateTimeImmutable();

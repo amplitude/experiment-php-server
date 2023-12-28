@@ -12,6 +12,9 @@ class AmplitudeConfigBuilder
     protected ?string $serverUrl = null;
     protected bool $useBatch = AmplitudeConfig::DEFAULTS['useBatch'];
     protected ?FetchClientInterface $fetchClient = AmplitudeConfig::DEFAULTS['fetchClient'];
+    /**
+     * @var array<string, mixed>
+     */
     protected array $guzzleClientConfig = AmplitudeConfig::DEFAULTS['guzzleClientConfig'];
 
     public function __construct()
@@ -54,13 +57,16 @@ class AmplitudeConfigBuilder
         return $this;
     }
 
+    /**
+     * @param array<string, mixed> $guzzleClientConfig
+     */
     public function guzzleClientConfig(array $guzzleClientConfig): AmplitudeConfigBuilder
     {
         $this->guzzleClientConfig = $guzzleClientConfig;
         return $this;
     }
 
-    public function build()
+    public function build(): AmplitudeConfig
     {
         if (!$this->serverUrl) {
             if ($this->useBatch) {
