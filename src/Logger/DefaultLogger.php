@@ -7,6 +7,9 @@ namespace AmplitudeExperiment\Logger;
 use DateTimeImmutable;
 use Psr\Log\LoggerInterface;
 
+/**
+ * A default LoggerInterface implementation that logs to error_log.
+ */
 class DefaultLogger implements LoggerInterface
 {
     public function emergency($message, array $context = []): void

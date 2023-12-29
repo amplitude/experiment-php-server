@@ -28,8 +28,6 @@ class FlagConfigService
     public function start(): void
     {
         $this->logger->debug('[Experiment] Flag service - start');
-
-        // Fetch initial flag configs and await the result.
         $this->refresh();
     }
 

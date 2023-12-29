@@ -38,6 +38,9 @@ const GUZZLE_DEFAULTS = [
     'fetchRetryTimeoutMillis' => 10000
 ];
 
+/**
+ * A default FetchClientInterface implementation that uses Guzzle.
+ */
 class GuzzleFetchClient implements FetchClientInterface
 {
     private Client $client;
