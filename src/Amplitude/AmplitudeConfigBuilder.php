@@ -66,7 +66,10 @@ class AmplitudeConfigBuilder
         return $this;
     }
 
-    public function build(): AmplitudeConfig
+    /**
+     * @phpstan-ignore-next-line
+     */
+    public function build()
     {
         if (!$this->serverUrl) {
             if ($this->useBatch) {

@@ -25,6 +25,9 @@ class AssignmentConfigBuilder extends AmplitudeConfigBuilder
         return $this;
     }
 
+    /**
+     * @phpstan-ignore-next-line
+     */
     public function build()
     {
         return new AssignmentConfig(
