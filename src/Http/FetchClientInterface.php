@@ -9,11 +9,11 @@ use Psr\Http\Message\RequestInterface;
 interface FetchClientInterface
 {
     /**
-     * return a Psr Client
+     * Return the underlying PSR HTTP Client
      */
     public function getClient(): ClientInterface;
     /**
-     * return a Psr Request to be sent by the client
+     * Return a PSR Request to be sent by the underlying PSR HTTP Client
      */
     public function createRequest(string $method, string $uri, ?string $body = null) : RequestInterface;
 }
