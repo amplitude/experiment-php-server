@@ -15,5 +15,5 @@ interface FetchClientInterface
     /**
      * return a Psr Request to be sent by the client
      */
-    public function createRequest(string $method, string $uri) : RequestInterface;
+    public function createRequest(string $method, string $uri, ?string $body = null) : RequestInterface;
 }

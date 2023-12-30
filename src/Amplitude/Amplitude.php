@@ -64,16 +64,19 @@ class Amplitude
             $this->logger->error('[Amplitude] Failed to encode payload: ' . json_last_error());
             return;
         }
-        $request = $this->httpClient->createRequest('POST', $url)->withHeader('json', $payloadJson);
+        $request = $this->httpClient
+            ->createRequest('POST', $url, $payloadJson)
+            ->withHeader('Content-Type', 'application/json');
         try {
             $response = $fetchClient->sendRequest($request);
             if ($response->getStatusCode() != 200) {
+                echo json_encode($payload) . "\n";
                 $this->logger->error('[Amplitude] Failed to send event: ' . $payloadJson . ', ' . $response->getStatusCode() . ' ' . $response->getReasonPhrase());
-            } else {
-                $this->logger->debug("[Amplitude] Event sent successfully: " . $payloadJson);
-                $this->queue = [];
+                return;
             }
             $this->logger->debug("[Amplitude] Event sent successfully: " . $payloadJson);
+            $this->queue = [];
+
         } catch (ClientExceptionInterface $e) {
             $this->logger->error('[Amplitude] Failed to send event: ' . $payloadJson . ', ' . $e->getMessage());
         }

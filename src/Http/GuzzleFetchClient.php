@@ -2,6 +2,7 @@
 
 namespace AmplitudeExperiment\Http;
 
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -61,7 +62,7 @@ class GuzzleFetchClient implements FetchClientInterface
         $handlerStack->push(Middleware::retry(
             function ($retries, Request $request, $response = null, $exception = null) {
                 // Retry if the maximum number of retries is not reached and an exception occurred
-                return $retries < $this->config['fetchRetries'] && $exception instanceof \Exception;
+                return $retries < $this->config['fetchRetries'] && $exception instanceof Exception;
             },
             function ($retries) {
                 // Calculate delay
@@ -78,8 +79,11 @@ class GuzzleFetchClient implements FetchClientInterface
         return $this->client;
     }
 
-    public function createRequest(string $method, string $uri): Request
+    public function createRequest(string $method, string $uri, ?string $body = null): Request
     {
+        if ($body !== null) {
+            return new Request($method, $uri, [], $body);
+        }
         return new Request($method, $uri);
     }
 

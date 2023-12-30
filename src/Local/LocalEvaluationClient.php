@@ -73,7 +73,7 @@ class LocalEvaluationClient
         }
         $this->logger->debug('[Experiment] Evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode($flags));
         $results = array_map('AmplitudeExperiment\Variant::convertEvaluationVariantToVariant', $this->evaluation->evaluate($user->toEvaluationContext(), $flags));
-        $this->logger->debug('[Experiment] Evaluate - variants:', $results);
+        $this->logger->debug('[Experiment] Evaluate - variants:' . json_encode($results));
         if ($this->assignmentService) {
             $this->assignmentService->track(new Assignment($user, $results));
         }

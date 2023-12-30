@@ -34,7 +34,7 @@ class LocalEvaluationConfig
     public ?FetchClientInterface $fetchClient;
     /**
      * @var array<string, mixed>
-     * The configuration for the underlying default Guzzle client.
+     * The configuration for the underlying default Guzzle client. See {@link GUZZLE_DEFAULTS} for defaults.
      */
     public array $guzzleClientConfig;
 
