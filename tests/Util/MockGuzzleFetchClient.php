@@ -42,7 +42,7 @@ class MockGuzzleFetchClient implements FetchClientInterface
         return $this->client;
     }
 
-    public function createRequest(string $method, string $uri): Request
+    public function createRequest(string $method, string $uri, ?string $body = null): Request
     {
         return new Request($method, $uri);
     }
