@@ -1,0 +1,10 @@
+parameters:
+	level: 8
+	paths:
+		- src
+
+	excludePaths:
+		- src/EvaluationCore
+
+	scanFiles:
+		- src/EvaluationCore/Util.php

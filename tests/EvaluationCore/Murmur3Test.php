@@ -2,6 +2,7 @@
 
 namespace AmplitudeExperiment\Test\EvaluationCore;
 
+use AmplitudeExperiment\EvaluationCore\Murmur3;
 use PHPUnit\Framework\TestCase;
 
 class Murmur3Test extends TestCase
@@ -11,7 +12,7 @@ class Murmur3Test extends TestCase
     public function testMurmur3HashSimple()
     {
         $input = 'brian';
-        $result = murmurhash3_int($input, self::MURMUR_SEED);
+        $result = Murmur3::hash3_int($input, self::MURMUR_SEED);
         $this->assertEquals(3948467465, $result);
     }
 
@@ -23,16 +24,16 @@ class Murmur3Test extends TestCase
         for ($i = 0; $i < count($inputs); $i++) {
             $input = $inputs[$i];
             $output = (int)$outputs[$i];
-            $result = murmurhash3_int($input, self::MURMUR_SEED);
+            $result = Murmur3::hash3_int($input, self::MURMUR_SEED);
             $this->assertEquals($output, $result);
         }
     }
 
     public function testUnicodeStrings()
     {
-        $this->assertEquals(2953494853, murmurhash3_int('My hovercraft is full of eels.'));
-        $this->assertEquals(1818098979, murmurhash3_int('My 🚀 is full of 🦎.'));
-        $this->assertEquals(3435142074, murmurhash3_int('吉 星 高 照'));
+        $this->assertEquals(2953494853, Murmur3::hash3_int('My hovercraft is full of eels.'));
+        $this->assertEquals(1818098979, Murmur3::hash3_int('My 🚀 is full of 🦎.'));
+        $this->assertEquals(3435142074, Murmur3::hash3_int('吉 星 高 照'));
     }
 
     const MURMUR3_X86_32 = '

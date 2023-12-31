@@ -4,23 +4,26 @@ namespace AmplitudeExperiment\Test\Amplitude;
 
 use AmplitudeExperiment\Amplitude\AmplitudeConfig;
 use AmplitudeExperiment\Amplitude\Event;
-use GuzzleHttp\Client;
+use AmplitudeExperiment\Logger\DefaultLogger;
+use AmplitudeExperiment\Logger\InternalLogger;
+use AmplitudeExperiment\Logger\LogLevel;
+use AmplitudeExperiment\Test\Util\MockGuzzleFetchClient;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\TransferStats;
-use Monolog\Test\TestCase;
+use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
+use Psr\Log\LoggerInterface;
 
 class AmplitudeTest extends TestCase
 {
-    private array $postContainer;
+    private LoggerInterface $logger;
     const API_KEY = 'test';
 
     public function setUp(): void
     {
-        $this->postContainer = [];
+        $this->logger = new InternalLogger(new DefaultLogger(), LogLevel::DEBUG);
     }
 
     public function testAmplitudeConfigServerUrl()
@@ -50,13 +53,12 @@ class AmplitudeTest extends TestCase
 
     public function testEmptyQueueAfterFlushSuccess()
     {
-        $client = new MockAmplitude(self::API_KEY, true);
+        $client = new MockAmplitude(self::API_KEY, $this->logger);
         $mock = new MockHandler([
             new Response(200, ['X-Foo' => 'Bar']),
         ]);
-
         $handlerStack = HandlerStack::create($mock);
-        $httpClient = new Client(['handler' => $handlerStack]);
+        $httpClient = new MockGuzzleFetchClient([], $handlerStack);
         $client->setHttpClient($httpClient);
         $event1 = new Event('test1');
         $event2 = new Event('test2');
@@ -65,25 +67,33 @@ class AmplitudeTest extends TestCase
         $client->logEvent($event2);
         $client->logEvent($event3);
         $this->assertEquals(3, $client->getQueueSize());
-        $client->flush()->wait();
+        $client->flush();
         $this->assertEquals(0, $client->getQueueSize());
     }
 
     public function testFlushAfterMaxQueue()
     {
+        // Initialize the request counter
+        $requestCounter = 0;
+
         $config = AmplitudeConfig::builder()
             ->flushQueueSize(3)
             ->build();
-        $client = new MockAmplitude(self::API_KEY, true, $config);
-        $mock = new MockHandler([
-            new Response(200, ['X-Foo' => 'Bar']),
+        $client = new MockAmplitude(self::API_KEY, $this->logger, $config);
+        $mockHandler = new MockHandler([
+            function (RequestInterface $request, array $options) use (&$requestCounter) {
+                $requestCounter++;
+
+                return new Response(200, ['X-Foo' => 'Bar']);
+            },
         ]);
-        $handlerStack = HandlerStack::create($mock);
-        $httpClient = new Client(['handler' => $handlerStack,
-            'on_stats' => function (TransferStats $stats) {
-                $this->postContainer[] = $stats;
-            }]);
-        $client->setHttpClient($httpClient);
+
+        // Create a handler stack with the mock handler
+        $handlerStack = HandlerStack::create($mockHandler);
+
+        // Create an instance of GuzzleFetchClient with the custom handler stack
+        $fetchClient = new MockGuzzleFetchClient([], $handlerStack);
+        $client->setHttpClient($fetchClient);
         $event1 = new Event('test1');
         $event2 = new Event('test2');
         $event3 = new Event('test3');
@@ -91,68 +101,65 @@ class AmplitudeTest extends TestCase
         $client->logEvent($event2);
         $this->assertEquals(2, $client->getQueueSize());
         $client->logEvent($event3);
-        $this->assertEquals(1, $this->countPostRequests());
+        $this->assertEquals(1, $requestCounter);
         $this->assertEquals(0, $client->getQueueSize());
     }
 
     public function testBackoffRetriesToFailure()
     {
-        $config = AmplitudeConfig::builder()
-            ->flushMaxRetries(5)
-            ->build();
-        $client = new MockAmplitude(self::API_KEY, true, $config);
-        $mock = new MockHandler([
-            new RequestException('Error Communicating with Server', new Request('POST', 'test')),
-            new RequestException('Error Communicating with Server', new Request('POST', 'test')),
-            new RequestException('Error Communicating with Server', new Request('POST', 'test')),
-            new RequestException('Error Communicating with Server', new Request('POST', 'test')),
-            new RequestException('Error Communicating with Server', new Request('POST', 'test')),
-        ]);
+        // Initialize the request counter
+        $requestCounter = 0;
+        $config = AmplitudeConfig::builder()->build();
+        $client = new MockAmplitude(self::API_KEY, $this->logger, $config);
 
-        $handlerStack = HandlerStack::create($mock);
-        $httpClient = new Client(['handler' => $handlerStack,
-            'on_stats' => function (TransferStats $stats) {
-                $this->postContainer[] = $stats;
-            }]);
+        // Set up the mock handler with request counter incrementation logic
+        $mockHandler = new MockHandler(array_fill(1, 5, function (RequestInterface $request, array $options) use (&$requestCounter) {
+            $requestCounter++;
+            return new RequestException('Error Communicating with Server', $request);
+        }));
+
+        $handlerStack = HandlerStack::create($mockHandler);
+        $httpClient = new MockGuzzleFetchClient(['fetchRetries' => 4], $handlerStack);
         $client->setHttpClient($httpClient);
+
         $event1 = new Event('test');
         $event1->userId = 'user_id';
         $client->logEvent($event1);
-        $client->flush()->wait();
-        $this->assertEquals(5, $this->countPostRequests());
+        $client->flush();
+
+        // Assert the number of requests sent (including retries)
+        $this->assertEquals(5, $requestCounter);
         $this->assertEquals(1, $client->getQueueSize());
     }
 
+
     public function testBackoffRetriesThenSuccess()
     {
-        $config = AmplitudeConfig::builder()
-            ->flushMaxRetries(5)
-            ->build();
-        $client = new MockAmplitude(self::API_KEY, true, $config);
-        $mock = new MockHandler([
-            new RequestException('Error Communicating with Server', new Request('POST', 'test')),
-            new RequestException('Error Communicating with Server', new Request('POST', 'test')),
-            new Response(200, ['X-Foo' => 'Bar']),
-        ]);
+        // Initialize the request counter
+        $requestCounter = 0;
+        $config = AmplitudeConfig::builder()->build();
+        $client = new MockAmplitude(self::API_KEY, $this->logger, $config);
 
-        $handlerStack = HandlerStack::create($mock);
-        $httpClient = new Client(['handler' => $handlerStack,
-            'on_stats' => function (TransferStats $stats) {
-                $this->postContainer[] = $stats;
-            }]);
+        // Set up the mock handler with request counter incrementation logic
+        $mockHandler = new MockHandler(array_fill(1, 2, function (RequestInterface $request, array $options) use (&$requestCounter) {
+                $requestCounter++;
+                return new RequestException('Error Communicating with Server', $request);
+            }) + [
+                function (RequestInterface $request, array $options) use (&$requestCounter) {
+                    $requestCounter++;
+
+                    return new Response(200, ['X-Foo' => 'Bar']);
+                },
+            ]);
+
+        $handlerStack = HandlerStack::create($mockHandler);
+        $httpClient = new MockGuzzleFetchClient(['fetchRetries' => 4], $handlerStack);
         $client->setHttpClient($httpClient);
         $event1 = new Event('test');
         $event1->userId = 'user_id';
         $client->logEvent($event1);
-        $client->flush()->wait();
-        $this->assertEquals(3, $this->countPostRequests());
+        $client->flush();
+        $this->assertEquals(3, $requestCounter);
         $this->assertEquals(0, $client->getQueueSize());
-    }
-
-    private function countPostRequests(): int
-    {
-        return count(array_filter($this->postContainer, function (TransferStats $stats) {
-            return $stats->getRequest()->getMethod() === 'POST';
-        }));
     }
 }

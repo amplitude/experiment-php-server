@@ -112,7 +112,7 @@ class EvaluationEngine
 
     private function getHash(string $key): int
     {
-        return murmurhash3_int($key);
+        return Murmur3::hash3_int($key);
     }
 
     private function bucket(array $target, array $segment): ?string

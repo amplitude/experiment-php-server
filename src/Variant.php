@@ -13,6 +13,7 @@ class Variant
      */
     public ?string $value;
     /**
+     * @var mixed
      * The attached payload, if any
      */
     public $payload;
@@ -21,11 +22,16 @@ class Variant
      */
     public ?string $expKey;
     /**
+     * @var ?array<mixed>
      * Flag, segment, and variant metadata produced as a result of
      * evaluation for the user. Used for system purposes.
      */
     public ?array $metadata;
 
+    /**
+     * @param mixed $payload
+     * @param ?array<mixed> $metadata
+     */
     public function __construct(
         ?string $key = null,
         ?string $value = null,
@@ -41,6 +47,9 @@ class Variant
         $this->metadata = $metadata;
     }
 
+    /**
+     * @param array<mixed> $evaluationVariant
+     */
     public static function convertEvaluationVariantToVariant(array $evaluationVariant): Variant
     {
 

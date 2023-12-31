@@ -5,6 +5,7 @@ namespace AmplitudeExperiment\Test\Local;
 use AmplitudeExperiment\Experiment;
 use AmplitudeExperiment\Local\LocalEvaluationClient;
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
+use AmplitudeExperiment\Logger\LogLevel;
 use AmplitudeExperiment\User;
 use PHPUnit\Framework\TestCase;
 
@@ -22,13 +23,13 @@ class LocalEvaluationClientTest extends TestCase
             ->deviceId('test_device')
             ->build();
         $experiment = new Experiment();
-        $config = LocalEvaluationConfig::builder()->debug(true)->build();
+        $config = LocalEvaluationConfig::builder()->logLevel(LogLevel::DEBUG)->build();
         $this->client = $experiment->initializeLocal($this->apiKey, $config);
     }
 
     public function setUp(): void
     {
-        $this->client->start()->wait();
+        $this->client->start();
     }
 
     public function testEvaluateAllFlags()

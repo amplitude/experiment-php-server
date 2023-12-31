@@ -19,8 +19,17 @@ class UserBuilder
     protected ?string $deviceModel = null;
     protected ?string $carrier = null;
     protected ?string $library = null;
+    /**
+     * @var ?array<mixed>
+     */
     protected ?array $userProperties = null;
+    /**
+     * @var ?array<mixed>
+     */
     protected ?array $groups = null;
+    /**
+     * @var ?array<mixed>
+     */
     protected ?array $groupProperties = null;
 
     public function __construct()
@@ -117,18 +126,27 @@ class UserBuilder
         return $this;
     }
 
+    /**
+     * @param ?array<mixed> $userProperties
+     */
     public function userProperties(?array $userProperties): UserBuilder
     {
         $this->userProperties = $userProperties;
         return $this;
     }
 
+    /**
+     * @param ?array<mixed> $groups
+     */
     public function groups(?array $groups): UserBuilder
     {
         $this->groups = $groups;
         return $this;
     }
 
+    /**
+     * @param ?array<mixed> $groupProperties
+     */
     public function groupProperties(?array $groupProperties): UserBuilder
     {
         $this->groupProperties = $groupProperties;

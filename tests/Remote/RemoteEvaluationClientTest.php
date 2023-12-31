@@ -5,9 +5,14 @@ namespace AmplitudeExperiment\Test\Remote;
 use AmplitudeExperiment\Experiment;
 use AmplitudeExperiment\Remote\RemoteEvaluationClient;
 use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
+use AmplitudeExperiment\Test\Util\MockGuzzleFetchClient;
 use AmplitudeExperiment\User;
-use Exception;
+use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
 
 class RemoteEvaluationClientTest extends TestCase
 {
@@ -22,73 +27,120 @@ class RemoteEvaluationClientTest extends TestCase
             ->build();
     }
 
-    /**
-     * @throws Exception
-     */
     public function testFetchSuccess()
     {
         $client = new RemoteEvaluationClient($this->apiKey);
-        $variants = $client->fetch($this->testUser)->wait();
+        $variants = $client->fetch($this->testUser);
         $variant = $variants['sdk-ci-test'];
         $this->assertEquals("on", $variant->key);
         $this->assertEquals("payload", $variant->payload);
     }
 
-    /**
-     * @throws Exception
-     */
     public function testFetchWithNoRetriesTimeoutFailure()
     {
+        $guzzleConfig = ['fetchRetries' => 0, 'fetchTimeoutMillis' => 1];
         $config = RemoteEvaluationConfig::builder()
-            ->fetchRetries(0)
-            ->fetchTimeoutMillis(1)
+            ->guzzleClientConfig($guzzleConfig)
             ->build();
         $client = new RemoteEvaluationClient($this->apiKey, $config);
-        $variants = $client->fetch($this->testUser)->wait();
+        $variants = $client->fetch($this->testUser);
         $this->assertEquals([], $variants);
     }
 
-    /**
-     * @throws Exception
-     */
     public function testFetchNoRetriesTimeoutFailureRetrySuccess()
     {
-        $config = RemoteEvaluationConfig::builder()
-            ->fetchRetries(1)
-            ->fetchTimeoutMillis(1)
-            ->build();
-        $client = new RemoteEvaluationClient($this->apiKey, $config);
-        $variants = $client->fetch($this->testUser)->wait();
+        // Initialize the request counter
+        $requestCounter = 0;
+
+        // Set up the mock handler
+        $mockHandler = new MockHandler([
+            // Simulate a failure (e.g., timeout) for the first request
+            function (RequestInterface $request, array $options) use (&$requestCounter) {
+                $requestCounter++;
+
+                return new RequestException('Error Communicating with Server', $request);
+            },
+            // Simulate a successful response for the retried request
+            function (RequestInterface $request, array $options) use (&$requestCounter) {
+                $requestCounter++;
+
+                return new Response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
+            },
+        ]);
+
+        // Create a handler stack with the mock handler
+        $handlerStack = HandlerStack::create($mockHandler);
+
+        // Create an instance of GuzzleFetchClient with the custom handler stack
+        $fetchClient = new MockGuzzleFetchClient([
+            'fetchRetries' => 1,
+            'fetchTimeoutMillis' => 10000,
+            'fetchRetryBackoffMinMillis' => 100,
+            'fetchRetryBackoffScalar' => 2,
+            'fetchRetryBackoffMaxMillis' => 500,
+        ], $handlerStack);
+
+        $client = new RemoteEvaluationClient($this->apiKey, RemoteEvaluationConfig::builder()->fetchClient($fetchClient)->build());
+
+        // Expect a successful response after auto-retry
+        $variants = $client->fetch($this->testUser);
         $variant = $variants['sdk-ci-test'];
         $this->assertEquals("on", $variant->key);
         $this->assertEquals("payload", $variant->payload);
+
+        // Assert the number of requests sent (including retries)
+        $this->assertEquals(2, $requestCounter);
     }
 
-    /**
-     * @throws Exception
-     */
     public function testFetchRetryOnceTimeoutFirstThenSucceedWithZeroBackoff()
     {
-        $config = RemoteEvaluationConfig::builder()
-            ->fetchRetries(1)
-            ->fetchTimeoutMillis(1)
-            ->fetchRetryBackoffMinMillis(0)
-            ->fetchRetryTimeoutMillis(10000)
-            ->build();
-        $client = new RemoteEvaluationClient($this->apiKey, $config);
-        $variants = $client->fetch($this->testUser)->wait();
+        // Initialize the request counter
+        $requestCounter = 0;
+
+        // Set up the mock handler
+        $mockHandler = new MockHandler([
+            // Simulate a failure (e.g., timeout) for the first request
+            function (RequestInterface $request, array $options) use (&$requestCounter) {
+                $requestCounter++;
+
+                return new RequestException('Error Communicating with Server', $request);
+            },
+            // Simulate a successful response for the retried request
+            function (RequestInterface $request, array $options) use (&$requestCounter) {
+                $requestCounter++;
+
+                return new Response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
+            },
+        ]);
+
+        // Create a handler stack with the mock handler
+        $handlerStack = HandlerStack::create($mockHandler);
+
+        // Create an instance of GuzzleFetchClient with the custom handler stack
+        $fetchClient = new MockGuzzleFetchClient([
+            'fetchRetries' => 1,
+            'fetchTimeoutMillis' => 10000,
+            'fetchRetryBackoffMinMillis' => 0,
+            'fetchRetryBackoffScalar' => 2,
+            'fetchRetryBackoffMaxMillis' => 0,
+        ], $handlerStack);
+
+        $client = new RemoteEvaluationClient($this->apiKey, RemoteEvaluationConfig::builder()->fetchClient($fetchClient)->build());
+
+        // Expect a successful response after auto-retry
+        $variants = $client->fetch($this->testUser);
         $variant = $variants['sdk-ci-test'];
         $this->assertEquals("on", $variant->key);
         $this->assertEquals("payload", $variant->payload);
+
+        // Assert the number of requests sent (including retries)
+        $this->assertEquals(2, $requestCounter);
     }
 
-    /**
-     * @throws Exception
-     */
     public function testFetchWithFlagKeysOptionsSuccess()
     {
         $client = new RemoteEvaluationClient($this->apiKey);
-        $variants = $client->fetch($this->testUser, ['sdk-ci-test'])->wait();
+        $variants = $client->fetch($this->testUser, ['sdk-ci-test']);
         $variant = $variants['sdk-ci-test'];
         $this->assertEquals(1, sizeof($variants));
         $this->assertEquals("on", $variant->key);

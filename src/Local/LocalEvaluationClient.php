@@ -10,15 +10,15 @@ use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
 use AmplitudeExperiment\Flag\FlagConfigFetcher;
 use AmplitudeExperiment\Flag\FlagConfigService;
+use AmplitudeExperiment\Http\GuzzleFetchClient;
+use AmplitudeExperiment\Logger\DefaultLogger;
+use AmplitudeExperiment\Logger\InternalLogger;
 use AmplitudeExperiment\User;
-use AmplitudeExperiment\Util;
-use GuzzleHttp\Promise\PromiseInterface;
-use Monolog\Logger;
+use AmplitudeExperiment\Variant;
+use Psr\Log\LoggerInterface;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
-use function AmplitudeExperiment\initializeLogger;
 
 require_once __DIR__ . '/../EvaluationCore/Util.php';
-require_once __DIR__ . '/../Util.php';
 
 /**
  * Experiment client for evaluating variants for a user locally.
@@ -26,34 +26,29 @@ require_once __DIR__ . '/../Util.php';
  */
 class LocalEvaluationClient
 {
-    private string $apiKey;
     private LocalEvaluationConfig $config;
     private FlagConfigService $flagConfigService;
     private EvaluationEngine $evaluation;
-    private Logger $logger;
+    private LoggerInterface $logger;
     private ?AssignmentService $assignmentService = null;
 
     public function __construct(string $apiKey, ?LocalEvaluationConfig $config = null)
     {
-        $this->apiKey = $apiKey;
         $this->config = $config ?? LocalEvaluationConfig::builder()->build();
-        $fetcher = new FlagConfigFetcher($apiKey, $this->config->debug, $this->config->serverUrl);
-        $this->flagConfigService = new FlagConfigService($fetcher, $this->config->debug, $this->config->bootstrap);
-        $this->logger = initializeLogger($this->config->debug);
-        $this->initializeAssignmentService($config->assignmentConfig);
+        $this->logger = new InternalLogger($this->config->logger ?? new DefaultLogger(), $this->config->logLevel);
+        $httpClient = $config->fetchClient ?? $this->config->fetchClient ?? new GuzzleFetchClient($this->config->guzzleClientConfig);
+        $fetcher = new FlagConfigFetcher($apiKey, $this->logger, $httpClient, $this->config->serverUrl);
+        $this->flagConfigService = new FlagConfigService($fetcher, $this->logger, $this->config->bootstrap);
+        $this->initializeAssignmentService($this->config->assignmentConfig);
         $this->evaluation = new EvaluationEngine();
     }
 
     /**
      * Fetch initial flag configurations.
-     *
-     * The promise returned by this function is resolved when the initial call
-     * to fetch the flag configuration completes.
-     *
      */
-    public function start(): PromiseInterface
+    public function start(): void
     {
-        return $this->flagConfigService->start();
+        $this->flagConfigService->start();
     }
 
     /**
@@ -63,10 +58,10 @@ class LocalEvaluationClient
      * flagKeys argument. If flagKeys is missing or empty, all flags in the
      * {@link FlagConfigService} will be evaluated.
      *
-     * @param $user User The user to evaluate
-     * @param $flagKeys array The flags to evaluate with the user. If empty, all flags
+     * @param User $user The user to evaluate
+     * @param array<string> $flagKeys The flags to evaluate with the user. If empty, all flags
      * from the flag cache are evaluated.
-     * @returns array evaluated variants
+     * @return array<Variant> evaluated variants
      */
     public function evaluate(User $user, array $flagKeys = []): array
     {
@@ -77,8 +72,8 @@ class LocalEvaluationClient
             $this->logger->error('[Experiment] Evaluate - error sorting flags: ' . $e->getMessage());
         }
         $this->logger->debug('[Experiment] Evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode($flags));
-        $results = array_map('AmplitudeExperiment\Variant::convertEvaluationVariantToVariant',$this->evaluation->evaluate($user->toEvaluationContext(), $flags));
-        $this->logger->debug('[Experiment] Evaluate - variants:', $results);
+        $results = array_map('AmplitudeExperiment\Variant::convertEvaluationVariantToVariant', $this->evaluation->evaluate($user->toEvaluationContext(), $flags));
+        $this->logger->debug('[Experiment] Evaluate - variants:' . json_encode($results));
         if ($this->assignmentService) {
             $this->assignmentService->track(new Assignment($user, $results));
         }
@@ -90,7 +85,7 @@ class LocalEvaluationClient
         if ($config) {
             $this->assignmentService = new AssignmentService(
                 new Amplitude($config->apiKey,
-                    $this->config->debug,
+                    $this->logger,
                     $config->amplitudeConfig),
                 new AssignmentFilter($config->cacheCapacity));
         }

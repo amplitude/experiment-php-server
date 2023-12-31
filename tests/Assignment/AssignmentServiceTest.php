@@ -6,6 +6,9 @@ use AmplitudeExperiment\Amplitude\Amplitude;
 use AmplitudeExperiment\Assignment\Assignment;
 use AmplitudeExperiment\Assignment\AssignmentFilter;
 use AmplitudeExperiment\Assignment\AssignmentService;
+use AmplitudeExperiment\Logger\DefaultLogger;
+use AmplitudeExperiment\Logger\InternalLogger;
+use AmplitudeExperiment\Logger\LogLevel;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use PHPUnit\Framework\TestCase;
@@ -82,10 +85,11 @@ class AssignmentServiceTest extends TestCase
         $this->assertEquals($expected, $event->insertId);
     }
 
-    public function testlogEventCalledInAmplitude() {
+    public function testlogEventCalledInAmplitude()
+    {
         $assignmentFilter = new AssignmentFilter(1);
         $mockAmp = $this->getMockBuilder(Amplitude::class)
-            ->setConstructorArgs(['', false])
+            ->setConstructorArgs(['', new InternalLogger(new DefaultLogger(), LogLevel::INFO)])
             ->onlyMethods(['logEvent'])
             ->getMock();
         $results = [

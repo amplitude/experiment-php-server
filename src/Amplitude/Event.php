@@ -5,7 +5,13 @@ namespace AmplitudeExperiment\Amplitude;
 class Event
 {
     public ?string $eventType = null;
+    /**
+     * @var ?array<mixed>
+     */
     public ?array $eventProperties = null;
+    /**
+     * @var ?array<mixed>
+     */
     public ?array $userProperties = null;
     public ?string $userId = null;
     public ?string $deviceId = null;
@@ -16,6 +22,9 @@ class Event
         $this->eventType = $eventType;
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return array_filter([
