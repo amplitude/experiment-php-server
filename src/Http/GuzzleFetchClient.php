@@ -81,10 +81,7 @@ class GuzzleFetchClient implements FetchClientInterface
 
     public function createRequest(string $method, string $uri, ?string $body = null): Request
     {
-        if ($body !== null) {
-            return new Request($method, $uri, [], $body);
-        }
-        return new Request($method, $uri);
+        return new Request($method, $uri, [], $body);
     }
 
 

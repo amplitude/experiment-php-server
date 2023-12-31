@@ -29,7 +29,7 @@ class LocalEvaluationConfig
     public array $bootstrap;
     public ?AssignmentConfig $assignmentConfig;
     /**
-     * The underlying HTTP client to use for requests.
+     * The underlying HTTP client to use for requests, if this is not set, the default GuzzleFetchClient will be used.
      */
     public ?FetchClientInterface $fetchClient;
     /**
