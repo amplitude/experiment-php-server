@@ -89,7 +89,7 @@ class GuzzleFetchClient implements FetchClientInterface
     {
         $delayMillis = $this->config['fetchRetryBackoffMinMillis'];
 
-        for ($i = 0; $i < $iteration; $i++) {
+        for ($i = 1; $i < $iteration; $i++) {
             $delayMillis = min(
                 $delayMillis * $this->config['fetchRetryBackoffScalar'],
                 $this->config['fetchRetryBackoffMaxMillis']
