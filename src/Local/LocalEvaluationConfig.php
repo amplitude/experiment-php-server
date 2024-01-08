@@ -7,6 +7,14 @@ use AmplitudeExperiment\Http\FetchClientInterface;
 use AmplitudeExperiment\Logger\LogLevel;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Configuration options. This is an object that can be created using
+ * a {@link LocalEvaluationConfigBuilder}. Example usage:
+ *
+ *```
+ * LocalEvaluationConfig::builder()->serverUrl("https://api.lab.amplitude.com/")->build();
+ * ```
+ */
 class LocalEvaluationConfig
 {
     /**
@@ -14,7 +22,7 @@ class LocalEvaluationConfig
      */
     public ?LoggerInterface $logger;
     /**
-     * The log level to use for the logger.
+     * The {@link LogLevel} to use for the logger.
      */
     public int $logLevel;
     /**
@@ -29,12 +37,12 @@ class LocalEvaluationConfig
     public array $bootstrap;
     public ?AssignmentConfig $assignmentConfig;
     /**
-     * The underlying HTTP client to use for requests, if this is not set, the default GuzzleFetchClient will be used.
+     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleFetchClient} will be used.
      */
     public ?FetchClientInterface $fetchClient;
     /**
      * @var array<string, mixed>
-     * The configuration for the underlying default Guzzle client. See {@link GUZZLE_DEFAULTS} for defaults.
+     * The configuration for the underlying default {@link GuzzleFetchClient} client (if used). See {@link GUZZLE_DEFAULTS} for defaults.
      */
     public array $guzzleClientConfig;
 

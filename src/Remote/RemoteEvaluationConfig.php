@@ -11,7 +11,9 @@ use Psr\Log\LoggerInterface;
  * Configuration options. This is an object that can be created using
  * a {@link RemoteEvaluationConfigBuilder}. Example usage:
  *
- *`RemoteEvaluationConfig::builder()->serverUrl("https://api.lab.amplitude.com/")->build()`
+ *```
+ * RemoteEvaluationConfig::builder()->serverUrl("https://api.lab.amplitude.com/")->build();
+ * ```
  */
 class RemoteEvaluationConfig
 {
@@ -20,7 +22,7 @@ class RemoteEvaluationConfig
      */
     public ?LoggerInterface $logger;
     /**
-     * The log level to use for the logger.
+     * The {@link LogLevel} to use for the logger.
      */
     public int $logLevel;
     /**
@@ -28,12 +30,12 @@ class RemoteEvaluationConfig
      */
     public string $serverUrl;
     /**
-     * The underlying HTTP client to use for requests, if this is not set, the default GuzzleFetchClient will be used.
+     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleFetchClient} will be used.
      */
     public ?FetchClientInterface $fetchClient;
     /**
      * @var array<string, mixed>
-     * The configuration for the underlying default Guzzle client. See {@link GUZZLE_DEFAULTS} for defaults.
+     * The configuration for the underlying default {@link GuzzleFetchClient} (if used). See {@link GUZZLE_DEFAULTS} for defaults.
      */
     public array $guzzleClientConfig;
 

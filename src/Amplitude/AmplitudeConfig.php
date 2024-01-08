@@ -2,13 +2,13 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
+use AmplitudeExperiment\Assignment\AssignmentConfig;
+use AmplitudeExperiment\Assignment\AssignmentConfigBuilder;
 use AmplitudeExperiment\Http\FetchClientInterface;
 
 /**
- * Configuration options for Amplitude. This is an object that can be created using
- * a {@link AmplitudeConfigBuilder}. Example usage:
- *
- * AmplitudeConfigBuilder::builder()->serverZone("EU")->build();
+ * Configuration options for Amplitude. The Amplitude object is created when you create an {@link AssignmentConfig}.
+ * Options should be set using {@link AssignmentConfigBuilder}.
  */
 class AmplitudeConfig
 {
@@ -33,9 +33,13 @@ class AmplitudeConfig
      * True to use batch API endpoint, False to use HTTP V2 API endpoint.
      */
     public bool $useBatch;
+    /**
+     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleFetchClient} will be used.
+     */
     public ?FetchClientInterface $fetchClient;
     /**
      * @var array<string, mixed>
+     * The configuration for the underlying default {@link GuzzleFetchClient} client (if used). See {@link GUZZLE_DEFAULTS} for defaults.
      */
     public array $guzzleClientConfig;
 
