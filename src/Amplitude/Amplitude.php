@@ -70,7 +70,6 @@ class Amplitude
         try {
             $response = $fetchClient->sendRequest($request);
             if ($response->getStatusCode() != 200) {
-                echo json_encode($payload) . "\n";
                 $this->logger->error('[Amplitude] Failed to send event: ' . $payloadJson . ', ' . $response->getStatusCode() . ' ' . $response->getReasonPhrase());
                 return;
             }
