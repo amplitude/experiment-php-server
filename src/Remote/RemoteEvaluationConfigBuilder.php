@@ -2,7 +2,7 @@
 
 namespace AmplitudeExperiment\Remote;
 
-use AmplitudeExperiment\Http\FetchClientInterface;
+use AmplitudeExperiment\Http\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
@@ -12,7 +12,7 @@ class RemoteEvaluationConfigBuilder
     protected int $logLevel = RemoteEvaluationConfig::DEFAULTS['logLevel'];
     protected bool $debug = RemoteEvaluationConfig::DEFAULTS['debug'];
     protected string $serverUrl = RemoteEvaluationConfig::DEFAULTS['serverUrl'];
-    protected ?FetchClientInterface $fetchClient = RemoteEvaluationConfig::DEFAULTS['fetchClient'];
+    protected ?HttpClientInterface $fetchClient = RemoteEvaluationConfig::DEFAULTS['fetchClient'];
     /**
      * @var array<string, mixed>
      */
@@ -40,7 +40,7 @@ class RemoteEvaluationConfigBuilder
         return $this;
     }
 
-    public function fetchClient(FetchClientInterface $fetchClient): RemoteEvaluationConfigBuilder
+    public function fetchClient(HttpClientInterface $fetchClient): RemoteEvaluationConfigBuilder
     {
         $this->fetchClient = $fetchClient;
         return $this;

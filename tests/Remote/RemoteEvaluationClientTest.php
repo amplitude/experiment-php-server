@@ -5,7 +5,7 @@ namespace AmplitudeExperiment\Test\Remote;
 use AmplitudeExperiment\Experiment;
 use AmplitudeExperiment\Remote\RemoteEvaluationClient;
 use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
-use AmplitudeExperiment\Test\Util\MockGuzzleFetchClient;
+use AmplitudeExperiment\Test\Util\MockGuzzleHttpClient;
 use AmplitudeExperiment\User;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
@@ -38,7 +38,7 @@ class RemoteEvaluationClientTest extends TestCase
 
     public function testFetchWithNoRetriesTimeoutFailure()
     {
-        $guzzleConfig = ['fetchRetries' => 0, 'fetchTimeoutMillis' => 1];
+        $guzzleConfig = ['retries' => 0, 'timeoutMillis' => 1];
         $config = RemoteEvaluationConfig::builder()
             ->guzzleClientConfig($guzzleConfig)
             ->build();
@@ -72,12 +72,12 @@ class RemoteEvaluationClientTest extends TestCase
         $handlerStack = HandlerStack::create($mockHandler);
 
         // Create an instance of GuzzleFetchClient with the custom handler stack
-        $fetchClient = new MockGuzzleFetchClient([
-            'fetchRetries' => 1,
-            'fetchTimeoutMillis' => 10000,
-            'fetchRetryBackoffMinMillis' => 100,
-            'fetchRetryBackoffScalar' => 2,
-            'fetchRetryBackoffMaxMillis' => 500,
+        $fetchClient = new MockGuzzleHttpClient([
+            'retries' => 1,
+            'timeoutMillis' => 10000,
+            'retryBackoffMinMillis' => 100,
+            'retryBackoffScalar' => 2,
+            'retryBackoffMaxMillis' => 500,
         ], $handlerStack);
 
         $client = new RemoteEvaluationClient($this->apiKey, RemoteEvaluationConfig::builder()->fetchClient($fetchClient)->build());
@@ -92,7 +92,7 @@ class RemoteEvaluationClientTest extends TestCase
         $this->assertEquals(2, $requestCounter);
     }
 
-    public function testFetchRetryOnceTimeoutFirstThenSucceedWithZeroBackoff()
+    public function testretryOnceTimeoutFirstThenSucceedWithZeroBackoff()
     {
         // Initialize the request counter
         $requestCounter = 0;
@@ -117,12 +117,12 @@ class RemoteEvaluationClientTest extends TestCase
         $handlerStack = HandlerStack::create($mockHandler);
 
         // Create an instance of GuzzleFetchClient with the custom handler stack
-        $fetchClient = new MockGuzzleFetchClient([
-            'fetchRetries' => 1,
-            'fetchTimeoutMillis' => 10000,
-            'fetchRetryBackoffMinMillis' => 0,
-            'fetchRetryBackoffScalar' => 2,
-            'fetchRetryBackoffMaxMillis' => 0,
+        $fetchClient = new MockGuzzleHttpClient([
+            'retries' => 1,
+            'timeoutMillis' => 10000,
+            'retryBackoffMinMillis' => 0,
+            'retryBackoffScalar' => 2,
+            'retryBackoffMaxMillis' => 0,
         ], $handlerStack);
 
         $client = new RemoteEvaluationClient($this->apiKey, RemoteEvaluationConfig::builder()->fetchClient($fetchClient)->build());

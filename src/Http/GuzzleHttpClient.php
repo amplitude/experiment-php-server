@@ -14,35 +14,35 @@ const GUZZLE_DEFAULTS = [
     /**
      * The request socket timeout, in milliseconds.
      */
-    'fetchTimeoutMillis' => 10000,
+    'timeoutMillis' => 10000,
     /**
      * The number of retries to attempt before failing
      */
-    'fetchRetries' => 8,
+    'retries' => 8,
     /**
      * Retry backoff minimum (starting backoff delay) in milliseconds. The minimum backoff is scaled by
-     * `fetchRetryBackoffScalar` after each retry failure.
+     * `retryBackoffScalar` after each retry failure.
      */
-    'fetchRetryBackoffMinMillis' => 500,
+    'retryBackoffMinMillis' => 500,
     /**
      * Retry backoff maximum in milliseconds. If the scaled backoff is greater than the max, the max is
      * used for all subsequent retries.
      */
-    'fetchRetryBackoffMaxMillis' => 10000,
+    'retryBackoffMaxMillis' => 10000,
     /**
      * Scales the minimum backoff exponentially.
      */
-    'fetchRetryBackoffScalar' => 1.5,
+    'retryBackoffScalar' => 1.5,
     /**
      * The request timeout for retrying fetch requests.
      */
-    'fetchRetryTimeoutMillis' => 10000
+    'retryTimeoutMillis' => 10000
 ];
 
 /**
- * A default FetchClientInterface implementation that uses Guzzle.
+ * A default {@link HttpClientInterface} implementation that uses Guzzle.
  */
-class GuzzleFetchClient implements FetchClientInterface
+class GuzzleHttpClient implements HttpClientInterface
 {
     private Client $client;
     /**
@@ -62,7 +62,7 @@ class GuzzleFetchClient implements FetchClientInterface
         $handlerStack->push(Middleware::retry(
             function ($retries, Request $request, $response = null, $exception = null) {
                 // Retry if the maximum number of retries is not reached and an exception occurred
-                return $retries < $this->config['fetchRetries'] && $exception instanceof Exception;
+                return $retries < $this->config['retries'] && $exception instanceof Exception;
             },
             function ($retries) {
                 // Calculate delay
@@ -71,7 +71,7 @@ class GuzzleFetchClient implements FetchClientInterface
         ));
 
         // Create a Guzzle client with the custom handler stack
-        $this->client = new Client(['handler' => $handlerStack, RequestOptions::TIMEOUT => $this->config['fetchTimeoutMillis'] / 1000]);
+        $this->client = new Client(['handler' => $handlerStack, RequestOptions::TIMEOUT => $this->config['timeoutMillis'] / 1000]);
     }
 
     public function getClient(): ClientInterface
@@ -87,12 +87,12 @@ class GuzzleFetchClient implements FetchClientInterface
 
     protected function calculateDelayMillis(int $iteration): int
     {
-        $delayMillis = $this->config['fetchRetryBackoffMinMillis'];
+        $delayMillis = $this->config['retryBackoffMinMillis'];
 
         for ($i = 1; $i < $iteration; $i++) {
             $delayMillis = min(
-                $delayMillis * $this->config['fetchRetryBackoffScalar'],
-                $this->config['fetchRetryBackoffMaxMillis']
+                $delayMillis * $this->config['retryBackoffScalar'],
+                $this->config['retryBackoffMaxMillis']
             );
         }
         return $delayMillis;

@@ -2,7 +2,7 @@
 
 namespace AmplitudeExperiment\Remote;
 
-use AmplitudeExperiment\Http\FetchClientInterface;
+use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Logger\DefaultLogger;
 use AmplitudeExperiment\Logger\LogLevel;
 use Psr\Log\LoggerInterface;
@@ -30,12 +30,12 @@ class RemoteEvaluationConfig
      */
     public string $serverUrl;
     /**
-     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleFetchClient} will be used.
+     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleHttpClient} will be used.
      */
-    public ?FetchClientInterface $fetchClient;
+    public ?HttpClientInterface $fetchClient;
     /**
      * @var array<string, mixed>
-     * The configuration for the underlying default {@link GuzzleFetchClient} (if used). See {@link GUZZLE_DEFAULTS} for defaults.
+     * The configuration for the underlying default {@link GuzzleHttpClient} (if used). See {@link GUZZLE_DEFAULTS} for defaults.
      */
     public array $guzzleClientConfig;
 
@@ -53,11 +53,11 @@ class RemoteEvaluationConfig
      * @param array<string, mixed> $guzzleClientConfig
      */
     public function __construct(
-        ?LoggerInterface      $logger,
-        int                   $logLevel,
-        string                $serverUrl,
-        ?FetchClientInterface $fetchClient,
-        array                 $guzzleClientConfig
+        ?LoggerInterface     $logger,
+        int                  $logLevel,
+        string               $serverUrl,
+        ?HttpClientInterface $fetchClient,
+        array                $guzzleClientConfig
     )
     {
         $this->logger = $logger;

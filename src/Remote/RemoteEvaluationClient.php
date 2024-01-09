@@ -2,8 +2,8 @@
 
 namespace AmplitudeExperiment\Remote;
 
-use AmplitudeExperiment\Http\FetchClientInterface;
-use AmplitudeExperiment\Http\GuzzleFetchClient;
+use AmplitudeExperiment\Http\HttpClientInterface;
+use AmplitudeExperiment\Http\GuzzleHttpClient;
 use AmplitudeExperiment\Logger\DefaultLogger;
 use AmplitudeExperiment\Logger\InternalLogger;
 use AmplitudeExperiment\User;
@@ -22,7 +22,7 @@ class RemoteEvaluationClient
 {
     private string $apiKey;
     private RemoteEvaluationConfig $config;
-    private FetchClientInterface $httpClient;
+    private HttpClientInterface $httpClient;
     private LoggerInterface $logger;
 
     /**
@@ -35,7 +35,7 @@ class RemoteEvaluationClient
     {
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
-        $this->httpClient = $config->fetchClient ?? $this->config->fetchClient ?? new GuzzleFetchClient($this->config->guzzleClientConfig);
+        $this->httpClient = $config->fetchClient ?? $this->config->fetchClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
         $this->logger = new InternalLogger($this->config->logger ?? new DefaultLogger(), $this->config->logLevel);
     }
 

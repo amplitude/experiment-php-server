@@ -4,7 +4,7 @@ namespace AmplitudeExperiment\Test\Amplitude;
 
 use AmplitudeExperiment\Amplitude\Amplitude;
 use AmplitudeExperiment\Amplitude\AmplitudeConfig;
-use AmplitudeExperiment\Http\FetchClientInterface;
+use AmplitudeExperiment\Http\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 
 class MockAmplitude extends Amplitude
@@ -13,7 +13,7 @@ class MockAmplitude extends Amplitude
     {
         parent::__construct($apiKey, $logger, $config);
     }
-    public function setHttpClient(FetchClientInterface $httpClient) {
+    public function setHttpClient(HttpClientInterface $httpClient) {
         $this->httpClient = $httpClient;
     }
     public function __destruct() {

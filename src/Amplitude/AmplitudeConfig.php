@@ -4,7 +4,7 @@ namespace AmplitudeExperiment\Amplitude;
 
 use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Assignment\AssignmentConfigBuilder;
-use AmplitudeExperiment\Http\FetchClientInterface;
+use AmplitudeExperiment\Http\HttpClientInterface;
 
 /**
  * Configuration options for Amplitude. The Amplitude object is created when you create an {@link AssignmentConfig}.
@@ -34,12 +34,12 @@ class AmplitudeConfig
      */
     public bool $useBatch;
     /**
-     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleFetchClient} will be used.
+     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleHttpClient} will be used.
      */
-    public ?FetchClientInterface $fetchClient;
+    public ?HttpClientInterface $fetchClient;
     /**
      * @var array<string, mixed>
-     * The configuration for the underlying default {@link GuzzleFetchClient} client (if used). See {@link GUZZLE_DEFAULTS} for defaults.
+     * The configuration for the underlying default {@link GuzzleHttpClient} client (if used). See {@link GUZZLE_DEFAULTS} for defaults.
      */
     public array $guzzleClientConfig;
 
@@ -67,13 +67,13 @@ class AmplitudeConfig
      * @param array<string, mixed> $guzzleClientConfig
      */
     public function __construct(
-        int    $flushQueueSize,
-        int    $minIdLength,
-        string $serverZone,
-        string $serverUrl,
-        bool   $useBatch,
-        ?FetchClientInterface $fetchClient,
-        array  $guzzleClientConfig
+        int                  $flushQueueSize,
+        int                  $minIdLength,
+        string               $serverZone,
+        string               $serverUrl,
+        bool                 $useBatch,
+        ?HttpClientInterface $fetchClient,
+        array                $guzzleClientConfig
     )
     {
         $this->flushQueueSize = $flushQueueSize;

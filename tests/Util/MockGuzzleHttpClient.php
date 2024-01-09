@@ -2,7 +2,7 @@
 
 namespace AmplitudeExperiment\Test\Util;
 
-use AmplitudeExperiment\Http\FetchClientInterface;
+use AmplitudeExperiment\Http\HttpClientInterface;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
@@ -12,7 +12,7 @@ use GuzzleHttp\RequestOptions;
 use Psr\Http\Client\ClientInterface;
 use const AmplitudeExperiment\Http\GUZZLE_DEFAULTS;
 
-class MockGuzzleFetchClient implements FetchClientInterface
+class MockGuzzleHttpClient implements HttpClientInterface
 {
     private Client $client;
     private array $config;
@@ -25,7 +25,7 @@ class MockGuzzleFetchClient implements FetchClientInterface
         $handlerStack->push(Middleware::retry(
             function ($retries, Request $request, $response = null, $exception = null) {
                 // Retry if the maximum number of retries is not reached and an exception occurred
-                return $retries < $this->config['fetchRetries'] && $exception instanceof Exception;
+                return $retries < $this->config['retries'] && $exception instanceof Exception;
             },
             function ($retries) {
                 // Calculate delay
@@ -34,7 +34,7 @@ class MockGuzzleFetchClient implements FetchClientInterface
         ));
 
         // Create a Guzzle client with the custom handler stack
-        $this->client = new Client(['handler' => $handlerStack, RequestOptions::TIMEOUT => $this->config['fetchTimeoutMillis'] / 1000]);
+        $this->client = new Client(['handler' => $handlerStack, RequestOptions::TIMEOUT => $this->config['timeoutMillis'] / 1000]);
     }
 
     public function getClient(): ClientInterface
@@ -49,12 +49,12 @@ class MockGuzzleFetchClient implements FetchClientInterface
 
     protected function calculateDelayMillis($iteration): int
     {
-        $delayMillis = $this->config['fetchRetryBackoffMinMillis'];
+        $delayMillis = $this->config['retryBackoffMinMillis'];
 
         for ($i = 0; $i < $iteration; $i++) {
             $delayMillis = min(
-                $delayMillis * $this->config['fetchRetryBackoffScalar'],
-                $this->config['fetchRetryBackoffMaxMillis']
+                $delayMillis * $this->config['retryBackoffScalar'],
+                $this->config['retryBackoffMaxMillis']
             );
         }
         return $delayMillis;

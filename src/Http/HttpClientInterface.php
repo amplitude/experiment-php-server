@@ -6,7 +6,7 @@ namespace AmplitudeExperiment\Http;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestInterface;
 
-interface FetchClientInterface
+interface HttpClientInterface
 {
     /**
      * Return the underlying PSR HTTP Client

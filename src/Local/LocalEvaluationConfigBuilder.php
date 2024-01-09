@@ -3,7 +3,7 @@
 namespace AmplitudeExperiment\Local;
 
 use AmplitudeExperiment\Assignment\AssignmentConfig;
-use AmplitudeExperiment\Http\FetchClientInterface;
+use AmplitudeExperiment\Http\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 
 class LocalEvaluationConfigBuilder
@@ -16,7 +16,7 @@ class LocalEvaluationConfigBuilder
      */
     protected array $bootstrap = LocalEvaluationConfig::DEFAULTS['bootstrap'];
     protected ?AssignmentConfig $assignmentConfig = LocalEvaluationConfig::DEFAULTS['assignmentConfig'];
-    protected ?FetchClientInterface $fetchClient = LocalEvaluationConfig::DEFAULTS['fetchClient'];
+    protected ?HttpClientInterface $fetchClient = LocalEvaluationConfig::DEFAULTS['fetchClient'];
     /**
      * @var array<string, mixed>
      */
@@ -59,7 +59,7 @@ class LocalEvaluationConfigBuilder
         return $this;
     }
 
-    public function fetchClient(FetchClientInterface $fetchClient): LocalEvaluationConfigBuilder
+    public function fetchClient(HttpClientInterface $fetchClient): LocalEvaluationConfigBuilder
     {
         $this->fetchClient = $fetchClient;
         return $this;

@@ -3,7 +3,7 @@
 namespace AmplitudeExperiment\Local;
 
 use AmplitudeExperiment\Assignment\AssignmentConfig;
-use AmplitudeExperiment\Http\FetchClientInterface;
+use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Logger\LogLevel;
 use Psr\Log\LoggerInterface;
 
@@ -37,12 +37,12 @@ class LocalEvaluationConfig
     public array $bootstrap;
     public ?AssignmentConfig $assignmentConfig;
     /**
-     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleFetchClient} will be used.
+     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleHttpClient} will be used.
      */
-    public ?FetchClientInterface $fetchClient;
+    public ?HttpClientInterface $fetchClient;
     /**
      * @var array<string, mixed>
-     * The configuration for the underlying default {@link GuzzleFetchClient} client (if used). See {@link GUZZLE_DEFAULTS} for defaults.
+     * The configuration for the underlying default {@link GuzzleHttpClient} client (if used). See {@link GUZZLE_DEFAULTS} for defaults.
      */
     public array $guzzleClientConfig;
 
@@ -60,7 +60,7 @@ class LocalEvaluationConfig
      * @param array<string, mixed> $guzzleClientConfig
      * @param array<string, mixed> $bootstrap
      */
-    public function __construct(?LoggerInterface $logger, int $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?FetchClientInterface $fetchClient, array $guzzleClientConfig)
+    public function __construct(?LoggerInterface $logger, int $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?HttpClientInterface $fetchClient, array $guzzleClientConfig)
     {
         $this->logger = $logger;
         $this->logLevel = $logLevel;

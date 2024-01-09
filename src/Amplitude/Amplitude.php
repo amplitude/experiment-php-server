@@ -2,8 +2,8 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
-use AmplitudeExperiment\Http\FetchClientInterface;
-use AmplitudeExperiment\Http\GuzzleFetchClient;
+use AmplitudeExperiment\Http\HttpClientInterface;
+use AmplitudeExperiment\Http\GuzzleHttpClient;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
 
@@ -17,7 +17,7 @@ class Amplitude
      * @var array<array<string,mixed>>
      */
     protected array $queue = [];
-    protected FetchClientInterface $httpClient;
+    protected HttpClientInterface $httpClient;
     private LoggerInterface $logger;
     private AmplitudeConfig $config;
 
@@ -26,7 +26,7 @@ class Amplitude
         $this->apiKey = $apiKey;
         $this->logger = $logger;
         $this->config = $config ?? AmplitudeConfig::builder()->build();
-        $this->httpClient = $this->config->fetchClient ?? $this->config->fetchClient ?? new GuzzleFetchClient($this->config->guzzleClientConfig);
+        $this->httpClient = $this->config->fetchClient ?? $this->config->fetchClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
     }
 
     public function flush(): void

@@ -2,7 +2,7 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
-use AmplitudeExperiment\Http\FetchClientInterface;
+use AmplitudeExperiment\Http\HttpClientInterface;
 
 class AmplitudeConfigBuilder
 {
@@ -11,7 +11,7 @@ class AmplitudeConfigBuilder
     protected string $serverZone = AmplitudeConfig::DEFAULTS['serverZone'];
     protected ?string $serverUrl = null;
     protected bool $useBatch = AmplitudeConfig::DEFAULTS['useBatch'];
-    protected ?FetchClientInterface $fetchClient = AmplitudeConfig::DEFAULTS['fetchClient'];
+    protected ?HttpClientInterface $fetchClient = AmplitudeConfig::DEFAULTS['fetchClient'];
     /**
      * @var array<string, mixed>
      */
@@ -51,7 +51,7 @@ class AmplitudeConfigBuilder
         return $this;
     }
 
-    public function fetchClient(FetchClientInterface $fetchClient): AmplitudeConfigBuilder
+    public function fetchClient(HttpClientInterface $fetchClient): AmplitudeConfigBuilder
     {
         $this->fetchClient = $fetchClient;
         return $this;

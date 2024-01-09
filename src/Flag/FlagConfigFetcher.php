@@ -2,7 +2,7 @@
 
 namespace AmplitudeExperiment\Flag;
 
-use AmplitudeExperiment\Http\FetchClientInterface;
+use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
@@ -14,9 +14,9 @@ class FlagConfigFetcher
     private LoggerInterface $logger;
     private string $apiKey;
     private string $serverUrl;
-    private FetchClientInterface $httpClient;
+    private HttpClientInterface $httpClient;
 
-    public function __construct(string $apiKey, LoggerInterface $logger, FetchClientInterface $fetchClient, string $serverUrl = LocalEvaluationConfig::DEFAULTS["serverUrl"])
+    public function __construct(string $apiKey, LoggerInterface $logger, HttpClientInterface $fetchClient, string $serverUrl = LocalEvaluationConfig::DEFAULTS["serverUrl"])
     {
         $this->apiKey = $apiKey;
         $this->serverUrl = $serverUrl;

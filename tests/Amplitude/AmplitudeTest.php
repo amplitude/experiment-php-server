@@ -7,7 +7,7 @@ use AmplitudeExperiment\Amplitude\Event;
 use AmplitudeExperiment\Logger\DefaultLogger;
 use AmplitudeExperiment\Logger\InternalLogger;
 use AmplitudeExperiment\Logger\LogLevel;
-use AmplitudeExperiment\Test\Util\MockGuzzleFetchClient;
+use AmplitudeExperiment\Test\Util\MockGuzzleHttpClient;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -58,7 +58,7 @@ class AmplitudeTest extends TestCase
             new Response(200, ['X-Foo' => 'Bar']),
         ]);
         $handlerStack = HandlerStack::create($mock);
-        $httpClient = new MockGuzzleFetchClient([], $handlerStack);
+        $httpClient = new MockGuzzleHttpClient([], $handlerStack);
         $client->setHttpClient($httpClient);
         $event1 = new Event('test1');
         $event2 = new Event('test2');
@@ -92,7 +92,7 @@ class AmplitudeTest extends TestCase
         $handlerStack = HandlerStack::create($mockHandler);
 
         // Create an instance of GuzzleFetchClient with the custom handler stack
-        $fetchClient = new MockGuzzleFetchClient([], $handlerStack);
+        $fetchClient = new MockGuzzleHttpClient([], $handlerStack);
         $client->setHttpClient($fetchClient);
         $event1 = new Event('test1');
         $event2 = new Event('test2');
@@ -119,7 +119,7 @@ class AmplitudeTest extends TestCase
         }));
 
         $handlerStack = HandlerStack::create($mockHandler);
-        $httpClient = new MockGuzzleFetchClient(['fetchRetries' => 4], $handlerStack);
+        $httpClient = new MockGuzzleHttpClient(['retries' => 4], $handlerStack);
         $client->setHttpClient($httpClient);
 
         $event1 = new Event('test');
@@ -153,7 +153,7 @@ class AmplitudeTest extends TestCase
             ]);
 
         $handlerStack = HandlerStack::create($mockHandler);
-        $httpClient = new MockGuzzleFetchClient(['fetchRetries' => 4], $handlerStack);
+        $httpClient = new MockGuzzleHttpClient(['retries' => 4], $handlerStack);
         $client->setHttpClient($httpClient);
         $event1 = new Event('test');
         $event1->userId = 'user_id';
