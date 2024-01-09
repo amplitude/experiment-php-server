@@ -92,8 +92,8 @@ class AmplitudeTest extends TestCase
         $handlerStack = HandlerStack::create($mockHandler);
 
         // Create an instance of GuzzleFetchClient with the custom handler stack
-        $fetchClient = new MockGuzzleHttpClient([], $handlerStack);
-        $client->setHttpClient($fetchClient);
+        $httpClient = new MockGuzzleHttpClient([], $handlerStack);
+        $client->setHttpClient($httpClient);
         $event1 = new Event('test1');
         $event2 = new Event('test2');
         $event3 = new Event('test3');

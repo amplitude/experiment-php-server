@@ -11,7 +11,7 @@ class AmplitudeConfigBuilder
     protected string $serverZone = AmplitudeConfig::DEFAULTS['serverZone'];
     protected ?string $serverUrl = null;
     protected bool $useBatch = AmplitudeConfig::DEFAULTS['useBatch'];
-    protected ?HttpClientInterface $fetchClient = AmplitudeConfig::DEFAULTS['fetchClient'];
+    protected ?HttpClientInterface $httpClient = AmplitudeConfig::DEFAULTS['httpClient'];
     /**
      * @var array<string, mixed>
      */
@@ -51,9 +51,9 @@ class AmplitudeConfigBuilder
         return $this;
     }
 
-    public function fetchClient(HttpClientInterface $fetchClient): AmplitudeConfigBuilder
+    public function httpClient(HttpClientInterface $httpClient): AmplitudeConfigBuilder
     {
-        $this->fetchClient = $fetchClient;
+        $this->httpClient = $httpClient;
         return $this;
     }
 
@@ -84,7 +84,7 @@ class AmplitudeConfigBuilder
             $this->serverZone,
             $this->serverUrl,
             $this->useBatch,
-            $this->fetchClient,
+            $this->httpClient,
             $this->guzzleClientConfig
         );
     }

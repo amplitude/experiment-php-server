@@ -26,7 +26,7 @@ class Amplitude
         $this->apiKey = $apiKey;
         $this->logger = $logger;
         $this->config = $config ?? AmplitudeConfig::builder()->build();
-        $this->httpClient = $this->config->fetchClient ?? $this->config->fetchClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
+        $this->httpClient = $this->config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
     }
 
     public function flush(): void
@@ -58,7 +58,7 @@ class Amplitude
      */
     private function post(string $url, array $payload): void
     {
-        $fetchClient = $this->httpClient->getClient();
+        $httpClient = $this->httpClient->getClient();
         $payloadJson = json_encode($payload);
         if ($payloadJson === false) {
             $this->logger->error('[Amplitude] Failed to encode payload: ' . json_last_error());
@@ -68,7 +68,7 @@ class Amplitude
             ->createRequest('POST', $url, $payloadJson)
             ->withHeader('Content-Type', 'application/json');
         try {
-            $response = $fetchClient->sendRequest($request);
+            $response = $httpClient->sendRequest($request);
             if ($response->getStatusCode() != 200) {
                 $this->logger->error('[Amplitude] Failed to send event: ' . $payloadJson . ', ' . $response->getStatusCode() . ' ' . $response->getReasonPhrase());
                 return;

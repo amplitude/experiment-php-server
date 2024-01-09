@@ -36,7 +36,7 @@ class AmplitudeConfig
     /**
      * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleHttpClient} will be used.
      */
-    public ?HttpClientInterface $fetchClient;
+    public ?HttpClientInterface $httpClient;
     /**
      * @var array<string, mixed>
      * The configuration for the underlying default {@link GuzzleHttpClient} client (if used). See {@link GUZZLE_DEFAULTS} for defaults.
@@ -59,7 +59,7 @@ class AmplitudeConfig
         'minIdLength' => 5,
         'flushQueueSize' => 200,
         'flushMaxRetries' => 12,
-        'fetchClient' => null,
+        'httpClient' => null,
         'guzzleClientConfig' => []
     ];
 
@@ -72,7 +72,7 @@ class AmplitudeConfig
         string               $serverZone,
         string               $serverUrl,
         bool                 $useBatch,
-        ?HttpClientInterface $fetchClient,
+        ?HttpClientInterface $httpClient,
         array                $guzzleClientConfig
     )
     {
@@ -81,7 +81,7 @@ class AmplitudeConfig
         $this->serverZone = $serverZone;
         $this->serverUrl = $serverUrl;
         $this->useBatch = $useBatch;
-        $this->fetchClient = $fetchClient;
+        $this->httpClient = $httpClient;
         $this->guzzleClientConfig = $guzzleClientConfig;
     }
 

@@ -35,7 +35,7 @@ class RemoteEvaluationClient
     {
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
-        $this->httpClient = $config->fetchClient ?? $this->config->fetchClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
+        $this->httpClient = $config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
         $this->logger = new InternalLogger($this->config->logger ?? new DefaultLogger(), $this->config->logLevel);
     }
 
@@ -80,10 +80,10 @@ class RemoteEvaluationClient
             $request = $request->withHeader('X-Amp-Exp-Flag-Keys', base64_encode($flagKeysJson));
         }
 
-        $fetchClient = $this->httpClient->getClient();
+        $httpClient = $this->httpClient->getClient();
 
         try {
-            $response = $fetchClient->sendRequest($request);
+            $response = $httpClient->sendRequest($request);
             if ($response->getStatusCode() != 200) {
                 $this->logger->error('[Experiment] Failed to fetch variants: ' . $response->getBody());
                 return [];

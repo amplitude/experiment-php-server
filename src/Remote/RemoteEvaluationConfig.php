@@ -32,7 +32,7 @@ class RemoteEvaluationConfig
     /**
      * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleHttpClient} will be used.
      */
-    public ?HttpClientInterface $fetchClient;
+    public ?HttpClientInterface $httpClient;
     /**
      * @var array<string, mixed>
      * The configuration for the underlying default {@link GuzzleHttpClient} (if used). See {@link GUZZLE_DEFAULTS} for defaults.
@@ -44,7 +44,7 @@ class RemoteEvaluationConfig
         'logLevel' => LogLevel::INFO,
         'debug' => false,
         'serverUrl' => 'https://api.lab.amplitude.com',
-        'fetchClient' => null,
+        'httpClient' => null,
         'guzzleClientConfig' => []
     ];
 
@@ -56,14 +56,14 @@ class RemoteEvaluationConfig
         ?LoggerInterface     $logger,
         int                  $logLevel,
         string               $serverUrl,
-        ?HttpClientInterface $fetchClient,
+        ?HttpClientInterface $httpClient,
         array                $guzzleClientConfig
     )
     {
         $this->logger = $logger;
         $this->logLevel = $logLevel;
         $this->serverUrl = $serverUrl;
-        $this->fetchClient = $fetchClient;
+        $this->httpClient = $httpClient;
         $this->guzzleClientConfig = $guzzleClientConfig;
     }
 

@@ -16,7 +16,7 @@ class LocalEvaluationConfigBuilder
      */
     protected array $bootstrap = LocalEvaluationConfig::DEFAULTS['bootstrap'];
     protected ?AssignmentConfig $assignmentConfig = LocalEvaluationConfig::DEFAULTS['assignmentConfig'];
-    protected ?HttpClientInterface $fetchClient = LocalEvaluationConfig::DEFAULTS['fetchClient'];
+    protected ?HttpClientInterface $httpClient = LocalEvaluationConfig::DEFAULTS['httpClient'];
     /**
      * @var array<string, mixed>
      */
@@ -59,9 +59,9 @@ class LocalEvaluationConfigBuilder
         return $this;
     }
 
-    public function fetchClient(HttpClientInterface $fetchClient): LocalEvaluationConfigBuilder
+    public function httpClient(HttpClientInterface $httpClient): LocalEvaluationConfigBuilder
     {
-        $this->fetchClient = $fetchClient;
+        $this->httpClient = $httpClient;
         return $this;
     }
 
@@ -82,7 +82,7 @@ class LocalEvaluationConfigBuilder
             $this->serverUrl,
             $this->bootstrap,
             $this->assignmentConfig,
-            $this->fetchClient,
+            $this->httpClient,
             $this->guzzleClientConfig
         );
     }

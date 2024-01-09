@@ -12,7 +12,7 @@ class RemoteEvaluationConfigBuilder
     protected int $logLevel = RemoteEvaluationConfig::DEFAULTS['logLevel'];
     protected bool $debug = RemoteEvaluationConfig::DEFAULTS['debug'];
     protected string $serverUrl = RemoteEvaluationConfig::DEFAULTS['serverUrl'];
-    protected ?HttpClientInterface $fetchClient = RemoteEvaluationConfig::DEFAULTS['fetchClient'];
+    protected ?HttpClientInterface $httpClient = RemoteEvaluationConfig::DEFAULTS['httpClient'];
     /**
      * @var array<string, mixed>
      */
@@ -40,9 +40,9 @@ class RemoteEvaluationConfigBuilder
         return $this;
     }
 
-    public function fetchClient(HttpClientInterface $fetchClient): RemoteEvaluationConfigBuilder
+    public function httpClient(HttpClientInterface $httpClient): RemoteEvaluationConfigBuilder
     {
-        $this->fetchClient = $fetchClient;
+        $this->httpClient = $httpClient;
         return $this;
     }
 
@@ -62,7 +62,7 @@ class RemoteEvaluationConfigBuilder
             $this->logger,
             $this->logLevel,
             $this->serverUrl,
-            $this->fetchClient,
+            $this->httpClient,
             $this->guzzleClientConfig
         );
     }

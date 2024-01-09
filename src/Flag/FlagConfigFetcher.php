@@ -16,12 +16,12 @@ class FlagConfigFetcher
     private string $serverUrl;
     private HttpClientInterface $httpClient;
 
-    public function __construct(string $apiKey, LoggerInterface $logger, HttpClientInterface $fetchClient, string $serverUrl = LocalEvaluationConfig::DEFAULTS["serverUrl"])
+    public function __construct(string $apiKey, LoggerInterface $logger, HttpClientInterface $httpClient, string $serverUrl = LocalEvaluationConfig::DEFAULTS["serverUrl"])
     {
         $this->apiKey = $apiKey;
         $this->serverUrl = $serverUrl;
         $this->logger = $logger;
-        $this->httpClient = $fetchClient;
+        $this->httpClient = $httpClient;
     }
 
     /**
@@ -40,9 +40,9 @@ class FlagConfigFetcher
             ->withHeader('X-Amp-Exp-Library', 'experiment-php-server/' . VERSION);
         $this->logger->debug('[Experiment] Fetch flag configs');
 
-        $fetchClient = $this->httpClient->getClient();
+        $httpClient = $this->httpClient->getClient();
 
-        $response = $fetchClient->sendRequest($request);
+        $response = $httpClient->sendRequest($request);
         if ($response->getStatusCode() !== 200) {
             $this->logger->error('[Experiment] Fetch flag configs - received error response: ' . $response->getStatusCode() . ': ' . $response->getBody());
             return [];

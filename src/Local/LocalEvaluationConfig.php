@@ -39,7 +39,7 @@ class LocalEvaluationConfig
     /**
      * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleHttpClient} will be used.
      */
-    public ?HttpClientInterface $fetchClient;
+    public ?HttpClientInterface $httpClient;
     /**
      * @var array<string, mixed>
      * The configuration for the underlying default {@link GuzzleHttpClient} client (if used). See {@link GUZZLE_DEFAULTS} for defaults.
@@ -52,7 +52,7 @@ class LocalEvaluationConfig
         'serverUrl' => 'https://api.lab.amplitude.com',
         'bootstrap' => [],
         'assignmentConfig' => null,
-        'fetchClient' => null,
+        'httpClient' => null,
         'guzzleClientConfig' => []
     ];
 
@@ -60,14 +60,14 @@ class LocalEvaluationConfig
      * @param array<string, mixed> $guzzleClientConfig
      * @param array<string, mixed> $bootstrap
      */
-    public function __construct(?LoggerInterface $logger, int $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?HttpClientInterface $fetchClient, array $guzzleClientConfig)
+    public function __construct(?LoggerInterface $logger, int $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?HttpClientInterface $httpClient, array $guzzleClientConfig)
     {
         $this->logger = $logger;
         $this->logLevel = $logLevel;
         $this->serverUrl = $serverUrl;
         $this->bootstrap = $bootstrap;
         $this->assignmentConfig = $assignmentConfig;
-        $this->fetchClient = $fetchClient;
+        $this->httpClient = $httpClient;
         $this->guzzleClientConfig = $guzzleClientConfig;
     }
 

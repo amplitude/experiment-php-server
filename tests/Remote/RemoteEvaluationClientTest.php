@@ -72,7 +72,7 @@ class RemoteEvaluationClientTest extends TestCase
         $handlerStack = HandlerStack::create($mockHandler);
 
         // Create an instance of GuzzleFetchClient with the custom handler stack
-        $fetchClient = new MockGuzzleHttpClient([
+        $httpClient = new MockGuzzleHttpClient([
             'retries' => 1,
             'timeoutMillis' => 10000,
             'retryBackoffMinMillis' => 100,
@@ -80,7 +80,7 @@ class RemoteEvaluationClientTest extends TestCase
             'retryBackoffMaxMillis' => 500,
         ], $handlerStack);
 
-        $client = new RemoteEvaluationClient($this->apiKey, RemoteEvaluationConfig::builder()->fetchClient($fetchClient)->build());
+        $client = new RemoteEvaluationClient($this->apiKey, RemoteEvaluationConfig::builder()->httpClient($httpClient)->build());
 
         // Expect a successful response after auto-retry
         $variants = $client->fetch($this->testUser);
@@ -117,7 +117,7 @@ class RemoteEvaluationClientTest extends TestCase
         $handlerStack = HandlerStack::create($mockHandler);
 
         // Create an instance of GuzzleFetchClient with the custom handler stack
-        $fetchClient = new MockGuzzleHttpClient([
+        $httpClient = new MockGuzzleHttpClient([
             'retries' => 1,
             'timeoutMillis' => 10000,
             'retryBackoffMinMillis' => 0,
@@ -125,7 +125,7 @@ class RemoteEvaluationClientTest extends TestCase
             'retryBackoffMaxMillis' => 0,
         ], $handlerStack);
 
-        $client = new RemoteEvaluationClient($this->apiKey, RemoteEvaluationConfig::builder()->fetchClient($fetchClient)->build());
+        $client = new RemoteEvaluationClient($this->apiKey, RemoteEvaluationConfig::builder()->httpClient($httpClient)->build());
 
         // Expect a successful response after auto-retry
         $variants = $client->fetch($this->testUser);

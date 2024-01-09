@@ -36,7 +36,7 @@ class LocalEvaluationClient
     {
         $this->config = $config ?? LocalEvaluationConfig::builder()->build();
         $this->logger = new InternalLogger($this->config->logger ?? new DefaultLogger(), $this->config->logLevel);
-        $httpClient = $config->fetchClient ?? $this->config->fetchClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
+        $httpClient = $config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
         $fetcher = new FlagConfigFetcher($apiKey, $this->logger, $httpClient, $this->config->serverUrl);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->logger, $this->config->bootstrap);
         $this->initializeAssignmentService($this->config->assignmentConfig);
