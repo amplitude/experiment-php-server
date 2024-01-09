@@ -48,7 +48,7 @@ class LocalEvaluationConfig
 
     const DEFAULTS = [
         'logger' => null,
-        'logLevel' => LogLevel::INFO,
+        'logLevel' => LogLevel::ERROR,
         'serverUrl' => 'https://api.lab.amplitude.com',
         'bootstrap' => [],
         'assignmentConfig' => null,

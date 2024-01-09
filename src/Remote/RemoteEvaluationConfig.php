@@ -41,7 +41,7 @@ class RemoteEvaluationConfig
 
     const DEFAULTS = [
         'logger' => null,
-        'logLevel' => LogLevel::INFO,
+        'logLevel' => LogLevel::ERROR,
         'debug' => false,
         'serverUrl' => 'https://api.lab.amplitude.com',
         'httpClient' => null,
