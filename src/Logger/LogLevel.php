@@ -4,14 +4,15 @@ namespace AmplitudeExperiment\Logger;
 
 class LogLevel
 {
-    public const EMERGENCY = 8;
-    public const ALERT = 7;
-    public const CRITICAL = 6;
-    public const ERROR = 5;
+    public const OFF = -1;
+    public const EMERGENCY = 0;
+    public const ALERT = 1;
+    public const CRITICAL = 2;
+    public const ERROR = 3;
     public const WARNING = 4;
-    public const NOTICE = 3;
-    public const INFO = 2;
-    public const DEBUG = 1;
+    public const NOTICE = 5;
+    public const INFO = 6;
+    public const DEBUG = 7;
 
     public static function toString(int $level): string
     {
