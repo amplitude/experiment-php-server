@@ -4,7 +4,7 @@ namespace AmplitudeExperiment\Logger;
 
 class LogLevel
 {
-    public const OFF = -1;
+    public const NO_LOG = -1;
     public const EMERGENCY = 0;
     public const ALERT = 1;
     public const CRITICAL = 2;
