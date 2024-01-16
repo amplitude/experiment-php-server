@@ -4,7 +4,6 @@ namespace AmplitudeExperiment\Remote;
 
 use AmplitudeExperiment\Http\HttpClientInterface;
 use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
 
 class RemoteEvaluationConfigBuilder
 {
