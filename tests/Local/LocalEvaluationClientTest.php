@@ -29,7 +29,7 @@ class LocalEvaluationClientTest extends TestCase
 
     public function setUp(): void
     {
-        $this->client->start();
+        $this->client->refreshFlagConfigs();
     }
 
     public function testEvaluateAllFlags()
@@ -69,5 +69,15 @@ class LocalEvaluationClientTest extends TestCase
         $this->assertEquals("off", $variant->key);
         $this->assertEquals(null, $variant->payload);
         $this->assertTrue($variant->metadata["default"]);
+    }
+
+    public function testGetFlagConfigs()
+    {
+        $flagConfigs = $this->client->getFlagConfigs();
+        $bootstrapClient = new LocalEvaluationClient('', LocalEvaluationConfig::builder()->bootstrap($flagConfigs)->build());
+        $variants = $bootstrapClient->evaluate($this->testUser);
+        $variant = $variants['sdk-local-evaluation-ci-test'];
+        $this->assertEquals("on", $variant->key);
+        $this->assertEquals("payload", $variant->payload);
     }
 }

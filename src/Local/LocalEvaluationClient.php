@@ -44,11 +44,11 @@ class LocalEvaluationClient
     }
 
     /**
-     * Fetch initial flag configurations.
+     * Fetch latest flag configurations.
      */
-    public function start(): void
+    public function refreshFlagConfigs(): void
     {
-        $this->flagConfigService->start();
+        $this->flagConfigService->refresh();
     }
 
     /**
@@ -78,6 +78,15 @@ class LocalEvaluationClient
             $this->assignmentService->track(new Assignment($user, $results));
         }
         return $results;
+    }
+
+
+    /**
+     * @return array<string, mixed> flag configurations.
+     */
+    public function getFlagConfigs(): array
+    {
+        return $this->flagConfigService->getFlagConfigs();
     }
 
     private function initializeAssignmentService(?AssignmentConfig $config): void

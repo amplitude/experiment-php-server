@@ -25,13 +25,7 @@ class FlagConfigService
         $this->cache = $bootstrap;
     }
 
-    public function start(): void
-    {
-        $this->logger->debug('[Experiment] Flag service - start');
-        $this->refresh();
-    }
-
-    private function refresh(): void
+    public function refresh(): void
     {
         $this->logger->debug('[Experiment] Flag config update');
         try {
