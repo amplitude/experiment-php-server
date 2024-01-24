@@ -10,8 +10,7 @@ function hashCode(string $s): int
     }
     for ($i = 0; $i < strlen($s); $i++) {
         $chr = ord($s[$i]);
-        $hash = ($hash << 5) - $hash + $chr;
-        $hash |= 0;
+        $hash = (int) (($hash << 5) - $hash + $chr);
     }
     return $hash;
 }
