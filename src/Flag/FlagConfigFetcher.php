@@ -2,74 +2,60 @@
 
 namespace AmplitudeExperiment\Flag;
 
+use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
-use AmplitudeExperiment\Util;
-use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\Promise\PromiseInterface;
-use Monolog\Logger;
-use Psr\Http\Message\ResponseInterface;
-use RuntimeException;
-use function AmplitudeExperiment\initializeLogger;
+use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Log\LoggerInterface;
 
 require_once __DIR__ . '/../Version.php';
-require_once __DIR__ . '/../Util.php';
-
-const FLAG_CONFIG_TIMEOUT = 5000;
 
 class FlagConfigFetcher
 {
-    private Logger $logger;
+    private LoggerInterface $logger;
     private string $apiKey;
     private string $serverUrl;
-    private Client $httpClient;
+    private HttpClientInterface $httpClient;
 
-    public function __construct(string $apiKey, bool $debug, string $serverUrl = LocalEvaluationConfig::DEFAULTS["serverUrl"])
+    public function __construct(string $apiKey, LoggerInterface $logger, HttpClientInterface $httpClient, string $serverUrl = LocalEvaluationConfig::DEFAULTS["serverUrl"])
     {
         $this->apiKey = $apiKey;
         $this->serverUrl = $serverUrl;
-        $this->httpClient = new Client();
-        $this->logger = initializeLogger($debug);
+        $this->logger = $logger;
+        $this->httpClient = $httpClient;
     }
 
     /**
      * Fetch local evaluation mode flag configs from the Experiment API server.
      * These flag configs can be used to perform local evaluation.
      *
-     * @return PromiseInterface
+     * @return array<array<mixed>> The flag configs
+     * @throws ClientExceptionInterface
      */
-    public function fetch(): PromiseInterface
+    public function fetch(): array
     {
         $endpoint = $this->serverUrl . '/sdk/v2/flags?v=0';
-        $headers = [
-            'Authorization' => 'Api-Key ' . $this->apiKey,
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json;charset=utf-8',
-            'X-Amp-Exp-Library' => 'experiment-php-server/' . VERSION,
-        ];
+        $request = $this->httpClient->createRequest('GET', $endpoint)
+            ->withHeader('Authorization', 'Api-Key ' . $this->apiKey)
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('X-Amp-Exp-Library', 'experiment-php-server/' . VERSION);
         $this->logger->debug('[Experiment] Fetch flag configs');
-        $promise = $this->httpClient->requestAsync('GET', $endpoint, [
-            'headers' => $headers,
-            'timeout' => FLAG_CONFIG_TIMEOUT / 1000,
-        ]);
 
-        return $promise->then(
-            function (ResponseInterface $response) {
-                // Check if the HTTP status code is not 200
-                if ($response->getStatusCode() !== 200) {
-                    $errorMessage = '[Experiment] Fetch flag configs - received error response: ' . $response->getStatusCode() . ': ' . $response->getBody();
-                    throw new RuntimeException($errorMessage);
-                }
-                $this->logger->debug('[Experiment] Got flag configs: ' . $response->getBody());
-                return $this->parse(json_decode($response->getBody(), true));
-            },
-            function (Exception $reason) {
-                $this->logger->error('[Experiment] Fetch flag configs - received error response: ' . $reason->getMessage());
-                throw $reason;
-            }
-        );
+        $httpClient = $this->httpClient->getClient();
+
+        $response = $httpClient->sendRequest($request);
+        if ($response->getStatusCode() !== 200) {
+            $this->logger->error('[Experiment] Fetch flag configs - received error response: ' . $response->getStatusCode() . ': ' . $response->getBody());
+            return [];
+        }
+        $this->logger->debug('[Experiment] Got flag configs: ' . $response->getBody());
+        return $this->parse(json_decode($response->getBody(), true));
+
     }
 
+    /**
+     * @param array<array<mixed>> $flagConfigs
+     * @return array<array<mixed>>
+     */
     private function parse(array $flagConfigs): array
     {
         $flagConfigsRecord = [];

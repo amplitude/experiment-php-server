@@ -2,11 +2,13 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
+use AmplitudeExperiment\Assignment\AssignmentConfig;
+use AmplitudeExperiment\Assignment\AssignmentConfigBuilder;
+use AmplitudeExperiment\Http\HttpClientInterface;
+
 /**
- * Configuration options for Amplitude. This is an object that can be created using
- * a {@link AmplitudeConfigBuilder}. Example usage:
- *
- * AmplitudeConfigBuilder::builder()->serverZone("EU")->build();
+ * Configuration options for Amplitude. The Amplitude object is created when you create an {@link AssignmentConfig}.
+ * Options should be set using {@link AssignmentConfigBuilder}.
  */
 class AmplitudeConfig
 {
@@ -17,10 +19,6 @@ class AmplitudeConfig
     public int $flushQueueSize;
     /**
      * The maximum retry attempts for an event when receiving error response.
-     */
-    public int $flushMaxRetries;
-    /**
-     * The minimum length of user_id and device_id for events. Default to 5.
      */
     public int $minIdLength;
     /**
@@ -34,7 +32,16 @@ class AmplitudeConfig
     /**
      * True to use batch API endpoint, False to use HTTP V2 API endpoint.
      */
-    public string $useBatch;
+    public bool $useBatch;
+    /**
+     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleHttpClient} will be used.
+     */
+    public ?HttpClientInterface $httpClient;
+    /**
+     * @var array<string, mixed>
+     * The configuration for the underlying default {@link GuzzleHttpClient} client (if used). See {@link GUZZLE_DEFAULTS} for defaults.
+     */
+    public array $guzzleClientConfig;
 
     const DEFAULTS = [
         'serverZone' => 'US',
@@ -52,23 +59,30 @@ class AmplitudeConfig
         'minIdLength' => 5,
         'flushQueueSize' => 200,
         'flushMaxRetries' => 12,
+        'httpClient' => null,
+        'guzzleClientConfig' => []
     ];
 
+    /**
+     * @param array<string, mixed> $guzzleClientConfig
+     */
     public function __construct(
-        int    $flushQueueSize,
-        int    $flushMaxRetries,
-        int    $minIdLength,
-        string $serverZone,
-        string $serverUrl,
-        bool   $useBatch
+        int                  $flushQueueSize,
+        int                  $minIdLength,
+        string               $serverZone,
+        string               $serverUrl,
+        bool                 $useBatch,
+        ?HttpClientInterface $httpClient,
+        array                $guzzleClientConfig
     )
     {
         $this->flushQueueSize = $flushQueueSize;
-        $this->flushMaxRetries = $flushMaxRetries;
         $this->minIdLength = $minIdLength;
         $this->serverZone = $serverZone;
         $this->serverUrl = $serverUrl;
         $this->useBatch = $useBatch;
+        $this->httpClient = $httpClient;
+        $this->guzzleClientConfig = $guzzleClientConfig;
     }
 
     public static function builder(): AmplitudeConfigBuilder

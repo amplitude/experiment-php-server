@@ -2,55 +2,43 @@
 
 namespace AmplitudeExperiment\Flag;
 
-use AmplitudeExperiment\Backoff;
-use AmplitudeExperiment\Util;
-use GuzzleHttp\Promise\PromiseInterface;
-use Monolog\Logger;
-use function AmplitudeExperiment\initializeLogger;
-
-require_once __DIR__ . '/../Util.php';
+use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Log\LoggerInterface;
 
 class FlagConfigService
 {
-    private Logger $logger;
+    private LoggerInterface $logger;
     public FlagConfigFetcher $fetcher;
+
+    /**
+     * @var array<string, mixed>
+     */
     public array $cache;
 
-    public function __construct(FlagConfigFetcher $fetcher, bool $debug, array $bootstrap)
+    /**
+     * @param array<string, mixed> $bootstrap
+     */
+    public function __construct(FlagConfigFetcher $fetcher, LoggerInterface $logger, array $bootstrap)
     {
         $this->fetcher = $fetcher;
-        $this->logger = initializeLogger($debug);
+        $this->logger = $logger;
         $this->cache = $bootstrap;
     }
 
-    public function start(): PromiseInterface
-    {
-        $this->logger->debug('[Experiment] Flag service - start');
-
-        // Fetch initial flag configs and await the result.
-        return Backoff::doWithBackoff(
-            function () {
-                return $this->refresh();
-            },
-            new Backoff(5, 1, 1, 1)
-        );
-    }
-
-    private function refresh(): PromiseInterface
+    public function refresh(): void
     {
         $this->logger->debug('[Experiment] Flag config update');
-        return $this->fetcher->fetch()->then(
-            function (array $flagConfigs) {
-                $this->cache = $flagConfigs;
-                $this->logger->debug('[Experiment] Flag config update success');
-            },
-            function (\Exception $error) {
-                $this->logger->debug('[Experiment] Flag config update failed: ' . $error);
-                throw $error;
-            }
-        );
+        try {
+            $flagConfigs = $this->fetcher->fetch();
+            $this->cache = $flagConfigs;
+        } catch (ClientExceptionInterface $error) {
+            $this->logger->error('[Experiment] Failed to fetch flag configs: ' . $error->getMessage());
+        }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getFlagConfigs(): array
     {
         return $this->cache;

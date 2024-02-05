@@ -2,16 +2,14 @@
 
 namespace AmplitudeExperiment\Remote;
 
+use AmplitudeExperiment\Http\HttpClientInterface;
+use AmplitudeExperiment\Http\GuzzleHttpClient;
+use AmplitudeExperiment\Logger\DefaultLogger;
+use AmplitudeExperiment\Logger\InternalLogger;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
-use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\Promise\Create;
-use GuzzleHttp\Promise\PromiseInterface;
-use Monolog\Logger;
-use Psr\Http\Message\ResponseInterface;
-use Throwable;
-use function AmplitudeExperiment\initializeLogger;
+use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Log\LoggerInterface;
 
 require_once __DIR__ . '/../Version.php';
 require_once __DIR__ . '/../Util.php';
@@ -24,21 +22,21 @@ class RemoteEvaluationClient
 {
     private string $apiKey;
     private RemoteEvaluationConfig $config;
-    private Client $httpClient;
-    private Logger $logger;
+    private HttpClientInterface $httpClient;
+    private LoggerInterface $logger;
 
     /**
      * Creates a new RemoteEvaluationClient instance.
      *
-     * @param $apiKey string The environment API Key
-     * @param $config ?RemoteEvaluationConfig See {@link RemoteEvaluationConfig} for config options
+     * @param string $apiKey The environment API Key
+     * @param ?RemoteEvaluationConfig $config See {@link RemoteEvaluationConfig} for config options
      */
     public function __construct(string $apiKey, ?RemoteEvaluationConfig $config = null)
     {
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
-        $this->httpClient = new Client();
-        $this->logger = initializeLogger($this->config->debug);
+        $this->httpClient = $config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
+        $this->logger = new InternalLogger($this->config->logger ?? new DefaultLogger(), $this->config->logLevel);
     }
 
     /**
@@ -46,123 +44,61 @@ class RemoteEvaluationClient
      *
      * This method will automatically retry if configured (default).
      *
-     * @param $user User The {@link User} context
-     * @param $flagKeys array The flags to evaluate for this specific fetch request.
-     * @return PromiseInterface A {@link Variant} array for the user on success, empty array on error.
-     * @throws Exception
+     * @param User $user The {@link User} context
+     * @param array<string> $flagKeys The flags to evaluate for this specific fetch request.
+     * @return array<Variant> A {@link Variant} array for the user on success, empty array on error.
      */
-    public function fetch(User $user, array $flagKeys = []): PromiseInterface
+    public function fetch(User $user, array $flagKeys = []): array
     {
         if ($user->userId == null && $user->deviceId == null) {
             $this->logger->warning('[Experiment] user id and device id are null; Amplitude may not resolve identity');
         }
         $this->logger->debug('[Experiment] Fetching variants for user: ' . json_encode($user->toArray()));
 
-        return $this->doFetch($user, $this->config->fetchTimeoutMillis, $flagKeys)
-            ->otherwise(function (Throwable $e) use ($user, $flagKeys) {
-                // Handle the exception
-                $this->logger->error('[Experiment] Fetch variant failed: ' . $e->getMessage());
-
-                // Retry the fetch
-                return $this->retryFetch($user, $flagKeys)
-                    ->then(function ($result) {
-                        // Process the result if retry is successful
-                        return $result;
-                    })
-                    ->otherwise(function (Throwable $retryException) use ($e) {
-                        // Handle the exception for the retry attempt
-                        $this->logger->error('[Experiment] Fetch variant retry failed: ' . $retryException->getMessage());
-
-                        // Re-throw the original exception if needed
-                        throw $e;
-                    });
-            });
-    }
-
-    public function doFetch(User $user, int $timeoutMillis, array $flagKeys = []): PromiseInterface
-    {
         // Define the request data
         $libraryUser = $user->copyToBuilder()->library('experiment-php-server/' . VERSION)->build();
-        $serializedUser = base64_encode(json_encode($libraryUser->toArray()));
+        $userJson = json_encode($libraryUser->toArray());
+        if ($userJson === false) {
+            $this->logger->error('[Experiment] Failed to fetch variants: ' . json_last_error_msg());
+            return [];
+        }
+        $serializedUser = base64_encode($userJson);
 
         // Define the request URL
         $endpoint = $this->config->serverUrl . '/sdk/v2/vardata?v=0';
-
-        // Define the request headers
-        $headers = [
-            'Authorization' => 'Api-Key ' . $this->apiKey,
-            'Content-Type' => 'application/json',
-            'X-Amp-Exp-User' => $serializedUser,
-        ];
+        $request = $this->httpClient->createRequest('GET', $endpoint)
+            ->withHeader('Authorization', 'Api-Key ' . $this->apiKey)
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('X-Amp-Exp-User', $serializedUser);
 
         if (!empty($flagKeys)) {
-            $headers['X-Amp-Exp-Flag-Keys'] = base64_encode(json_encode($flagKeys));
-        }
-
-        $promise = $this->httpClient->requestAsync('GET', $endpoint, [
-            'headers' => $headers,
-            'timeout' => $timeoutMillis / 1000,
-        ]);
-
-        return $promise->then(
-            function (ResponseInterface $response) {
-                $results = json_decode($response->getBody(), true);
-                $variants = [];
-                foreach ($results as $flagKey => $flagResult) {
-                    $variants[$flagKey] = Variant::convertEvaluationVariantToVariant($flagResult);
-                }
-                $this->logger->debug('[Experiment] Fetched variants: ' . $response->getBody());
-                return $variants;
-            },
-            function (Exception $reason) {
-                $this->logger->error('[Experiment] Failed to fetch variants: ' . $reason->getMessage());
-                throw $reason;
+            $flagKeysJson = json_encode($flagKeys);
+            if ($flagKeysJson === false) {
+                $this->logger->error('[Experiment] Failed to fetch variants: ' . json_last_error_msg());
+                return [];
             }
-        );
-    }
-
-    /**
-     * @throws Exception
-     */
-    private function retryFetch(User $user, array $flagKeys = []): PromiseInterface
-    {
-        if ($this->config->fetchRetries == 0) {
-            return Create::promiseFor([]);
+            $request = $request->withHeader('X-Amp-Exp-Flag-Keys', base64_encode($flagKeysJson));
         }
 
-        $this->logger->debug('[Experiment] Retrying fetch variant');
+        $httpClient = $this->httpClient->getClient();
 
-        $err = null;
-        $delayMillis = $this->config->fetchRetryBackoffMinMillis;
-
-        for ($i = 0; $i < $this->config->fetchRetries; $i++) {
-            usleep($delayMillis * 1000); // Convert to microseconds
-
-            try {
-                return $this->doFetch(
-                    $user,
-                    $this->config->fetchRetryTimeoutMillis,
-                    $flagKeys
-                )->then(
-                    function ($result) {
-                        return $result;
-                    },
-                    function ($e) use (&$err) {
-                        $this->logger->error('[Experiment] Fetch variant retry failed: ' . $e->getMessage());
-                        $err = $e;
-                    }
-                );
-            } catch (Exception $e) {
-                $this->logger->error('[Experiment]  Fetch variant retry failed: ' . $e->getMessage());
-                $err = $e;
+        try {
+            $response = $httpClient->sendRequest($request);
+            if ($response->getStatusCode() != 200) {
+                $this->logger->error('[Experiment] Failed to fetch variants: ' . $response->getBody());
+                return [];
             }
 
-            $delayMillis = min(
-                $delayMillis * $this->config->fetchRetryBackoffScalar,
-                $this->config->fetchRetryBackoffMaxMillis
-            );
+            $results = json_decode($response->getBody(), true);
+            $variants = [];
+            foreach ($results as $flagKey => $flagResult) {
+                $variants[$flagKey] = Variant::convertEvaluationVariantToVariant($flagResult);
+            }
+            $this->logger->debug('[Experiment] Fetched variants: ' . $response->getBody());
+            return $variants;
+        } catch (ClientExceptionInterface $e) {
+            $this->logger->error('[Experiment] Failed to fetch variants: ' . $e->getMessage());
+            return [];
         }
-
-        throw $err;
     }
 }

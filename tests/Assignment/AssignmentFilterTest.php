@@ -7,7 +7,6 @@ use AmplitudeExperiment\Assignment\AssignmentFilter;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use PHPUnit\Framework\TestCase;
-use function AmplitudeExperiment\sleep;
 
 require_once __DIR__ . '/../../src/Util.php';
 
@@ -149,7 +148,7 @@ class AssignmentFilterTest extends TestCase
         $assignment1 = new Assignment($user1, $results);
         $assignment2 = new Assignment($user2, $results);
         $this->assertTrue($filter->shouldTrack($assignment1));
-        \sleep(1.05);
+        sleep(1);
         $this->assertTrue($filter->shouldTrack($assignment2));
     }
 }

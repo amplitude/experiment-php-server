@@ -2,79 +2,69 @@
 
 namespace AmplitudeExperiment\Remote;
 
+use AmplitudeExperiment\Http\HttpClientInterface;
+use AmplitudeExperiment\Logger\DefaultLogger;
+use AmplitudeExperiment\Logger\LogLevel;
+use Psr\Log\LoggerInterface;
+
 /**
  * Configuration options. This is an object that can be created using
  * a {@link RemoteEvaluationConfigBuilder}. Example usage:
  *
- *`RemoteEvaluationConfig::builder()->serverUrl("https://api.lab.amplitude.com/")->build()`
+ *```
+ * RemoteEvaluationConfig::builder()->serverUrl("https://api.lab.amplitude.com/")->build();
+ * ```
  */
 class RemoteEvaluationConfig
 {
     /**
-     * Set to true to log some extra information to the console.
+     * Set to use custom logger. If not set, a {@link DefaultLogger} is used.
      */
-    public bool $debug;
+    public ?LoggerInterface $logger;
+    /**
+     * The {@link LogLevel} to use for the logger.
+     */
+    public int $logLevel;
     /**
      * The server endpoint from which to request variants.
      */
     public string $serverUrl;
     /**
-     * The request socket timeout, in milliseconds.
+     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleHttpClient} will be used.
      */
-    public int $fetchTimeoutMillis;
+    public ?HttpClientInterface $httpClient;
     /**
-     * The number of retries to attempt before failing
+     * @var array<string, mixed>
+     * The configuration for the underlying default {@link GuzzleHttpClient} (if used). See {@link GUZZLE_DEFAULTS} for defaults.
      */
-    public int $fetchRetries;
-    /**
-     * Retry backoff minimum (starting backoff delay) in milliseconds. The minimum backoff is scaled by
-     * `fetchRetryBackoffScalar` after each retry failure.
-     */
-    public int $fetchRetryBackoffMinMillis;
-    /**
-     * Retry backoff maximum in milliseconds. If the scaled backoff is greater than the max, the max is
-     * used for all subsequent retries.
-     */
-    public int $fetchRetryBackoffMaxMillis;
-    /**
-     * Scales the minimum backoff exponentially.
-     */
-    public float $fetchRetryBackoffScalar;
-    /**
-     * The request timeout for retrying fetch requests.
-     */
-    public int $fetchRetryTimeoutMillis;
+    public array $guzzleClientConfig;
 
     const DEFAULTS = [
+        'logger' => null,
+        'logLevel' => LogLevel::ERROR,
         'debug' => false,
         'serverUrl' => 'https://api.lab.amplitude.com',
-        'fetchTimeoutMillis' => 10000,
-        'fetchRetries' => 8,
-        'fetchRetryBackoffMinMillis' => 500,
-        'fetchRetryBackoffMaxMillis' => 10000,
-        'fetchRetryBackoffScalar' => 1.5,
-        'fetchRetryTimeoutMillis' => 10000
+        'httpClient' => null,
+        'guzzleClientConfig' => []
     ];
 
+
+    /**
+     * @param array<string, mixed> $guzzleClientConfig
+     */
     public function __construct(
-        bool   $debug,
-        string $serverUrl,
-        int    $fetchTimeoutMillis,
-        int    $fetchRetries,
-        int    $fetchRetryBackoffMinMillis,
-        int    $fetchRetryBackoffMaxMillis,
-        float  $fetchRetryBackoffScalar,
-        int    $fetchRetryTimeoutMillis
+        ?LoggerInterface     $logger,
+        int                  $logLevel,
+        string               $serverUrl,
+        ?HttpClientInterface $httpClient,
+        array                $guzzleClientConfig
     )
     {
-        $this->debug = $debug;
+        $this->logger = $logger;
+        $this->logLevel = $logLevel;
         $this->serverUrl = $serverUrl;
-        $this->fetchTimeoutMillis = $fetchTimeoutMillis;
-        $this->fetchRetries = $fetchRetries;
-        $this->fetchRetryBackoffMinMillis = $fetchRetryBackoffMinMillis;
-        $this->fetchRetryBackoffMaxMillis = $fetchRetryBackoffMaxMillis;
-        $this->fetchRetryBackoffScalar = $fetchRetryBackoffScalar;
-        $this->fetchRetryTimeoutMillis = $fetchRetryTimeoutMillis;
+        $this->httpClient = $httpClient;
+        $this->guzzleClientConfig = $guzzleClientConfig;
     }
 
     public static function builder(): RemoteEvaluationConfigBuilder

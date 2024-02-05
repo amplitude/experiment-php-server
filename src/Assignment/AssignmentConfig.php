@@ -6,15 +6,27 @@ use AmplitudeExperiment\Amplitude\AmplitudeConfig;
 
 /**
  * Configuration options for assignment tracking. This is an object that can be created using
- * a {@link AssignmentConfigBuilder}. Example usage:
+ * a {@link AssignmentConfigBuilder}, which also sets options for {@link AmplitudeConfig}. Example usage:
  *
- * AssignmentConfigBuilder::builder('api-key')->build()
+ * ```
+ * AssignmentConfigBuilder::builder('api-key')->minIdLength(10)->build();
+ * ```
  */
 
 class AssignmentConfig
 {
+    /**
+     * The Amplitude Analytics API key.
+     */
     public string $apiKey;
+    /**
+     * The maximum number of assignments stored in the assignment cache
+     */
     public int $cacheCapacity;
+    /**
+     * Configuration options for the underlying {@link Amplitude} client. This is created when
+     * calling {@link AssignmentConfigBuilder::build()} and does not need to be explicitly set.
+     */
     public AmplitudeConfig $amplitudeConfig;
 
     const DEFAULTS = [

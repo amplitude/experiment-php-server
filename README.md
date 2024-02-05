@@ -27,7 +27,7 @@ $user = \AmplitudeExperiment\User::builder()
     ->userProperties(['premium' => True])
     ->build();
 
-$variants = $client->fetch($user)->wait();
+$variants = $client->fetch($user);
 
 // (3) Access a flag's variant
 $variant = $variants['FLAG_KEY'] ?? null;
@@ -48,8 +48,8 @@ if ($variant) {
 $experiment = new \AmplitudeExperiment\Experiment();
 $client = $experiment->initializeLocal('<DEPLOYMENT_KEY>');
 
-// (2) Start the local evaluation client.
-$client->start()->wait();
+// (2) Fetch latest flag configurations for the local evaluation client.
+$client->refreshFlagConfigs();
 
 // (3) Evaluate a user.
 $user = \AmplitudeExperiment\User::builder()

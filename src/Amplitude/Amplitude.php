@@ -2,13 +2,10 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
-use AmplitudeExperiment\Backoff;
-use GuzzleHttp\Client;
-use GuzzleHttp\Promise\PromiseInterface;
-use Monolog\Logger;
-use function AmplitudeExperiment\initializeLogger;
-
-require_once __DIR__ . '/../Util.php';
+use AmplitudeExperiment\Http\HttpClientInterface;
+use AmplitudeExperiment\Http\GuzzleHttpClient;
+use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Amplitude client for sending events to Amplitude.
@@ -16,41 +13,33 @@ require_once __DIR__ . '/../Util.php';
 class Amplitude
 {
     private string $apiKey;
+    /**
+     * @var array<array<string,mixed>>
+     */
     protected array $queue = [];
-    protected Client $httpClient;
-    private Logger $logger;
-    private ?AmplitudeConfig $config;
+    protected HttpClientInterface $httpClient;
+    private LoggerInterface $logger;
+    private AmplitudeConfig $config;
 
-    public function __construct(string $apiKey, bool $debug, AmplitudeConfig $config = null)
+    public function __construct(string $apiKey, LoggerInterface $logger, AmplitudeConfig $config = null)
     {
         $this->apiKey = $apiKey;
-        $this->httpClient = new Client();
-        $this->logger = initializeLogger($debug);
+        $this->logger = $logger;
         $this->config = $config ?? AmplitudeConfig::builder()->build();
+        $this->httpClient = $this->config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
     }
 
-    public function flush(): PromiseInterface
+    public function flush(): void
     {
         $payload = ["api_key" => $this->apiKey, "events" => $this->queue, "options" => ["min_id_length" => $this->config->minIdLength]];
-
-        // Fetch initial flag configs and await the result.
-        return Backoff::doWithBackoff(
-            function () use ($payload) {
-                return $this->post($this->config->serverUrl, $payload)->then(
-                    function () {
-                        $this->queue = [];
-                    }
-                );
-            },
-            new Backoff($this->config->flushMaxRetries, 1, 1, 1)
-        );
+        $this->post($this->config->serverUrl, $payload);
     }
 
-    public function logEvent(Event $event)
+    public function logEvent(Event $event): void
     {
         $this->queue[] = $event->toArray();
         if (count($this->queue) >= $this->config->flushQueueSize) {
-            $this->flush()->wait();
+            $this->flush();
         }
     }
 
@@ -60,27 +49,35 @@ class Amplitude
     public function __destruct()
     {
         if (count($this->queue) > 0) {
-            $this->flush()->wait();
+            $this->flush();
         }
     }
 
-    private function post(string $url, array $payload): PromiseInterface
+    /**
+     * @param array<string,mixed> $payload
+     */
+    private function post(string $url, array $payload): void
     {
-        // Using sendAsync to make an asynchronous request
-        $promise = $this->httpClient->postAsync($url, [
-            'json' => $payload,
-        ]);
-
-        return $promise->then(
-            function ($response) use ($payload) {
-                // Process the successful response if needed
-                $this->logger->debug("[Amplitude] Event sent successfully: " . json_encode($payload));
-            },
-            function (\Exception $exception) use ($payload) {
-                // Handle the exception for async request
-                $this->logger->error('[Amplitude] Failed to send event: ' . json_encode($payload) . ', ' . $exception->getMessage());
-                throw $exception;
+        $httpClient = $this->httpClient->getClient();
+        $payloadJson = json_encode($payload);
+        if ($payloadJson === false) {
+            $this->logger->error('[Amplitude] Failed to encode payload: ' . json_last_error());
+            return;
+        }
+        $request = $this->httpClient
+            ->createRequest('POST', $url, $payloadJson)
+            ->withHeader('Content-Type', 'application/json');
+        try {
+            $response = $httpClient->sendRequest($request);
+            if ($response->getStatusCode() != 200) {
+                $this->logger->error('[Amplitude] Failed to send event: ' . $payloadJson . ', ' . $response->getStatusCode() . ' ' . $response->getReasonPhrase());
+                return;
             }
-        );
+            $this->logger->debug("[Amplitude] Event sent successfully: " . $payloadJson);
+            $this->queue = [];
+
+        } catch (ClientExceptionInterface $e) {
+            $this->logger->error('[Amplitude] Failed to send event: ' . $payloadJson . ', ' . $e->getMessage());
+        }
     }
 }

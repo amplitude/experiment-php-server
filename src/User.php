@@ -38,10 +38,24 @@ class User
     public ?string $deviceModel;
     public ?string $carrier;
     public ?string $library;
+    /**
+     * @var ?array<mixed>
+     */
     public ?array $userProperties;
+    /**
+     * @var ?array<mixed>
+     */
     public ?array $groups;
+    /**
+     * @var ?array<mixed>
+     */
     public ?array $groupProperties;
 
+    /**
+     * @param ?array<mixed> $userProperties
+     * @param ?array<mixed> $groups
+     * @param ?array<mixed> $groupProperties
+     */
     public function __construct(
         ?string $deviceId,
         ?string $userId,
@@ -109,6 +123,9 @@ class User
             ->groupProperties($this->groupProperties);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function toArray(): array {
         return array_filter(["device_id" => $this->deviceId,
             "user_id" => $this->userId,
@@ -130,6 +147,9 @@ class User
             "group_properties" => $this->groupProperties]);
     }
 
+    /**
+     * @return array<mixed>
+     */
     public function toEvaluationContext(): array
     {
 

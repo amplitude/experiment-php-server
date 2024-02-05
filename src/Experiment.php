@@ -9,7 +9,13 @@ use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
 
 class Experiment
 {
+    /**
+     * @var array<string, RemoteEvaluationClient>
+     */
     private array $remoteInstances = [];
+    /**
+     * @var array<string, LocalEvaluationClient>
+     */
     private array $localInstances = [];
 
     /**
