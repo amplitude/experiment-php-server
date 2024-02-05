@@ -1,3 +1,10 @@
+# [0.4.0](https://github.com/amplitude/experiment-php-server/compare/0.3.1...0.4.0) (2024-02-05)
+
+
+### Features
+
+* Use custom HTTP Client, custom Logger, PHPStan ([#13](https://github.com/amplitude/experiment-php-server/issues/13)) ([e33e12b](https://github.com/amplitude/experiment-php-server/commit/e33e12bfb79563e30297bd04c11e8c747f4223d9))
+
 ## [0.3.1](https://github.com/amplitude/experiment-php-server/compare/0.3.0...0.3.1) (2023-11-30)
 
 
