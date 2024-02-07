@@ -13,7 +13,7 @@ const DAY_MILLIS = 24 * 60 * 60 * 1000;
 
 class AssignmentService
 {
-    private Amplitude $amplitude;
+    public Amplitude $amplitude;
     private AssignmentFilter $assignmentFilter;
 
     public function __construct(Amplitude $amplitude, AssignmentFilter $assignmentFilter)
@@ -22,10 +22,17 @@ class AssignmentService
         $this->assignmentFilter = $assignmentFilter;
     }
 
-    public function track(Assignment $assignment): void
+    /**
+     * @throws \Exception
+     */
+    public function track(Assignment $assignment, bool $async): void
     {
         if ($this->assignmentFilter->shouldTrack($assignment)) {
-            $this->amplitude->logEvent($this->toEvent($assignment));
+            if ($async) {
+                $this->amplitude->logEventAsync($this->toEvent($assignment));
+            } else {
+                $this->amplitude->logEvent($this->toEvent($assignment));
+            }
         }
     }
 

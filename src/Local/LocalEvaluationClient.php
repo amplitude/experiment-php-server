@@ -15,6 +15,7 @@ use AmplitudeExperiment\Logger\DefaultLogger;
 use AmplitudeExperiment\Logger\InternalLogger;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
+use Exception;
 use Psr\Log\LoggerInterface;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
 
@@ -62,22 +63,29 @@ class LocalEvaluationClient
      * @param array<string> $flagKeys The flags to evaluate with the user. If empty, all flags
      * from the flag cache are evaluated.
      * @return array<Variant> evaluated variants
+     * @throws Exception
      */
-    public function evaluate(User $user, array $flagKeys = []): array
+    public function evaluate(User $user, array $flagKeys = [], bool $async = false): array
     {
         $flags = $this->flagConfigService->getFlagConfigs();
         try {
             $flags = topologicalSort($flags, $flagKeys);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('[Experiment] Evaluate - error sorting flags: ' . $e->getMessage());
         }
         $this->logger->debug('[Experiment] Evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode($flags));
         $results = array_map('AmplitudeExperiment\Variant::convertEvaluationVariantToVariant', $this->evaluation->evaluate($user->toEvaluationContext(), $flags));
         $this->logger->debug('[Experiment] Evaluate - variants:' . json_encode($results));
         if ($this->assignmentService) {
-            $this->assignmentService->track(new Assignment($user, $results));
+            $this->assignmentService->track(new Assignment($user, $results), $async);
         }
         return $results;
+    }
+
+    public function stop(): void {
+        if ($this->assignmentService) {
+            $this->assignmentService->amplitude->stop();
+        }
     }
 
 

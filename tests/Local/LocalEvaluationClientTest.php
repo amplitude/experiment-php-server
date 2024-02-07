@@ -2,11 +2,13 @@
 
 namespace AmplitudeExperiment\Test\Local;
 
+use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Experiment;
 use AmplitudeExperiment\Local\LocalEvaluationClient;
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
 use AmplitudeExperiment\Logger\LogLevel;
 use AmplitudeExperiment\User;
+use Exception;
 use PHPUnit\Framework\TestCase;
 
 class LocalEvaluationClientTest extends TestCase
@@ -79,5 +81,47 @@ class LocalEvaluationClientTest extends TestCase
         $variant = $variants['sdk-local-evaluation-ci-test'];
         $this->assertEquals("on", $variant->key);
         $this->assertEquals("payload", $variant->payload);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testAssignmentPerformanceAsync()
+    {
+        $flagConfigs = $this->client->getFlagConfigs();
+        $assignmentConfig = AssignmentConfig::builder('a6dd847b9d2f03c816d4f3f8458cdc1d')->useBatch(false)->build();
+        for ($i = 0; $i < 100; $i++) {
+            $testClient = new LocalEvaluationClient('', LocalEvaluationConfig::builder()->assignmentConfig($assignmentConfig)->bootstrap($flagConfigs)->build());
+            $user = User::builder()
+                ->userId('tim.yiu@amplitude.com')
+                ->deviceId('test_device_e' . $i)
+                ->build();
+            $variants = $testClient->evaluate($user, [], true);
+            $variant = $variants['sdk-local-evaluation-ci-test'];
+            $this->assertEquals("on", $variant->key);
+            $this->assertEquals("payload", $variant->payload);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testAssignmentPerformanceSync()
+    {
+        $flagConfigs = $this->client->getFlagConfigs();
+        $assignmentConfig = AssignmentConfig::builder('a6dd847b9d2f03c816d4f3f8458cdc1d')->useBatch(true)->build();
+        for ($i = 0; $i < 30; $i++) {
+            $testClient = new LocalEvaluationClient('', LocalEvaluationConfig::builder()->assignmentConfig($assignmentConfig)->bootstrap($flagConfigs)->build());
+            $user = User::builder()
+                ->userId('tim.yiu@amplitude.com')
+                ->deviceId('test_device' . $i)
+                ->build();
+            $variants = $testClient->evaluate($user);
+            $variant = $variants['sdk-local-evaluation-ci-test'];
+            $this->assertEquals("on", $variant->key);
+            $this->assertEquals("payload", $variant->payload);
+            usleep(100 * 1000);
+            $testClient->stop();
+        }
     }
 }
