@@ -63,9 +63,8 @@ class LocalEvaluationClient
      * @param array<string> $flagKeys The flags to evaluate with the user. If empty, all flags
      * from the flag cache are evaluated.
      * @return array<Variant> evaluated variants
-     * @throws Exception
      */
-    public function evaluate(User $user, array $flagKeys = [], bool $async = false): array
+    public function evaluate(User $user, array $flagKeys = []): array
     {
         $flags = $this->flagConfigService->getFlagConfigs();
         try {
@@ -77,7 +76,7 @@ class LocalEvaluationClient
         $results = array_map('AmplitudeExperiment\Variant::convertEvaluationVariantToVariant', $this->evaluation->evaluate($user->toEvaluationContext(), $flags));
         $this->logger->debug('[Experiment] Evaluate - variants:' . json_encode($results));
         if ($this->assignmentService) {
-            $this->assignmentService->track(new Assignment($user, $results), $async);
+            $this->assignmentService->track(new Assignment($user, $results));
         }
         return $results;
     }

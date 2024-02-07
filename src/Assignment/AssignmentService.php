@@ -4,6 +4,7 @@ namespace AmplitudeExperiment\Assignment;
 
 use AmplitudeExperiment\Amplitude\Amplitude;
 use AmplitudeExperiment\Amplitude\Event;
+use Exception;
 use function AmplitudeExperiment\hashCode;
 
 require_once __DIR__ . '/../Util.php';
@@ -22,17 +23,10 @@ class AssignmentService
         $this->assignmentFilter = $assignmentFilter;
     }
 
-    /**
-     * @throws \Exception
-     */
-    public function track(Assignment $assignment, bool $async): void
+    public function track(Assignment $assignment): void
     {
         if ($this->assignmentFilter->shouldTrack($assignment)) {
-            if ($async) {
-                $this->amplitude->logEventAsync($this->toEvent($assignment));
-            } else {
-                $this->amplitude->logEvent($this->toEvent($assignment));
-            }
+            $this->amplitude->logEvent($this->toEvent($assignment));
         }
     }
 
