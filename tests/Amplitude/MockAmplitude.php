@@ -9,9 +9,9 @@ use Psr\Log\LoggerInterface;
 
 class MockAmplitude extends Amplitude
 {
-    public function __construct(string $apiKey, LoggerInterface $logger, AmplitudeConfig $config = null)
+    public function __construct(string $apiKey, AmplitudeConfig $config = null)
     {
-        parent::__construct($apiKey, $logger, $config);
+        parent::__construct($apiKey, $config);
     }
     public function setHttpClient(HttpClientInterface $httpClient) {
         $this->httpClient = $httpClient;

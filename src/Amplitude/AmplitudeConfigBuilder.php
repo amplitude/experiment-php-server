@@ -3,6 +3,7 @@
 namespace AmplitudeExperiment\Amplitude;
 
 use AmplitudeExperiment\Http\HttpClientInterface;
+use Psr\Log\LoggerInterface;
 
 class AmplitudeConfigBuilder
 {
@@ -16,6 +17,8 @@ class AmplitudeConfigBuilder
      * @var array<string, mixed>
      */
     protected array $guzzleClientConfig = AmplitudeConfig::DEFAULTS['guzzleClientConfig'];
+    protected ?LoggerInterface $logger = AmplitudeConfig::DEFAULTS['logger'];
+    protected int $logLevel = AmplitudeConfig::DEFAULTS['logLevel'];
 
     public function __construct()
     {
@@ -66,10 +69,20 @@ class AmplitudeConfigBuilder
         return $this;
     }
 
-    /**
-     * @phpstan-ignore-next-line
-     */
-    public function build()
+    public function logger(LoggerInterface $logger): AmplitudeConfigBuilder
+    {
+        $this->logger = $logger;
+        return $this;
+    }
+
+    public function logLevel(int $logLevel): AmplitudeConfigBuilder
+    {
+        $this->logLevel = $logLevel;
+        return $this;
+    }
+
+
+    public function build(): AmplitudeConfig
     {
         if (!$this->serverUrl) {
             if ($this->useBatch) {
@@ -85,7 +98,9 @@ class AmplitudeConfigBuilder
             $this->serverUrl,
             $this->useBatch,
             $this->httpClient,
-            $this->guzzleClientConfig
+            $this->guzzleClientConfig,
+            $this->logger,
+            $this->logLevel
         );
     }
 }

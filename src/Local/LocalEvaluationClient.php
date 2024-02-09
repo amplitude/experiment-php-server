@@ -2,7 +2,6 @@
 
 namespace AmplitudeExperiment\Local;
 
-use AmplitudeExperiment\Amplitude\Amplitude;
 use AmplitudeExperiment\Assignment\Assignment;
 use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Assignment\AssignmentFilter;
@@ -93,9 +92,7 @@ class LocalEvaluationClient
     {
         if ($config) {
             $this->assignmentService = new AssignmentService(
-                new Amplitude($config->apiKey,
-                    $this->logger,
-                    $config->amplitudeConfig),
+                $config->assignmentTrackingProvider,
                 new AssignmentFilter($config->cacheCapacity));
         }
     }

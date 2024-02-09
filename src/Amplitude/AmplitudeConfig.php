@@ -5,6 +5,8 @@ namespace AmplitudeExperiment\Amplitude;
 use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Assignment\AssignmentConfigBuilder;
 use AmplitudeExperiment\Http\HttpClientInterface;
+use AmplitudeExperiment\Logger\LogLevel;
+use Psr\Log\LoggerInterface;
 
 /**
  * Configuration options for Amplitude. The Amplitude object is created when you create an {@link AssignmentConfig}.
@@ -42,6 +44,14 @@ class AmplitudeConfig
      * The configuration for the underlying default {@link GuzzleHttpClient} client (if used). See {@link GUZZLE_DEFAULTS} for defaults.
      */
     public array $guzzleClientConfig;
+    /**
+     * Set to use custom logger. If not set, a {@link DefaultLogger} is used.
+     */
+    public ?LoggerInterface $logger;
+    /**
+     * The {@link LogLevel} to use for the logger.
+     */
+    public int $logLevel;
 
     const DEFAULTS = [
         'serverZone' => 'US',
@@ -60,7 +70,9 @@ class AmplitudeConfig
         'flushQueueSize' => 200,
         'flushMaxRetries' => 12,
         'httpClient' => null,
-        'guzzleClientConfig' => []
+        'guzzleClientConfig' => [],
+        'logger' => null,
+        'logLevel' => LogLevel::ERROR,
     ];
 
     /**
@@ -73,8 +85,9 @@ class AmplitudeConfig
         string               $serverUrl,
         bool                 $useBatch,
         ?HttpClientInterface $httpClient,
-        array                $guzzleClientConfig
-    )
+        array                $guzzleClientConfig,
+        ?LoggerInterface      $logger,
+        int                  $logLevel)
     {
         $this->flushQueueSize = $flushQueueSize;
         $this->minIdLength = $minIdLength;
@@ -83,6 +96,8 @@ class AmplitudeConfig
         $this->useBatch = $useBatch;
         $this->httpClient = $httpClient;
         $this->guzzleClientConfig = $guzzleClientConfig;
+        $this->logger = $logger;
+        $this->logLevel = $logLevel;
     }
 
     public static function builder(): AmplitudeConfigBuilder
