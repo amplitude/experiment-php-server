@@ -9,6 +9,7 @@ class AssignmentConfigBuilder
 
     public function __construct(AssignmentTrackingProvider $assignmentTrackingProvider)
     {
+        $this->assignmentTrackingProvider = $assignmentTrackingProvider;
     }
 
     public function cacheCapacity(int $cacheCapacity): AssignmentConfigBuilder
