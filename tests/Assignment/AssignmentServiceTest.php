@@ -7,9 +7,6 @@ use AmplitudeExperiment\Assignment\Assignment;
 use AmplitudeExperiment\Assignment\AssignmentFilter;
 use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\Assignment\DefaultAssignmentTrackingProvider;
-use AmplitudeExperiment\Logger\DefaultLogger;
-use AmplitudeExperiment\Logger\InternalLogger;
-use AmplitudeExperiment\Logger\LogLevel;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use PHPUnit\Framework\TestCase;
@@ -50,7 +47,7 @@ class AssignmentServiceTest extends TestCase
             'empty_variant' => new Variant()
         ];
 
-        $assignment = new Assignment($user, $results);
+        $assignment = new Assignment($user, $results, 'apiKey', 10);
         $event = $assignment->toEvent();
 
         $this->assertEquals($user->userId, $event->userId);
@@ -84,6 +81,9 @@ class AssignmentServiceTest extends TestCase
         $canonicalization = 'user device basic control default off different_value on empty_metadata on holdout holdout mutex slot-1 partial_metadata on ';
         $expected = "user device " . hashCode($canonicalization) . ' ' . floor($assignment->timestamp / DAY_MILLIS);
         $this->assertEquals($expected, $event->insertId);
+        $expectedPayload = json_encode(["api_key" => 'apiKey', "events" => [$event], "options" => ["min_id_length" => 10]]);
+        $this->assertEquals($expectedPayload, $assignment->toJSONPayload());
+        echo $assignment->toJSONPayload() . "\n";
     }
 
     public function testlogEventCalledInAmplitude()
