@@ -74,7 +74,7 @@ class LocalEvaluationClient
         $results = array_map('AmplitudeExperiment\Variant::convertEvaluationVariantToVariant', $this->evaluation->evaluate($user->toEvaluationContext(), $flags));
         $this->logger->debug('[Experiment] Evaluate - variants:' . json_encode($results));
         if ($this->assignmentService) {
-            $this->assignmentService->track(new Assignment($user, $results));
+            $this->assignmentService->track($this->assignmentService->createAssignment($user, $results));
         }
         return $results;
     }
@@ -93,7 +93,9 @@ class LocalEvaluationClient
         if ($config) {
             $this->assignmentService = new AssignmentService(
                 $config->assignmentTrackingProvider,
-                new AssignmentFilter($config->cacheCapacity));
+                new AssignmentFilter($config->cacheCapacity),
+                $config->apiKey,
+                $config->minIdLength);
         }
     }
 }

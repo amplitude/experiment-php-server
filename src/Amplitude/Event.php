@@ -2,6 +2,8 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
+use RuntimeException;
+
 /**
  * Event class for tracking assignments to Amplitude Experiment.
  *
@@ -41,5 +43,17 @@ class Event
             'user_id' => $this->userId,
             'device_id' => $this->deviceId,
             'insert_id' => $this->insertId,]);
+    }
+
+    /**
+     * @throws RuntimeException
+     */
+    public function toJSONString(): string
+    {
+        $jsonString = json_encode($this->toArray());
+        if (!$jsonString) {
+            throw new RuntimeException('Failed to encode Event to JSON string');
+        }
+        return $jsonString;
     }
 }

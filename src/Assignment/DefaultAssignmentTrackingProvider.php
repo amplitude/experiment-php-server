@@ -17,8 +17,8 @@ class DefaultAssignmentTrackingProvider implements AssignmentTrackingProvider
         $this->amplitude = $amplitude;
     }
 
-    public function track(Event $event): void
+    public function track(Assignment $assignment): void
     {
-        $this->amplitude->logEvent($event);
+        $this->amplitude->logEvent($assignment->toEvent());
     }
 }

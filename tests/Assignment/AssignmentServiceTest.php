@@ -51,7 +51,7 @@ class AssignmentServiceTest extends TestCase
         ];
 
         $assignment = new Assignment($user, $results);
-        $event = AssignmentService::toEvent($assignment);
+        $event = $assignment->toEvent();
 
         $this->assertEquals($user->userId, $event->userId);
         $this->assertEquals($user->deviceId, $event->deviceId);

@@ -20,7 +20,7 @@ class AmplitudeConfig
      */
     public int $flushQueueSize;
     /**
-     * The maximum retry attempts for an event when receiving error response.
+     * The minimum length of the id field in events. Default to 5.
      */
     public int $minIdLength;
     /**

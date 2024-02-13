@@ -2,9 +2,8 @@
 
 namespace AmplitudeExperiment\Assignment;
 
-use AmplitudeExperiment\Amplitude\Amplitude;
-use AmplitudeExperiment\Amplitude\Event;
-use function AmplitudeExperiment\hashCode;
+use AmplitudeExperiment\User;
+use AmplitudeExperiment\Variant;
 
 require_once __DIR__ . '/../Util.php';
 
@@ -15,59 +14,29 @@ class AssignmentService
 {
     private AssignmentTrackingProvider $assignmentTrackingProvider;
     private AssignmentFilter $assignmentFilter;
+    private string $apiKey;
+    private int $minIdLength;
 
-    public function __construct(AssignmentTrackingProvider $assignmentTrackingProvider, AssignmentFilter $assignmentFilter)
+    public function __construct(AssignmentTrackingProvider $assignmentTrackingProvider, AssignmentFilter $assignmentFilter, string $apiKey = '', int $minIdLength = AssignmentConfig::DEFAULTS['minIdLength'])
     {
         $this->assignmentTrackingProvider = $assignmentTrackingProvider;
         $this->assignmentFilter = $assignmentFilter;
+        $this->apiKey = $apiKey;
+        $this->minIdLength = $minIdLength;
     }
 
     public function track(Assignment $assignment): void
     {
         if ($this->assignmentFilter->shouldTrack($assignment)) {
-            $this->assignmentTrackingProvider->track($this->toEvent($assignment));
+            $this->assignmentTrackingProvider->track($assignment);
         }
     }
 
-    public static function toEvent(Assignment $assignment): Event
+    /**
+     * @param array<Variant> $variants
+     */
+    public function createAssignment(User $user, array $variants): Assignment
     {
-        $event = new Event('[Experiment] Assignment');
-        $event->userId = $assignment->user->userId;
-        $event->deviceId = $assignment->user->deviceId;
-        $event->eventProperties = [];
-        $event->userProperties = [];
-
-        $set = [];
-        $unset = [];
-        foreach ($assignment->variants as $flagKey => $variant) {
-            if (!$variant->key) {
-                continue;
-            }
-            $event->eventProperties["{$flagKey}.variant"] = $variant->key;
-            $version = $variant->metadata['flagVersion'] ?? null;
-            $segmentName = $variant->metadata['segmentName'] ?? null;
-            if ($version && $segmentName) {
-                $event->eventProperties["{$flagKey}.details"] = "v{$version} rule:{$segmentName}";
-            }
-            $flagType = $variant->metadata['flagType'] ?? null;
-            $default = $variant->metadata['default'] ?? false;
-            if ($flagType == FLAG_TYPE_MUTUAL_EXCLUSION_GROUP) {
-                continue;
-            } elseif ($default) {
-                $unset["[Experiment] {$flagKey}"] = '-';
-            } else {
-                $set["[Experiment] {$flagKey}"] = $variant->key;
-            }
-        }
-
-        $event->userProperties['$set'] = $set;
-        $event->userProperties['$unset'] = $unset;
-
-        $hash = hashCode($assignment->canonicalize());
-
-        $event->insertId = "{$event->userId} {$event->deviceId} {$hash} " .
-            floor($assignment->timestamp / DAY_MILLIS);
-
-        return $event;
+        return new Assignment($user, $variants, $this->apiKey, $this->minIdLength);
     }
 }

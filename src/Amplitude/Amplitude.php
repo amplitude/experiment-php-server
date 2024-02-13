@@ -2,6 +2,8 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
+use AmplitudeExperiment\Assignment\Assignment;
+use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Http\GuzzleHttpClient;
 use AmplitudeExperiment\Logger\DefaultLogger;
@@ -14,6 +16,9 @@ use Psr\Log\LoggerInterface;
  */
 class Amplitude
 {
+    /**
+     * The Amplitude Project API key.
+     */
     private string $apiKey;
     /**
      * @var array<array<string,mixed>>
@@ -39,7 +44,7 @@ class Amplitude
 
     public function logEvent(Event $event): void
     {
-        $this->queue[] = $event->toArray();
+        $this->queue[] =  $event->toArray();
         if (count($this->queue) >= $this->config->flushQueueSize) {
             $this->flush();
         }
