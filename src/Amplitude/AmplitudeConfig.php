@@ -68,7 +68,6 @@ class AmplitudeConfig
         'useBatch' => false,
         'minIdLength' => 5,
         'flushQueueSize' => 200,
-        'flushMaxRetries' => 12,
         'httpClient' => null,
         'guzzleClientConfig' => [],
         'logger' => null,

@@ -8,6 +8,9 @@ use AmplitudeExperiment\Variant;
 use RuntimeException;
 use function AmplitudeExperiment\hashCode;
 
+/**
+ * Event class for tracking assignments to Amplitude Experiment.
+ */
 class Assignment
 {
     public User $user;
@@ -96,7 +99,7 @@ class Assignment
      * Convert an Assignment to an array representation of an Amplitude event
      * @return array<string, mixed>
      */
-    public function toJSONArray(): array
+    public function toArray(): array
     {
         return $this->toEvent()->toArray();
     }
@@ -107,7 +110,7 @@ class Assignment
      */
     public function toJSONString(): string
     {
-        $jsonString = json_encode($this->toJSONArray());
+        $jsonString = json_encode($this->toArray());
         if (!$jsonString) {
             throw new RuntimeException('Failed to encode Assignment to JSON string');
         }

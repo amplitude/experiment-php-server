@@ -2,7 +2,6 @@
 
 namespace AmplitudeExperiment\Local;
 
-use AmplitudeExperiment\Assignment\Assignment;
 use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Assignment\AssignmentFilter;
 use AmplitudeExperiment\Assignment\AssignmentService;

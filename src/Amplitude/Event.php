@@ -4,13 +4,6 @@ namespace AmplitudeExperiment\Amplitude;
 
 use RuntimeException;
 
-/**
- * Event class for tracking assignments to Amplitude Experiment.
- *
- * This object contains all the required information to send an `$assignment`
- * event to experiment.
- */
-
 class Event
 {
     public ?string $eventType = null;

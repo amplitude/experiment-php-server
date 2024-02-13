@@ -9,10 +9,10 @@ class AssignmentConfigBuilder
     protected string $apiKey;
     protected int $minIdLength = AssignmentConfig::DEFAULTS['minIdLength'];
 
-    public function __construct(AssignmentTrackingProvider $assignmentTrackingProvider, string $apiKey)
+    public function __construct(string $apiKey, AssignmentTrackingProvider $assignmentTrackingProvider)
     {
-        $this->assignmentTrackingProvider = $assignmentTrackingProvider;
         $this->apiKey = $apiKey;
+        $this->assignmentTrackingProvider = $assignmentTrackingProvider;
     }
 
     public function cacheCapacity(int $cacheCapacity): AssignmentConfigBuilder
@@ -30,9 +30,9 @@ class AssignmentConfigBuilder
     public function build(): AssignmentConfig
     {
         return new AssignmentConfig(
+            $this->apiKey,
             $this->cacheCapacity,
             $this->assignmentTrackingProvider,
-            $this->apiKey,
             $this->minIdLength
         );
     }

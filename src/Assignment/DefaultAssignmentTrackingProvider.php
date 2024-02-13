@@ -3,8 +3,6 @@
 namespace AmplitudeExperiment\Assignment;
 
 use AmplitudeExperiment\Amplitude\Amplitude;
-use AmplitudeExperiment\Amplitude\AmplitudeConfig;
-use AmplitudeExperiment\Amplitude\Event;
 
 /**
  * A default implementation of the AssignmentTrackingProvider interface.

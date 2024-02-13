@@ -2,8 +2,6 @@
 
 namespace AmplitudeExperiment\Assignment;
 
-use AmplitudeExperiment\Local\LocalEvaluationClient;
-
 /**
  * An interface for tracking assignments to Amplitude Experiment during local evaluation.
  *
@@ -22,7 +20,7 @@ interface AssignmentTrackingProvider
      * Use {@link Assignment::toJSONPayload()} to convert the Assignment to a JSON string which can be used as a payload
      * to the Amplitude event upload API.
      *
-     * Use {@link Assignment::toJSONArray()} to convert the Assignment to an array representation of an Amplitude event
+     * Use {@link Assignment::toArray()} to convert the Assignment to an array representation of an Amplitude event
      *
      * Used {@link Assignment::toJSONString()} to convert the Assignment to an Amplitude event JSON string
      *

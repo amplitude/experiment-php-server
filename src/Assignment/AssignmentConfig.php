@@ -2,8 +2,6 @@
 
 namespace AmplitudeExperiment\Assignment;
 
-use AmplitudeExperiment\Amplitude\AmplitudeConfig;
-
 /**
  * Configuration options for assignment tracking. This is an object that can be created using
  * a {@link AssignmentConfigBuilder}. Example usage:
@@ -16,6 +14,10 @@ use AmplitudeExperiment\Amplitude\AmplitudeConfig;
 class AssignmentConfig
 {
     /**
+     * The API key for the Amplitude project.
+     */
+    public string $apiKey;
+    /**
      * The maximum number of assignments stored in the assignment cache
      */
     public int $cacheCapacity;
@@ -23,10 +25,6 @@ class AssignmentConfig
      * The provider for tracking assignment events to Amplitude
      */
     public AssignmentTrackingProvider $assignmentTrackingProvider;
-    /**
-     * The API key for the Amplitude project.
-     */
-    public string $apiKey;
     /**
      * The minimum length of the id field in events. Default to 5. This is set in {@link AmplitudeConfig} if the
      * {@link DefaultAssignmentTrackingProvider} is used, and does not need to be set here.
@@ -38,16 +36,16 @@ class AssignmentConfig
         'minIdLength' => 5,
     ];
 
-    public function __construct(int $cacheCapacity, AssignmentTrackingProvider $assignmentTrackingProvider, string $apiKey, int $minIdLength)
+    public function __construct(string $apiKey, int $cacheCapacity, AssignmentTrackingProvider $assignmentTrackingProvider, int $minIdLength)
     {
+        $this->apiKey = $apiKey;
         $this->cacheCapacity = $cacheCapacity;
         $this->assignmentTrackingProvider = $assignmentTrackingProvider;
-        $this->apiKey = $apiKey;
         $this->minIdLength = $minIdLength;
     }
 
-    public static function builder(AssignmentTrackingProvider $assignmentTrackingProvider, string $apiKey): AssignmentConfigBuilder
+    public static function builder(string $apiKey, AssignmentTrackingProvider $assignmentTrackingProvider): AssignmentConfigBuilder
     {
-        return new AssignmentConfigBuilder($assignmentTrackingProvider, $apiKey);
+        return new AssignmentConfigBuilder($apiKey, $assignmentTrackingProvider);
     }
 }

@@ -2,8 +2,6 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
-use AmplitudeExperiment\Assignment\Assignment;
-use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Http\GuzzleHttpClient;
 use AmplitudeExperiment\Logger\DefaultLogger;
