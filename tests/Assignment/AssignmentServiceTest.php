@@ -83,7 +83,6 @@ class AssignmentServiceTest extends TestCase
         $this->assertEquals($expected, $event->insertId);
         $expectedPayload = json_encode(["api_key" => 'apiKey', "events" => [$event], "options" => ["min_id_length" => 10]]);
         $this->assertEquals($expectedPayload, $assignment->toJSONPayload());
-        echo $assignment->toJSONPayload() . "\n";
     }
 
     public function testlogEventCalledInAmplitude()

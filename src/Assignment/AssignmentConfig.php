@@ -14,7 +14,7 @@ namespace AmplitudeExperiment\Assignment;
 class AssignmentConfig
 {
     /**
-     * The API key for the Amplitude project.
+     * The Amplitude Project API key.
      */
     public string $apiKey;
     /**
