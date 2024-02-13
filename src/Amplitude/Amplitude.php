@@ -44,7 +44,7 @@ class Amplitude
 
     public function logEvent(Event $event): void
     {
-        $this->queue[] =  $event->toArray();
+        $this->queue[] = $event->toArray();
         if (count($this->queue) >= $this->config->flushQueueSize) {
             $this->flush();
         }
