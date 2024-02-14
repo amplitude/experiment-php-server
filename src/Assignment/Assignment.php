@@ -8,6 +8,9 @@ use AmplitudeExperiment\Variant;
 use RuntimeException;
 use function AmplitudeExperiment\hashCode;
 
+require_once __DIR__  . '/../Util.php';
+require_once __DIR__ . '/AssignmentService.php';
+
 /**
  * Event class for tracking assignments to Amplitude Experiment.
  */
