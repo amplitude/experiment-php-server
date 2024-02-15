@@ -18,13 +18,7 @@ use Psr\Log\LoggerInterface;
 
 class AmplitudeTest extends TestCase
 {
-    private LoggerInterface $logger;
     const API_KEY = 'test';
-
-    public function setUp(): void
-    {
-        $this->logger = new InternalLogger(new DefaultLogger(), LogLevel::DEBUG);
-    }
 
     public function testAmplitudeConfigServerUrl()
     {
@@ -53,7 +47,7 @@ class AmplitudeTest extends TestCase
 
     public function testEmptyQueueAfterFlushSuccess()
     {
-        $client = new MockAmplitude(self::API_KEY, $this->logger);
+        $client = new MockAmplitude(self::API_KEY);
         $mock = new MockHandler([
             new Response(200, ['X-Foo' => 'Bar']),
         ]);
@@ -79,7 +73,7 @@ class AmplitudeTest extends TestCase
         $config = AmplitudeConfig::builder()
             ->flushQueueSize(3)
             ->build();
-        $client = new MockAmplitude(self::API_KEY, $this->logger, $config);
+        $client = new MockAmplitude(self::API_KEY, $config);
         $mockHandler = new MockHandler([
             function (RequestInterface $request, array $options) use (&$requestCounter) {
                 $requestCounter++;
@@ -110,7 +104,7 @@ class AmplitudeTest extends TestCase
         // Initialize the request counter
         $requestCounter = 0;
         $config = AmplitudeConfig::builder()->build();
-        $client = new MockAmplitude(self::API_KEY, $this->logger, $config);
+        $client = new MockAmplitude(self::API_KEY, $config);
 
         // Set up the mock handler with request counter incrementation logic
         $mockHandler = new MockHandler(array_fill(1, 5, function (RequestInterface $request, array $options) use (&$requestCounter) {
@@ -138,7 +132,7 @@ class AmplitudeTest extends TestCase
         // Initialize the request counter
         $requestCounter = 0;
         $config = AmplitudeConfig::builder()->build();
-        $client = new MockAmplitude(self::API_KEY, $this->logger, $config);
+        $client = new MockAmplitude(self::API_KEY, $config);
 
         // Set up the mock handler with request counter incrementation logic
         $mockHandler = new MockHandler(array_fill(1, 2, function (RequestInterface $request, array $options) use (&$requestCounter) {

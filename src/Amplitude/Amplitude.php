@@ -4,6 +4,8 @@ namespace AmplitudeExperiment\Amplitude;
 
 use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Http\GuzzleHttpClient;
+use AmplitudeExperiment\Logger\DefaultLogger;
+use AmplitudeExperiment\Logger\InternalLogger;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
 
@@ -12,6 +14,9 @@ use Psr\Log\LoggerInterface;
  */
 class Amplitude
 {
+    /**
+     * The Amplitude Project API key.
+     */
     private string $apiKey;
     /**
      * @var array<array<string,mixed>>
@@ -21,11 +26,11 @@ class Amplitude
     private LoggerInterface $logger;
     private AmplitudeConfig $config;
 
-    public function __construct(string $apiKey, LoggerInterface $logger, AmplitudeConfig $config = null)
+    public function __construct(string $apiKey, AmplitudeConfig $config = null)
     {
         $this->apiKey = $apiKey;
-        $this->logger = $logger;
         $this->config = $config ?? AmplitudeConfig::builder()->build();
+        $this->logger = new InternalLogger($this->config->logger ?? new DefaultLogger(), $this->config->logLevel);
         $this->httpClient = $this->config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
     }
 

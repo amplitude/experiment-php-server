@@ -2,8 +2,6 @@
 
 namespace AmplitudeExperiment\Local;
 
-use AmplitudeExperiment\Amplitude\Amplitude;
-use AmplitudeExperiment\Assignment\Assignment;
 use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Assignment\AssignmentFilter;
 use AmplitudeExperiment\Assignment\AssignmentService;
@@ -75,7 +73,7 @@ class LocalEvaluationClient
         $results = array_map('AmplitudeExperiment\Variant::convertEvaluationVariantToVariant', $this->evaluation->evaluate($user->toEvaluationContext(), $flags));
         $this->logger->debug('[Experiment] Evaluate - variants:' . json_encode($results));
         if ($this->assignmentService) {
-            $this->assignmentService->track(new Assignment($user, $results));
+            $this->assignmentService->track($this->assignmentService->createAssignment($user, $results));
         }
         return $results;
     }
@@ -93,10 +91,10 @@ class LocalEvaluationClient
     {
         if ($config) {
             $this->assignmentService = new AssignmentService(
-                new Amplitude($config->apiKey,
-                    $this->logger,
-                    $config->amplitudeConfig),
-                new AssignmentFilter($config->cacheCapacity));
+                $config->assignmentTrackingProvider,
+                new AssignmentFilter($config->cacheCapacity),
+                $config->apiKey,
+                $config->minIdLength);
         }
     }
 }
