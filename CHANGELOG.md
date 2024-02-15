@@ -1,3 +1,10 @@
+# [0.5.0](https://github.com/amplitude/experiment-php-server/compare/0.4.0...0.5.0) (2024-02-15)
+
+
+### Features
+
+* AssignmentTrackingProvider used to track local evaluation assignment events ([#14](https://github.com/amplitude/experiment-php-server/issues/14)) ([62a6696](https://github.com/amplitude/experiment-php-server/commit/62a66960c744b0c7b91793146da4979e8cb57bf0))
+
 # [0.4.0](https://github.com/amplitude/experiment-php-server/compare/0.3.1...0.4.0) (2024-02-05)
 
 
