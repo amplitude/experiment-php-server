@@ -1,3 +1,10 @@
+## [0.5.1](https://github.com/amplitude/experiment-php-server/compare/0.5.0...0.5.1) (2024-02-22)
+
+
+### Bug Fixes
+
+* use namespaced version constant ([#16](https://github.com/amplitude/experiment-php-server/issues/16)) ([a9a6d50](https://github.com/amplitude/experiment-php-server/commit/a9a6d50d68d9de84f27dde9bbcd248f864f7cf04))
+
 # [0.5.0](https://github.com/amplitude/experiment-php-server/compare/0.4.0...0.5.0) (2024-02-15)
 
 
