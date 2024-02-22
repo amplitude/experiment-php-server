@@ -10,9 +10,9 @@ use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
+use const AmplitudeExperiment\VERSION;
 
 require_once __DIR__ . '/../Version.php';
-require_once __DIR__ . '/../Util.php';
 
 /**
  * Experiment client for fetching variants for a user remotely.

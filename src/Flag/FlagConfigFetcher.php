@@ -6,6 +6,7 @@ use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
+use const AmplitudeExperiment\VERSION;
 
 require_once __DIR__ . '/../Version.php';
 
