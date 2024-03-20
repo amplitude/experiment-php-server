@@ -1,3 +1,10 @@
+## [0.5.2](https://github.com/amplitude/experiment-php-server/compare/0.5.1...0.5.2) (2024-03-20)
+
+
+### Bug Fixes
+
+* add time field to Assignment event ([#17](https://github.com/amplitude/experiment-php-server/issues/17)) ([ae78a13](https://github.com/amplitude/experiment-php-server/commit/ae78a130e2d711e6642ce9f226fb949254126d2d))
+
 ## [0.5.1](https://github.com/amplitude/experiment-php-server/compare/0.5.0...0.5.1) (2024-02-22)
 
 
