@@ -18,6 +18,7 @@ class Event
     public ?string $userId = null;
     public ?string $deviceId = null;
     public ?string $insertId = null;
+    public ?int $time = null;
 
     public function __construct(string $eventType)
     {
@@ -35,7 +36,8 @@ class Event
             'user_properties' => $this->userProperties,
             'user_id' => $this->userId,
             'device_id' => $this->deviceId,
-            'insert_id' => $this->insertId,]);
+            'insert_id' => $this->insertId,
+            'time' => $this->time]);
     }
 
     /**

@@ -8,7 +8,7 @@ use AmplitudeExperiment\Variant;
 use RuntimeException;
 use function AmplitudeExperiment\hashCode;
 
-require_once __DIR__  . '/../Util.php';
+require_once __DIR__ . '/../Util.php';
 require_once __DIR__ . '/AssignmentService.php';
 
 /**
@@ -62,6 +62,7 @@ class Assignment
         $event->deviceId = $this->user->deviceId;
         $event->eventProperties = [];
         $event->userProperties = [];
+        $event->time = $this->timestamp;
 
         $set = [];
         $unset = [];
