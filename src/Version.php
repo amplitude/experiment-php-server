@@ -1,3 +1,3 @@
 <?php
 namespace AmplitudeExperiment;
-const VERSION = '0.5.2';
+const VERSION = '1.0.0';
