@@ -4,6 +4,17 @@ namespace AmplitudeExperiment\Amplitude;
 
 use RuntimeException;
 
+/**
+ * @phpstan-type Payload array{
+ *     event_type: string,
+ *     event_properties: array<mixed>|null,
+ *     user_properties: array<mixed>|null,
+ *     user_id: string|null,
+ *     device_id: string|null,
+ *     insert_id: string|null,
+ *     time: int|null
+ * }
+ */
 class Event
 {
     public ?string $eventType;
@@ -44,15 +55,7 @@ class Event
     }
 
     /**
-     * @return array{
-     *     event_type: string,
-     *     event_properties: array<mixed>|null,
-     *     user_properties: array<mixed>|null,
-     *     user_id: string|null,
-     *     device_id: string|null,
-     *     insert_id: string|null,
-     *     time: int|null
-     * }
+     * @return Payload
      */
     public function toArray(): array
     {
@@ -68,15 +71,7 @@ class Event
     }
 
     /**
-     * @param array{
-     *      event_type: string,
-     *      event_properties: array<mixed>|null,
-     *      user_properties: array<mixed>|null,
-     *      user_id: string|null,
-     *      device_id: string|null,
-     *      insert_id: string|null,
-     *      time: int|null
-     *  } $data
+     * @param Payload $data
      */
     public static function fromArray(array $data) : self
     {
