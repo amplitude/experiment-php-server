@@ -7,12 +7,12 @@ use RuntimeException;
 /**
  * @phpstan-type Payload array{
  *     event_type: string,
- *     event_properties: array<mixed>|null,
- *     user_properties: array<mixed>|null,
- *     user_id: string|null,
- *     device_id: string|null,
- *     insert_id: string|null,
- *     time: int|null
+ *     event_properties?: array<mixed>|null,
+ *     user_properties?: array<mixed>|null,
+ *     user_id?: string|null,
+ *     device_id?: string|null,
+ *     insert_id?: string|null,
+ *     time?: int|null
  * }
  */
 class Event
