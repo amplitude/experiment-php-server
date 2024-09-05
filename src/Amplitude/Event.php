@@ -6,27 +6,53 @@ use RuntimeException;
 
 class Event
 {
-    public ?string $eventType = null;
+    public ?string $eventType;
     /**
-     * @var ?array<mixed>
+     * @var array<mixed>|null
      */
-    public ?array $eventProperties = null;
+    public ?array $eventProperties;
     /**
-     * @var ?array<mixed>
+     * @var array<mixed>|null
      */
-    public ?array $userProperties = null;
-    public ?string $userId = null;
-    public ?string $deviceId = null;
-    public ?string $insertId = null;
-    public ?int $time = null;
+    public ?array $userProperties;
+    public ?string $userId;
+    public ?string $deviceId;
+    public ?string $insertId;
+    public ?int $time;
 
-    public function __construct(string $eventType)
+    /**
+     * @param array<mixed>|null $eventProperties
+     * @param array<mixed>|null $userProperties
+     */
+    public function __construct(
+        string $eventType,
+        ?array $eventProperties = null,
+        ?array $userProperties = null,
+        ?string $userId = null,
+        ?string $deviceId = null,
+        ?string $insertId = null,
+        ?int $time = null
+    )
     {
         $this->eventType = $eventType;
+        $this->eventProperties = $eventProperties;
+        $this->userProperties = $userProperties;
+        $this->userId = $userId;
+        $this->deviceId = $deviceId;
+        $this->insertId = $insertId;
+        $this->time = $time;
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array{
+     *     event_type: string,
+     *     event_properties: array<mixed>|null,
+     *     user_properties: array<mixed>|null,
+     *     user_id: string|null,
+     *     device_id: string|null,
+     *     insert_id: string|null,
+     *     time: int|null
+     * }
      */
     public function toArray(): array
     {
@@ -37,7 +63,32 @@ class Event
             'user_id' => $this->userId,
             'device_id' => $this->deviceId,
             'insert_id' => $this->insertId,
-            'time' => $this->time]);
+            'time' => $this->time
+        ]);
+    }
+
+    /**
+     * @param array{
+     *      event_type: string,
+     *      event_properties: array<mixed>|null,
+     *      user_properties: array<mixed>|null,
+     *      user_id: string|null,
+     *      device_id: string|null,
+     *      insert_id: string|null,
+     *      time: int|null
+     *  } $data
+     */
+    public static function fromArray(array $data) : self
+    {
+        return new self(
+            $data['event_type'],
+            $data['event_properties'] ?? null,
+            $data['user_properties'] ?? null,
+            $data['user_id'] ?? null,
+            $data['device_id'] ?? null,
+            $data['insert_id'] ?? null,
+            $data['time'] ?? null
+        );
     }
 
     /**
