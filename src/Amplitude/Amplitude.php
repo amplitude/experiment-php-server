@@ -31,12 +31,17 @@ class Amplitude
         $this->apiKey = $apiKey;
         $this->config = $config ?? AmplitudeConfig::builder()->build();
         $this->logger = new InternalLogger($this->config->logger ?? new DefaultLogger(), $this->config->logLevel);
-        $this->httpClient = $this->config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
+        $this->httpClient = $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
     }
 
     public function flush(): void
     {
-        $payload = ["api_key" => $this->apiKey, "events" => $this->queue, "options" => ["min_id_length" => $this->config->minIdLength]];
+        $payload = [
+            "api_key" => $this->apiKey,
+            "events" => $this->queue,
+            "options" => ["min_id_length" => $this->config->minIdLength]
+        ];
+
         $this->post($this->config->serverUrl, $payload);
     }
 
@@ -65,24 +70,41 @@ class Amplitude
     {
         $httpClient = $this->httpClient->getClient();
         $payloadJson = json_encode($payload);
+
         if ($payloadJson === false) {
             $this->logger->error('[Amplitude] Failed to encode payload: ' . json_last_error());
             return;
         }
+
+        $payloadString = $this->payloadToString($payload);
+
         $request = $this->httpClient
             ->createRequest('POST', $url, $payloadJson)
             ->withHeader('Content-Type', 'application/json');
+
         try {
             $response = $httpClient->sendRequest($request);
             if ($response->getStatusCode() != 200) {
-                $this->logger->error('[Amplitude] Failed to send event: ' . $payloadJson . ', ' . $response->getStatusCode() . ' ' . $response->getReasonPhrase());
+                $this->logger->error('[Amplitude] Failed to send event: ' . $payloadString . ', ' . $response->getStatusCode() . ' ' . $response->getReasonPhrase());
                 return;
             }
-            $this->logger->debug("[Amplitude] Event sent successfully: " . $payloadJson);
+            $this->logger->debug("[Amplitude] Event sent successfully: " . $payloadString);
             $this->queue = [];
 
         } catch (ClientExceptionInterface $e) {
-            $this->logger->error('[Amplitude] Failed to send event: ' . $payloadJson . ', ' . $e->getMessage());
+            $this->logger->error('[Amplitude] Failed to send event: ' . $payloadString . ', ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Convert the payload to a string for logging
+     *
+     * @param array<string,mixed> $payload
+     * @return string
+     */
+    private function payloadToString(array $payload): string
+    {
+        unset($payload['api_key']);
+        return json_encode($payload) ?: '{}';
     }
 }
