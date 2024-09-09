@@ -8,6 +8,7 @@ class AssignmentConfigBuilder
     protected AssignmentTrackingProvider $assignmentTrackingProvider;
     protected string $apiKey;
     protected int $minIdLength = AssignmentConfig::DEFAULTS['minIdLength'];
+    protected ?AssignmentFilter $assignmentFilter;
 
     public function __construct(string $apiKey, AssignmentTrackingProvider $assignmentTrackingProvider)
     {
@@ -27,13 +28,23 @@ class AssignmentConfigBuilder
         return $this;
     }
 
+    public function assignmentFilter(AssignmentFilter $assignmentFilter): AssignmentConfigBuilder
+    {
+        $this->assignmentFilter = $assignmentFilter;
+        return $this;
+    }
+
     public function build(): AssignmentConfig
     {
+        if ($this->assignmentFilter === null) {
+            $this->assignmentFilter = new DefaultAssignmentFilter($this->cacheCapacity);
+        }
         return new AssignmentConfig(
             $this->apiKey,
             $this->cacheCapacity,
             $this->assignmentTrackingProvider,
-            $this->minIdLength
+            $this->minIdLength,
+            $this->assignmentFilter
         );
     }
 }

@@ -4,7 +4,7 @@ namespace AmplitudeExperiment\Test\Assignment;
 
 use AmplitudeExperiment\Amplitude\Amplitude;
 use AmplitudeExperiment\Assignment\Assignment;
-use AmplitudeExperiment\Assignment\AssignmentFilter;
+use AmplitudeExperiment\Assignment\DefaultAssignmentFilter;
 use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\Assignment\DefaultAssignmentTrackingProvider;
 use AmplitudeExperiment\User;
@@ -15,7 +15,7 @@ class AssignmentServiceTest extends TestCase
 {
     public function testlogEventCalledInAmplitude()
     {
-        $assignmentFilter = new AssignmentFilter(1);
+        $assignmentFilter = new DefaultAssignmentFilter(1);
         $mockAmp = $this->getMockBuilder(Amplitude::class)
             ->setConstructorArgs([''])
             ->onlyMethods(['logEvent'])

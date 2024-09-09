@@ -13,11 +13,11 @@ const DAY_MILLIS = 24 * 60 * 60 * 1000;
 class AssignmentService
 {
     private AssignmentTrackingProvider $assignmentTrackingProvider;
-    private AssignmentFilter $assignmentFilter;
+    private DefaultAssignmentFilter $assignmentFilter;
     private string $apiKey;
     private int $minIdLength;
 
-    public function __construct(AssignmentTrackingProvider $assignmentTrackingProvider, AssignmentFilter $assignmentFilter, string $apiKey = '', int $minIdLength = AssignmentConfig::DEFAULTS['minIdLength'])
+    public function __construct(AssignmentTrackingProvider $assignmentTrackingProvider, DefaultAssignmentFilter $assignmentFilter, string $apiKey = '', int $minIdLength = AssignmentConfig::DEFAULTS['minIdLength'])
     {
         $this->assignmentTrackingProvider = $assignmentTrackingProvider;
         $this->assignmentFilter = $assignmentFilter;

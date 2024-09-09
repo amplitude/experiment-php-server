@@ -31,17 +31,22 @@ class AssignmentConfig
      */
     public int $minIdLength;
 
+    public AssignmentFilter $assignmentFilter;
+
     const DEFAULTS = [
         'cacheCapacity' => 65536,
         'minIdLength' => 5,
+        'assignmentFilter' => null,
     ];
 
-    public function __construct(string $apiKey, int $cacheCapacity, AssignmentTrackingProvider $assignmentTrackingProvider, int $minIdLength)
+    public function __construct(string $apiKey, int $cacheCapacity, AssignmentTrackingProvider $assignmentTrackingProvider, int $minIdLength,
+                AssignmentFilter $assignmentFilter)
     {
         $this->apiKey = $apiKey;
         $this->cacheCapacity = $cacheCapacity;
         $this->assignmentTrackingProvider = $assignmentTrackingProvider;
         $this->minIdLength = $minIdLength;
+        $this->assignmentFilter = $assignmentFilter;
     }
 
     public static function builder(string $apiKey, AssignmentTrackingProvider $assignmentTrackingProvider): AssignmentConfigBuilder
