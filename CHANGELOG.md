@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/amplitude/experiment-php-server/compare/1.0.0...1.0.1) (2024-09-09)
+
+
+### Bug Fixes
+
+* remove API key from error logging ([#28](https://github.com/amplitude/experiment-php-server/issues/28)) ([cfe8267](https://github.com/amplitude/experiment-php-server/commit/cfe826710b258e56ba78a7eb4dcc6f4394428e02))
+
 ## [0.5.2](https://github.com/amplitude/experiment-php-server/compare/0.5.1...0.5.2) (2024-03-20)
 
 
