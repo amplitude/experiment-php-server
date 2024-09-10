@@ -18,7 +18,7 @@ class AssignmentConfig
      */
     public string $apiKey;
     /**
-     * The maximum number of assignments stored in the assignment cache
+     * The maximum number of assignments stored in the assignment cache if a {@link DefaultAssignmentFilter} is used.
      */
     public int $cacheCapacity;
     /**

@@ -2,8 +2,6 @@
 
 namespace AmplitudeExperiment\Assignment;
 
-use Psr\Cache\CacheItemPoolInterface;
-
 interface AssignmentFilter
 {
 
