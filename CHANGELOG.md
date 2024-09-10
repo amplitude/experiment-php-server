@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/amplitude/experiment-php-server/compare/1.0.1...1.1.0) (2024-09-10)
+
+
+### Features
+
+* Introduce Event::fromArray to create assignment event from array ([#27](https://github.com/amplitude/experiment-php-server/issues/27)) ([6ba0618](https://github.com/amplitude/experiment-php-server/commit/6ba0618f60a44c324cbec9a47a416d80f7cebb8e))
+
 ## [1.0.1](https://github.com/amplitude/experiment-php-server/compare/1.0.0...1.0.1) (2024-09-09)
 
 
