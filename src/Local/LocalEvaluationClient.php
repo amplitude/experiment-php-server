@@ -3,7 +3,6 @@
 namespace AmplitudeExperiment\Local;
 
 use AmplitudeExperiment\Assignment\AssignmentConfig;
-use AmplitudeExperiment\Assignment\DefaultAssignmentFilter;
 use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
 use AmplitudeExperiment\Flag\FlagConfigFetcher;
@@ -92,7 +91,7 @@ class LocalEvaluationClient
         if ($config) {
             $this->assignmentService = new AssignmentService(
                 $config->assignmentTrackingProvider,
-                new DefaultAssignmentFilter($config->cacheCapacity),
+                $config->assignmentFilter,
                 $config->apiKey,
                 $config->minIdLength);
         }

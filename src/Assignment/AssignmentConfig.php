@@ -31,6 +31,10 @@ class AssignmentConfig
      */
     public int $minIdLength;
 
+    /**
+     * The filter used to determine whether an Assignment event should be tracked.
+     * Default to {@link DefaultAssignmentFilter}.
+     */
     public AssignmentFilter $assignmentFilter;
 
     const DEFAULTS = [

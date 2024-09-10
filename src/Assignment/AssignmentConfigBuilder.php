@@ -39,7 +39,7 @@ class AssignmentConfigBuilder
     public function build(): AssignmentConfig
     {
         if ($this->assignmentFilter === null) {
-            $this->assignmentFilter = new DefaultAssignmentFilter(new ArrayAdapter(0,0,0,$this->cacheCapacity));
+            $this->assignmentFilter = new DefaultAssignmentFilter(new ArrayAdapter(DAY_MILLIS / 1000, true, 0, $this->cacheCapacity));
         }
         return new AssignmentConfig(
             $this->apiKey,

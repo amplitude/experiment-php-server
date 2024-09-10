@@ -10,12 +10,13 @@ use AmplitudeExperiment\Assignment\DefaultAssignmentTrackingProvider;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
 class AssignmentServiceTest extends TestCase
 {
     public function testlogEventCalledInAmplitude()
     {
-        $assignmentFilter = new DefaultAssignmentFilter(1);
+        $assignmentFilter = new DefaultAssignmentFilter(new ArrayAdapter(0, true, 0, 100));
         $mockAmp = $this->getMockBuilder(Amplitude::class)
             ->setConstructorArgs([''])
             ->onlyMethods(['logEvent'])
