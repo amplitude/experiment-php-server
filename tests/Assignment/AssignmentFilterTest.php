@@ -148,7 +148,7 @@ class AssignmentFilterTest extends TestCase
         $assignment1 = new Assignment($user1, $results);
         $this->assertTrue($filter->shouldTrack($assignment1));
         $this->assertFalse($filter->shouldTrack($assignment1));
-        sleep(1.5);
+        sleep(2);
         $this->assertTrue($filter->shouldTrack($assignment1));
     }
 }

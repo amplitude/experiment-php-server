@@ -35,7 +35,7 @@ class AssignmentConfig
      * The filter used to determine whether an Assignment event should be tracked.
      * Default to {@link DefaultAssignmentFilter}.
      */
-    public AssignmentFilter $assignmentFilter;
+    public AssignmentFilterInterface $assignmentFilter;
 
     const DEFAULTS = [
         'cacheCapacity' => 65536,
@@ -43,8 +43,8 @@ class AssignmentConfig
         'assignmentFilter' => null
     ];
 
-    public function __construct(string $apiKey, int $cacheCapacity, AssignmentTrackingProvider $assignmentTrackingProvider, int $minIdLength,
-                AssignmentFilter $assignmentFilter)
+    public function __construct(string                    $apiKey, int $cacheCapacity, AssignmentTrackingProvider $assignmentTrackingProvider, int $minIdLength,
+                                AssignmentFilterInterface $assignmentFilter)
     {
         $this->apiKey = $apiKey;
         $this->cacheCapacity = $cacheCapacity;

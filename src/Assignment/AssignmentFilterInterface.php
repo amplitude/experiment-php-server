@@ -2,7 +2,7 @@
 
 namespace AmplitudeExperiment\Assignment;
 
-interface AssignmentFilter
+interface AssignmentFilterInterface
 {
 
     /**

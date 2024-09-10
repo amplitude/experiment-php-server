@@ -10,7 +10,7 @@ class AssignmentConfigBuilder
     protected AssignmentTrackingProvider $assignmentTrackingProvider;
     protected string $apiKey;
     protected int $minIdLength = AssignmentConfig::DEFAULTS['minIdLength'];
-    protected ?AssignmentFilter $assignmentFilter = AssignmentConfig::DEFAULTS['assignmentFilter'];
+    protected ?AssignmentFilterInterface $assignmentFilter = AssignmentConfig::DEFAULTS['assignmentFilter'];
 
     public function __construct(string $apiKey, AssignmentTrackingProvider $assignmentTrackingProvider)
     {
@@ -30,7 +30,7 @@ class AssignmentConfigBuilder
         return $this;
     }
 
-    public function assignmentFilter(AssignmentFilter $assignmentFilter): AssignmentConfigBuilder
+    public function assignmentFilter(AssignmentFilterInterface $assignmentFilter): AssignmentConfigBuilder
     {
         $this->assignmentFilter = $assignmentFilter;
         return $this;

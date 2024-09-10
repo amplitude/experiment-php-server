@@ -6,7 +6,10 @@ require_once __DIR__ . '/AssignmentService.php';
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\Cache\InvalidArgumentException;
 
-class DefaultAssignmentFilter implements AssignmentFilter
+/**
+ * Default implementation of AssignmentFilterInterface.
+ */
+class DefaultAssignmentFilter implements AssignmentFilterInterface
 {
     private CacheItemPoolInterface $cache;
 
