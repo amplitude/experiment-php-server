@@ -2,6 +2,7 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
+use InvalidArgumentException;
 use RuntimeException;
 
 /**
@@ -17,7 +18,7 @@ use RuntimeException;
  */
 class Event
 {
-    public ?string $eventType;
+    public string $eventType;
     /**
      * @var array<mixed>|null
      */
@@ -45,6 +46,10 @@ class Event
         ?int $time = null
     )
     {
+        if (empty($eventType)) {
+            throw new InvalidArgumentException('Event type cannot be an empty string.');
+        }
+
         $this->eventType = $eventType;
         $this->eventProperties = $eventProperties;
         $this->userProperties = $userProperties;
@@ -56,24 +61,29 @@ class Event
 
     /**
      * @return Payload
+     * @throws InvalidArgumentException
      */
     public function toArray(): array
     {
-        return [
-            'event_type' => $this->eventType ?? '',
-            'event_properties' => $this->eventProperties ?? null,
-            'user_properties' => $this->userProperties ?? null,
-            'user_id' => $this->userId ?? null,
-            'device_id' => $this->deviceId ?? null,
-            'insert_id' => $this->insertId ?? null,
-            'time' => $this->time ?? null,
-        ];
+        if (empty($this->eventType)) {
+            throw new InvalidArgumentException('Event type cannot be an empty string.');
+        }
+
+        return array_filter([
+            'event_type' => $this->eventType,
+            'event_properties' => $this->eventProperties,
+            'user_properties' => $this->userProperties,
+            'user_id' => $this->userId,
+            'device_id' => $this->deviceId,
+            'insert_id' => $this->insertId,
+            'time' => $this->time
+        ]);
     }
 
     /**
      * @param Payload $data
      */
-    public static function fromArray(array $data) : self
+    public static function fromArray(array $data): self
     {
         return new self(
             $data['event_type'],
