@@ -40,7 +40,7 @@ class AssignmentConfig
     const DEFAULTS = [
         'cacheCapacity' => 65536,
         'minIdLength' => 5,
-        'assignmentFilter' => null,
+        'assignmentFilter' => null
     ];
 
     public function __construct(string $apiKey, int $cacheCapacity, AssignmentTrackingProvider $assignmentTrackingProvider, int $minIdLength,
