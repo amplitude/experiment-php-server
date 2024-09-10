@@ -3,13 +3,16 @@
 namespace AmplitudeExperiment\Assignment;
 require_once __DIR__ . '/AssignmentService.php';
 
+use Psr\Cache\InvalidArgumentException;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+
 class DefaultAssignmentFilter implements AssignmentFilter
 {
-    private LRUCache $cache;
+    private ArrayAdapter $cache;
 
-    public function __construct(int $size)
+    public function __construct(ArrayAdapter $cache)
     {
-        $this->cache = new LRUCache($size, $ttlMillis);
+        $this->cache = $cache;
     }
 
     public function shouldTrack(Assignment $assignment): bool
@@ -19,10 +22,21 @@ class DefaultAssignmentFilter implements AssignmentFilter
         }
 
         $canonicalAssignment = $assignment->canonicalize();
-        $track = $this->cache->get($canonicalAssignment) === null;
+
+        try {
+            $track = $this->cache->getItem($canonicalAssignment)->isHit();
+        } catch (InvalidArgumentException $e) {
+            $track = true;
+        }
 
         if ($track) {
-            $this->cache->put($canonicalAssignment, 0);
+            try {
+                $item = $this->cache->getItem($canonicalAssignment);
+                $item->set(0);
+                $this->cache->save($item);
+            } catch (InvalidArgumentException $e) {
+                // Ignore
+            }
         }
 
         return $track;

@@ -2,6 +2,8 @@
 
 namespace AmplitudeExperiment\Assignment;
 
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+
 class AssignmentConfigBuilder
 {
     protected int $cacheCapacity = AssignmentConfig::DEFAULTS['cacheCapacity'];
@@ -37,7 +39,7 @@ class AssignmentConfigBuilder
     public function build(): AssignmentConfig
     {
         if ($this->assignmentFilter === null) {
-            $this->assignmentFilter = new DefaultAssignmentFilter($this->cacheCapacity);
+            $this->assignmentFilter = new DefaultAssignmentFilter(new ArrayAdapter(0,0,0,$this->cacheCapacity));
         }
         return new AssignmentConfig(
             $this->apiKey,
