@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/amplitude/experiment-php-server/compare/1.1.0...1.2.0) (2024-09-13)
+
+
+### Features
+
+* Allow custom Assignment Filter to be configured ([#29](https://github.com/amplitude/experiment-php-server/issues/29)) ([4cb177c](https://github.com/amplitude/experiment-php-server/commit/4cb177cc181ca6f6e86aff12fb7d5544cc79190c))
+
 # [1.1.0](https://github.com/amplitude/experiment-php-server/compare/1.0.1...1.1.0) (2024-09-10)
 
 
