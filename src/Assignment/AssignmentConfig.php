@@ -18,7 +18,7 @@ class AssignmentConfig
      */
     public string $apiKey;
     /**
-     * The maximum number of assignments stored in the assignment cache
+     * The maximum number of assignments stored in the assignment cache if a {@link DefaultAssignmentFilter} is used.
      */
     public int $cacheCapacity;
     /**
@@ -31,17 +31,26 @@ class AssignmentConfig
      */
     public int $minIdLength;
 
+    /**
+     * The filter used to determine whether an Assignment event should be tracked.
+     * Default to {@link DefaultAssignmentFilter}.
+     */
+    public AssignmentFilterInterface $assignmentFilter;
+
     const DEFAULTS = [
         'cacheCapacity' => 65536,
         'minIdLength' => 5,
+        'assignmentFilter' => null
     ];
 
-    public function __construct(string $apiKey, int $cacheCapacity, AssignmentTrackingProvider $assignmentTrackingProvider, int $minIdLength)
+    public function __construct(string                    $apiKey, int $cacheCapacity, AssignmentTrackingProvider $assignmentTrackingProvider, int $minIdLength,
+                                AssignmentFilterInterface $assignmentFilter)
     {
         $this->apiKey = $apiKey;
         $this->cacheCapacity = $cacheCapacity;
         $this->assignmentTrackingProvider = $assignmentTrackingProvider;
         $this->minIdLength = $minIdLength;
+        $this->assignmentFilter = $assignmentFilter;
     }
 
     public static function builder(string $apiKey, AssignmentTrackingProvider $assignmentTrackingProvider): AssignmentConfigBuilder

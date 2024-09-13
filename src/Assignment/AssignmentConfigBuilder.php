@@ -2,12 +2,15 @@
 
 namespace AmplitudeExperiment\Assignment;
 
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+
 class AssignmentConfigBuilder
 {
     protected int $cacheCapacity = AssignmentConfig::DEFAULTS['cacheCapacity'];
     protected AssignmentTrackingProvider $assignmentTrackingProvider;
     protected string $apiKey;
     protected int $minIdLength = AssignmentConfig::DEFAULTS['minIdLength'];
+    protected ?AssignmentFilterInterface $assignmentFilter = AssignmentConfig::DEFAULTS['assignmentFilter'];
 
     public function __construct(string $apiKey, AssignmentTrackingProvider $assignmentTrackingProvider)
     {
@@ -27,13 +30,23 @@ class AssignmentConfigBuilder
         return $this;
     }
 
+    public function assignmentFilter(AssignmentFilterInterface $assignmentFilter): AssignmentConfigBuilder
+    {
+        $this->assignmentFilter = $assignmentFilter;
+        return $this;
+    }
+
     public function build(): AssignmentConfig
     {
+        if ($this->assignmentFilter === null) {
+            $this->assignmentFilter = new DefaultAssignmentFilter(new ArrayAdapter(DAY_MILLIS / 1000, false, 0, $this->cacheCapacity));
+        }
         return new AssignmentConfig(
             $this->apiKey,
             $this->cacheCapacity,
             $this->assignmentTrackingProvider,
-            $this->minIdLength
+            $this->minIdLength,
+            $this->assignmentFilter
         );
     }
 }
