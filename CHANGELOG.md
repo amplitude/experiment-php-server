@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/amplitude/experiment-php-server/compare/1.2.0...1.2.1) (2024-09-17)
+
+
+### Bug Fixes
+
+* allow more supported versions of symfony/cache ([#31](https://github.com/amplitude/experiment-php-server/issues/31)) ([f66e592](https://github.com/amplitude/experiment-php-server/commit/f66e59243b81418d050fe94e2ce2bbb4fc6dc8a3))
+
 # [1.2.0](https://github.com/amplitude/experiment-php-server/compare/1.1.0...1.2.0) (2024-09-13)
 
 
