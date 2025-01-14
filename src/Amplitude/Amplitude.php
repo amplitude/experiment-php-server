@@ -26,7 +26,7 @@ class Amplitude
     private LoggerInterface $logger;
     private AmplitudeConfig $config;
 
-    public function __construct(string $apiKey, AmplitudeConfig $config = null)
+    public function __construct(string $apiKey, ?AmplitudeConfig $config = null)
     {
         $this->apiKey = $apiKey;
         $this->config = $config ?? AmplitudeConfig::builder()->build();
