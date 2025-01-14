@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 
 class MockAmplitude extends Amplitude
 {
-    public function __construct(string $apiKey, AmplitudeConfig $config = null)
+    public function __construct(string $apiKey, ?AmplitudeConfig $config = null)
     {
         parent::__construct($apiKey, $config);
     }
