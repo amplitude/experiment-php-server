@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/amplitude/experiment-php-server/compare/1.2.1...1.2.2) (2025-01-15)
+
+
+### Bug Fixes
+
+* use explicit nullable type for AmplitudeConfig ([#32](https://github.com/amplitude/experiment-php-server/issues/32)) ([c5a91cd](https://github.com/amplitude/experiment-php-server/commit/c5a91cd0d000e07cfab6b527601631252ecd0a87))
+
 ## [1.2.1](https://github.com/amplitude/experiment-php-server/compare/1.2.0...1.2.1) (2024-09-17)
 
 
