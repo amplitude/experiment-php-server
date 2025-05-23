@@ -248,16 +248,16 @@ class EvaluationEngine
 
     private function matchesIs(string $propValue, array $filterValues): bool
     {
-        if ($this->containsBooleans($filterValues)) {
-            $lower = strtolower($propValue);
-            if ($lower === 'true' || $lower === 'false') {
-                foreach ($filterValues as $value) {
-                    if (strtolower($value) === $lower) {
-                        return true;
-                    }
-                }
-            }
+        $lowerFilterValues = array_map('strtolower', $filterValues);
+        $lowerPropValue = strtolower($propValue);
+        if (in_array('true', $lowerFilterValues) && in_array($lowerPropValue, ['true', '1'])) {
+            return true;
         }
+
+        if (in_array('false', $lowerFilterValues) && in_array($lowerPropValue, ['false', '0'])) {
+            return true;
+        }
+
         return in_array($propValue, $filterValues);
     }
 
@@ -348,17 +348,6 @@ class EvaluationEngine
     private function containsNone(array $filterValues): bool
     {
         return in_array('(none)', $filterValues);
-    }
-
-    private function containsBooleans(array $filterValues): bool
-    {
-        foreach ($filterValues as $filterValue) {
-            $lowercaseFilterValue = strtolower($filterValue);
-            if ($lowercaseFilterValue === 'true' || $lowercaseFilterValue === 'false') {
-                return true;
-            }
-        }
-        return false;
     }
 
     private function parseNumber(string $value): ?int

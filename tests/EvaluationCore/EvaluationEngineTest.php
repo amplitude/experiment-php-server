@@ -26,8 +26,12 @@ final class EvaluationEngineTest extends TestCase
         yield ['True', ['true']];
         yield ['True', ['True']];
 
+        yield [true, ['true']];
+        yield [true, ['True']];
         yield [true, ['1']];
 
+        yield ['1', ['true']];
+        yield ['1', ['True']];
         yield ['1', ['1']];
 
         yield ['false', ['false']];
@@ -36,6 +40,8 @@ final class EvaluationEngineTest extends TestCase
         yield ['False', ['false']];
         yield ['False', ['False']];
 
+        yield ['0', ['false']];
+        yield ['0', ['False']];
         yield ['0', ['0']];
     }
 
