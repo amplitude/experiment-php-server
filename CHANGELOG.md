@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/amplitude/experiment-php-server/compare/1.2.2...1.2.3) (2025-05-29)
+
+
+### Bug Fixes
+
+* Use strict typing in EvaluationEngine and fix evaluation boolean handling ([#36](https://github.com/amplitude/experiment-php-server/issues/36)) ([b2c5621](https://github.com/amplitude/experiment-php-server/commit/b2c562130f2d0d1507de50734987022d187182a5))
+
 ## [1.2.2](https://github.com/amplitude/experiment-php-server/compare/1.2.1...1.2.2) (2025-01-15)
 
 
