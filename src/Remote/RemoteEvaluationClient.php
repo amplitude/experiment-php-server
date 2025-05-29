@@ -2,6 +2,7 @@
 
 namespace AmplitudeExperiment\Remote;
 
+use AmplitudeExperiment\EvaluationCore\Types\EvaluationVariant;
 use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Http\GuzzleHttpClient;
 use AmplitudeExperiment\Logger\DefaultLogger;
@@ -89,11 +90,10 @@ class RemoteEvaluationClient
                 return [];
             }
 
-            $results = json_decode($response->getBody(), true);
-            $variants = [];
-            foreach ($results as $flagKey => $flagResult) {
-                $variants[$flagKey] = Variant::convertEvaluationVariantToVariant($flagResult);
-            }
+            $results = EvaluationVariant::fromEvaluationResults(json_decode($response->getBody(), true));
+            $variants = array_map(function ($flagResult) {
+                return Variant::convertEvaluationVariantToVariant($flagResult);
+            }, $results);
             $this->logger->debug('[Experiment] Fetched variants: ' . $response->getBody());
             return $variants;
         } catch (ClientExceptionInterface $e) {

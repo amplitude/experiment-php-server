@@ -2,6 +2,7 @@
 
 namespace AmplitudeExperiment\EvaluationCore;
 
+use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
 use Exception;
 
 function select($selectable, $selector)
@@ -11,7 +12,16 @@ function select($selectable, $selector)
     }
 
     foreach ($selector as $selectorElement) {
-        if (!$selectorElement || !$selectable || !is_array($selectable)) {
+        if ($selectable instanceof Types\EvaluationVariant) {
+            $selectable = [
+                'key' => $selectable->key,
+                'value' => $selectable->value,
+                'payload' => $selectable->payload,
+                'metadata' => $selectable->metadata
+            ];
+        }
+
+        if (!is_bool($selectable) && (!$selectable || !is_array($selectable))) {
             return null;
         }
 
@@ -23,7 +33,8 @@ function select($selectable, $selector)
     }
 
     // "0" is falsy in PHP, so we need to check for it explicitly
-    if (!$selectable && $selectable !== '0') {
+    // Also handle boolean values explicitly
+    if ((!$selectable && $selectable !== '0' && $selectable !== 0 && $selectable !== false) || $selectable === null) {
         return null;
     } else {
         return $selectable;
@@ -31,19 +42,33 @@ function select($selectable, $selector)
 }
 
 /**
+ * @param array<string, EvaluationFlag> $flags
+ * @param string[]|null $flagKeys
+ * @return EvaluationFlag[]
  * @throws Exception
  */
-function topologicalSort($flags, $flagKeys = null): array
+function topologicalSort(array $flags, ?array $flagKeys = null): array
 {
-    $available = $flags;
+    $available = [];
+    // Index flags by key for lookup
+    foreach ($flags as $flag) {
+        $available[$flag->key] = $flag;
+    }
+
     $result = [];
-    $isNullOrEmpty = !$flagKeys || count($flagKeys) === 0;
-    $startingKeys = $isNullOrEmpty ? array_keys($available) : $flagKeys;
+    $startingKeys = $flagKeys ?? array_keys($available);
+
+    if (empty($startingKeys)) {
+        return array_values($flags);
+    }
 
     foreach ($startingKeys as $flagKey) {
+        if (!array_key_exists($flagKey, $available)) {
+            continue;
+        }
         $traversal = parentTraversal($flagKey, $available);
-        if ($traversal) {
-            $result = array_merge($result, $traversal);
+        if ($traversal !== null) {
+            array_push($result, ...$traversal);
         }
     }
 
@@ -51,35 +76,41 @@ function topologicalSort($flags, $flagKeys = null): array
 }
 
 /**
+ * @param string $flagKey
+ * @param array<string, EvaluationFlag> $available
+ * @param string[] $path
+ * @return EvaluationFlag[]|null
  * @throws Exception
  */
-function parentTraversal($flagKey, &$available, $path = []): ?array
+function parentTraversal(string $flagKey, array &$available, array $path = []): ?array
 {
     $flag = $available[$flagKey] ?? null;
-
     if (!$flag) {
         return null;
-    } elseif (empty($flag["dependencies"])) {
-        unset($available[$flag["key"]]);
+    }
+
+    if (!$flag->dependencies || empty($flag->dependencies)) {
+        unset($available[$flag->key]);
         return [$flag];
     }
 
-    $path[] = $flag["key"];
+    $path[] = $flag->key;
     $result = [];
 
-    foreach ($flag["dependencies"] as $parentKey) {
+    foreach ($flag->dependencies as $parentKey) {
         if (in_array($parentKey, $path)) {
             throw new Exception("Detected a cycle between flags " . implode(',', $path));
         }
-
-        $traversal = parentTraversal($parentKey, $available, $path);
-        if ($traversal) {
-            $result = array_merge($result, $traversal);
+        if (array_key_exists($parentKey, $available)) {
+            $traversal = parentTraversal($parentKey, $available, $path);
+            if ($traversal !== null) {
+                array_push($result, ...$traversal);
+            }
         }
     }
+
     $result[] = $flag;
     array_pop($path);
-    unset($available[$flag["key"]]);
+    unset($available[$flag->key]);
     return $result;
 }
-
