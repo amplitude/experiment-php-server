@@ -78,7 +78,7 @@ class LocalEvaluationClient
         // Evaluate the user against the flags
         $evaluationResults = $this->evaluation->evaluate($user->toEvaluationContext(), $flags);
 
-        // Convert evaluation results to public Variant objects
+        // Convert evaluation results to Variant objects
         $results = [];
         foreach ($evaluationResults as $key => $evaluationVariant) {
             $results[$key] = Variant::convertEvaluationVariantToVariant($evaluationVariant);

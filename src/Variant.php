@@ -50,7 +50,7 @@ class Variant
     }
 
     /**
-     * Converts an EvaluationVariant to a public Variant
+     * Converts an EvaluationVariant to a Variant
      *
      * @param EvaluationVariant $evaluationVariant The evaluation variant to convert
      * @return Variant The converted variant
