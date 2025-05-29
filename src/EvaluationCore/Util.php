@@ -72,7 +72,7 @@ function topologicalSort(array $flags, ?array $flagKeys = null): array
         }
     }
 
-    return array_values(array_unique($result, SORT_REGULAR));
+    return $result;
 }
 
 /**
