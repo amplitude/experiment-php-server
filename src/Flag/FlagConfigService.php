@@ -3,6 +3,7 @@
 namespace AmplitudeExperiment\Flag;
 
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
+use Exception;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
 
@@ -69,7 +70,7 @@ class FlagConfigService
     {
         try {
             $this->translatedFlags = createFlagsFromArray($this->cache);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->logger->error('[Experiment] Failed to translate flag configs: ' . $e->getMessage());
             $this->translatedFlags = [];
         }
