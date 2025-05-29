@@ -5,6 +5,7 @@ namespace AmplitudeExperiment\Local;
 use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
+use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
 use AmplitudeExperiment\Flag\FlagConfigFetcher;
 use AmplitudeExperiment\Flag\FlagConfigService;
 use AmplitudeExperiment\Http\GuzzleHttpClient;
@@ -58,22 +59,38 @@ class LocalEvaluationClient
      * @param User $user The user to evaluate
      * @param array<string> $flagKeys The flags to evaluate with the user. If empty, all flags
      * from the flag cache are evaluated.
-     * @return array<Variant> evaluated variants
+     * @return array<string, Variant> evaluated variants
      */
     public function evaluate(User $user, array $flagKeys = []): array
     {
-        $flags = $this->flagConfigService->getFlagConfigs();
+        // Get translated flags from the flag config service
+        $flags = $this->flagConfigService->getTranslatedFlags();
+
         try {
+            // Sort flags topologically based on dependencies
             $flags = topologicalSort($flags, $flagKeys);
         } catch (\Exception $e) {
             $this->logger->error('[Experiment] Evaluate - error sorting flags: ' . $e->getMessage());
         }
-        $this->logger->debug('[Experiment] Evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode($flags));
-        $results = array_map('AmplitudeExperiment\Variant::convertEvaluationVariantToVariant', $this->evaluation->evaluate($user->toEvaluationContext(), $flags));
+
+        $this->logger->debug('[Experiment] Evaluate - user: ' . json_encode($user->toArray()) . ' with flags: ' . json_encode(array_map(function($flag) { return $flag->key; }, $flags)));
+
+        // Evaluate the user against the flags
+        $evaluationResults = $this->evaluation->evaluate($user->toEvaluationContext(), $flags);
+
+        // Convert evaluation results to public Variant objects
+        $results = [];
+        foreach ($evaluationResults as $key => $evaluationVariant) {
+            $results[$key] = Variant::convertEvaluationVariantToVariant($evaluationVariant);
+        }
+
         $this->logger->debug('[Experiment] Evaluate - variants:' . json_encode($results));
+
+        // Track assignments if assignment service is configured
         if ($this->assignmentService) {
             $this->assignmentService->track($this->assignmentService->createAssignment($user, $results));
         }
+
         return $results;
     }
 

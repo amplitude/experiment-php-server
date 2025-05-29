@@ -1,11 +1,21 @@
 <?php
 
 namespace AmplitudeExperiment\EvaluationCore;
-use Exception;
+
+use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
+use AmplitudeExperiment\EvaluationCore\Types\EvaluationVariant;
+use AmplitudeExperiment\EvaluationCore\Types\EvaluationSegment;
+use AmplitudeExperiment\EvaluationCore\Types\EvaluationCondition;
 
 require_once __DIR__ . '/Util.php';
+
 class EvaluationEngine
 {
+    /**
+     * @param array<string, mixed> $context
+     * @param EvaluationFlag[] $flags
+     * @return array<string, EvaluationVariant>
+     */
     public function evaluate(array $context, array $flags): array
     {
         $results = [];
@@ -17,46 +27,62 @@ class EvaluationEngine
         foreach ($flags as $flag) {
             $variant = $this->evaluateFlag($target, $flag);
             if ($variant !== null) {
-                $results[$flag['key']] = $variant;
+                $results[$flag->key] = $variant;
             }
         }
 
         return $results;
     }
 
-    private function evaluateFlag(array $target, array $flag): ?array
+    /**
+     * @param array<string, mixed> $target
+     * @param EvaluationFlag $flag
+     * @return EvaluationVariant|null
+     */
+    private function evaluateFlag(array $target, EvaluationFlag $flag): ?EvaluationVariant
     {
         $result = null;
 
-        foreach ($flag['segments'] as $segment) {
+        foreach ($flag->segments as $segment) {
             $result = $this->evaluateSegment($target, $flag, $segment);
             if ($result !== null) {
                 $metadata = array_merge(
-                    $flag['metadata'] ?? [],
-                    $segment['metadata'] ?? [],
-                    $result['metadata'] ?? []
+                    $flag->metadata ?? [],
+                    $segment->metadata ?? [],
+                    $result->metadata ?? []
                 );
-                $result = array_merge($result, ['metadata' => $metadata]);
-                break;
+
+                return new EvaluationVariant(
+                    $result->key,
+                    $result->value,
+                    $result->payload,
+                    $metadata
+                );
             }
         }
         return $result;
     }
 
 
-    private function evaluateSegment(array $target, array $flag, array $segment): ?array
+    /**
+     * @param array<string, mixed> $target
+     * @param EvaluationFlag $flag
+     * @param EvaluationSegment $segment
+     * @return EvaluationVariant|null
+     */
+    private function evaluateSegment(array $target, EvaluationFlag $flag, EvaluationSegment $segment): ?EvaluationVariant
     {
-        if (!isset($segment['conditions'])) {
+        if ($segment->conditions === null) {
             $variantKey = $this->bucket($target, $segment);
 
-            if ($variantKey !== null) {
-                return $flag['variants'][$variantKey];
+            if ($variantKey !== null && isset($flag->variants[$variantKey])) {
+                return $flag->variants[$variantKey];
             } else {
                 return null;
             }
         }
 
-        foreach ($segment['conditions'] as $conditions) {
+        foreach ($segment->conditions as $conditions) {
             $match = true;
 
             foreach ($conditions as $condition) {
@@ -70,8 +96,8 @@ class EvaluationEngine
             if ($match) {
                 $variantKey = $this->bucket($target, $segment);
 
-                if ($variantKey !== null) {
-                    return $flag['variants'][$variantKey];
+                if ($variantKey !== null && isset($flag->variants[$variantKey])) {
+                    return $flag->variants[$variantKey];
                 } else {
                     return null;
                 }
@@ -81,28 +107,35 @@ class EvaluationEngine
         return null;
     }
 
-    private function matchCondition(array $target, array $condition): bool
+    /**
+     * @param array<string, mixed> $target
+     * @param EvaluationCondition $condition
+     * @return bool
+     */
+    private function matchCondition(array $target, EvaluationCondition $condition): bool
     {
-        $propValue = select($target, $condition['selector']);
+        $propValue = select($target, $condition->selector);
 
-        if (!$propValue && $propValue !== '0') {
-            return $this->matchNull($condition['op'], $condition['values']);
-        } elseif ($this->isSetOperator($condition['op'])) {
+        if ($propValue === null) {
+            return $this->matchNull($condition->op, $condition->values);
+        } elseif (is_bool($propValue)) {
+            return $this->matchBoolean($propValue, $condition->op, $condition->values);
+        } elseif ($this->isSetOperator($condition->op)) {
             $propValueStringList = $this->coerceStringArray($propValue);
 
             if ($propValueStringList === null) {
                 return false;
             }
 
-            return $this->matchSet($propValueStringList, $condition['op'], $condition['values']);
+            return $this->matchSet($propValueStringList, $condition->op, $condition->values);
         } else {
             $propValueString = $this->coerceString($propValue);
 
             if ($propValueString !== null) {
                 return $this->matchString(
                     $propValueString,
-                    $condition['op'],
-                    $condition['values']
+                    $condition->op,
+                    $condition->values
                 );
             } else {
                 return false;
@@ -110,47 +143,61 @@ class EvaluationEngine
         }
     }
 
+    /**
+     * @param string $key
+     * @return int
+     */
     private function getHash(string $key): int
     {
         return Murmur3::hash3_int($key);
     }
 
-    private function bucket(array $target, array $segment): ?string
+    /**
+     * @param array<string, mixed> $target
+     * @param EvaluationSegment $segment
+     * @return string|null
+     */
+    private function bucket(array $target, EvaluationSegment $segment): ?string
     {
-        if (!isset($segment['bucket'])) {
-            return $segment['variant'] ?? null;
+        if ($segment->bucket === null) {
+            return $segment->variant ?? null;
         }
 
-        $bucketingValue = $this->coerceString(select($target, $segment['bucket']['selector']));
+        $bucketingValue = $this->coerceString(select($target, $segment->bucket->selector));
 
         if ($bucketingValue === null || strlen($bucketingValue) === 0) {
-            return $segment['variant'] ?? null;
+            return $segment->variant ?? null;
         }
 
-        $keyToHash = "{$segment['bucket']['salt']}/$bucketingValue";
+        $keyToHash = "{$segment->bucket->salt}/$bucketingValue";
         $hash = $this->getHash($keyToHash);
         $allocationValue = $hash % 100;
         $distributionValue = floor($hash / 100);
 
-        foreach ($segment['bucket']['allocations'] as $allocation) {
-            $allocationStart = $allocation['range'][0];
-            $allocationEnd = $allocation['range'][1];
+        foreach ($segment->bucket->allocations as $allocation) {
+            $allocationStart = $allocation->range[0];
+            $allocationEnd = $allocation->range[1];
 
             if ($allocationValue >= $allocationStart && $allocationValue < $allocationEnd) {
-                foreach ($allocation['distributions'] as $distribution) {
-                    $distributionStart = $distribution['range'][0];
-                    $distributionEnd = $distribution['range'][1];
+                foreach ($allocation->distributions as $distribution) {
+                    $distributionStart = $distribution->range[0];
+                    $distributionEnd = $distribution->range[1];
 
                     if ($distributionValue >= $distributionStart && $distributionValue < $distributionEnd) {
-                        return $distribution['variant'];
+                        return $distribution->variant;
                     }
                 }
             }
         }
 
-        return $segment['variant'] ?? null;
+        return $segment->variant ?? null;
     }
 
+    /**
+     * @param string $op
+     * @param array<string> $filterValues
+     * @return bool
+     */
     private function matchNull(string $op, array $filterValues): bool
     {
         $containsNone = $this->containsNone($filterValues);
@@ -180,6 +227,12 @@ class EvaluationEngine
         }
     }
 
+    /**
+     * @param array<string> $propValues
+     * @param string $op
+     * @param array<string> $filterValues
+     * @return bool
+     */
     private function matchSet(array $propValues, string $op, array $filterValues): bool
     {
         switch ($op) {
@@ -200,6 +253,12 @@ class EvaluationEngine
         }
     }
 
+    /**
+     * @param string $propValue
+     * @param string $op
+     * @param array<string> $filterValues
+     * @return bool
+     */
     private function matchString(string $propValue, string $op, array $filterValues): bool
     {
         switch ($op) {
@@ -219,10 +278,8 @@ class EvaluationEngine
                     $propValue,
                     $op,
                     $filterValues,
-                    function ($value) {
-                        return $this->parseNumber($value);
-                    },
-                    array($this, 'comparator')
+                    fn(string $value): ?int => $this->parseNumber($value),
+                    fn($a, string $op, $b): bool => $this->comparator($a, $op, $b)
                 );
             case EvaluationOperator::VERSION_LESS_THAN:
             case EvaluationOperator::VERSION_LESS_THAN_EQUALS:
@@ -232,10 +289,8 @@ class EvaluationEngine
                     $propValue,
                     $op,
                     $filterValues,
-                    function ($value) {
-                        return SemanticVersion::parse($value);
-                    },
-                    array($this, 'versionComparator')
+                    fn(string $value): ?SemanticVersion => SemanticVersion::parse($value),
+                    fn(SemanticVersion $a, string $op, SemanticVersion $b): bool => $this->versionComparator($a, $op, $b)
                 );
             case EvaluationOperator::REGEX_MATCH:
                 return $this->matchesRegex($propValue, $filterValues);
@@ -246,21 +301,30 @@ class EvaluationEngine
         }
     }
 
+    /**
+     * @param string $propValue
+     * @param array<string> $filterValues
+     * @return bool
+     */
     private function matchesIs(string $propValue, array $filterValues): bool
     {
-        if ($this->containsBooleans($filterValues)) {
-            $lower = strtolower($propValue);
-            if ($lower === 'true' || $lower === 'false') {
-                foreach ($filterValues as $value) {
-                    if (strtolower($value) === $lower) {
-                        return true;
-                    }
-                }
-            }
+        $lowerFilterValues = array_map('strtolower', $filterValues);
+        $lowerPropValue = strtolower($propValue);
+        if (in_array('true', $lowerFilterValues) && in_array($lowerPropValue, ['true', '1'])) {
+            return true;
+        }
+
+        if (in_array('false', $lowerFilterValues) && in_array($lowerPropValue, ['false', '0'])) {
+            return true;
         }
         return in_array($propValue, $filterValues);
     }
 
+    /**
+     * @param string $propValue
+     * @param array<string> $filterValues
+     * @return bool
+     */
     private function matchesContains(string $propValue, array $filterValues): bool
     {
         foreach ($filterValues as $filterValue) {
@@ -350,17 +414,6 @@ class EvaluationEngine
         return in_array('(none)', $filterValues);
     }
 
-    private function containsBooleans(array $filterValues): bool
-    {
-        foreach ($filterValues as $filterValue) {
-            $lowercaseFilterValue = strtolower($filterValue);
-            if ($lowercaseFilterValue === 'true' || $lowercaseFilterValue === 'false') {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private function parseNumber(string $value): ?int
     {
         $parsedValue = filter_var($value, FILTER_VALIDATE_INT);
@@ -387,11 +440,11 @@ class EvaluationEngine
         try {
             $parsedValue = json_decode($stringValue, true);
             if (is_array($parsedValue)) {
-                return array_filter(array_map([$this, 'coerceString'], $value));
+                return array_filter(array_map([$this, 'coerceString'], $parsedValue));
             } else {
                 return null;
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return null;
         }
     }
@@ -442,5 +495,38 @@ class EvaluationEngine
         }
         return false;
     }
-}
 
+    /**
+     * @param bool $propValue
+     * @param string $op
+     * @param array<string> $filterValues
+     * @return bool
+     */
+    private function matchBoolean(bool $propValue, string $op, array $filterValues): bool
+    {
+        $propValueString = $propValue ? 'true' : 'false';
+
+        switch ($op) {
+            case EvaluationOperator::IS:
+                foreach ($filterValues as $value) {
+                    $lowercaseValue = strtolower($value);
+                    if (($propValue && $lowercaseValue === 'true') ||
+                        (!$propValue && $lowercaseValue === 'false')) {
+                        return true;
+                    }
+                }
+                return false;
+            case EvaluationOperator::IS_NOT:
+                foreach ($filterValues as $value) {
+                    $lowercaseValue = strtolower($value);
+                    if (($propValue && $lowercaseValue === 'true') ||
+                        (!$propValue && $lowercaseValue === 'false')) {
+                        return false;
+                    }
+                }
+                return true;
+            default:
+                return $this->matchString($propValueString, $op, $filterValues);
+        }
+    }
+}

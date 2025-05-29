@@ -2,6 +2,7 @@
 
 namespace AmplitudeExperiment\Test\EvaluationCore;
 
+use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
@@ -294,19 +295,19 @@ class TopologicalSortTest extends TestCase
     private function topologicalSortInternal($flags, $flagKeys = null): array
     {
         $flagsMap = array_reduce($flags, function ($map, $flag) {
-            $map[$flag["key"]] = $flag;
+            $map[$flag->key] = $flag;
             return $map;
         }, []);
         return topologicalSort($flagsMap, $flagKeys);
     }
 
-    private function flag($key, $dependencies = null): array
+    private function flag($key, $dependencies = null): EvaluationFlag
     {
-        return [
-            'key' => strval($key),
-            'variants' => [],
-            'segments' => [],
-            'dependencies' => is_array($dependencies) ? array_map('strval', $dependencies) : null,
-        ];
+        $flag = new EvaluationFlag($key, [], []);
+        $flag->key = strval($key);
+        $flag->variants = [];
+        $flag->segments = [];
+        $flag->dependencies = is_array($dependencies) ? array_map('strval', $dependencies) : null;
+        return $flag;
     }
 }

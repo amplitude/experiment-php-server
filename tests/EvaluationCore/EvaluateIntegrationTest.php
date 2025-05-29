@@ -3,15 +3,24 @@
 namespace AmplitudeExperiment\Test\EvaluationCore;
 
 use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
+use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
+use AmplitudeExperiment\Variant;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use PHPUnit\Framework\TestCase;
 
+require_once __DIR__ . '/../../src/Flag/Util.php';
+use function AmplitudeExperiment\Flag\createFlagsFromArray;
+
 class EvaluateIntegrationTest extends TestCase
 {
     private EvaluationEngine $engine;
-    private $flags;
+
+    /**
+     * @var EvaluationFlag[]
+     */
+    private array $flags;
 
     /**
      * @throws GuzzleException
@@ -19,106 +28,133 @@ class EvaluateIntegrationTest extends TestCase
     protected function setUp(): void
     {
         $this->engine = new EvaluationEngine();
-        $this->flags = $this->getFlags('server-NgJxxvg8OGwwBsWVXqyxQbdiflbhvugy');
+        $rawFlags = $this->getFlags('server-NgJxxvg8OGwwBsWVXqyxQbdiflbhvugy');
+        $this->flags = createFlagsFromArray($rawFlags);
     }
 
     public function testOff()
     {
         $user = $this->userContext('user_id', 'device_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-off'];
-        $this->assertEquals('off', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-off'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('off', $variant->key);
     }
 
     public function testOn()
     {
         $user = $this->userContext('user_id', 'device_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-on'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-on'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testIndividualInclusionsMatchUserId()
     {
         $user = $this->userContext('user_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-individual-inclusions'];
-        $this->assertEquals('on', $result['key']);
-        $this->assertEquals('individual-inclusions', $result['metadata']['segmentName']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-individual-inclusions'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+        $this->assertEquals('individual-inclusions', $variant->metadata['segmentName']);
     }
 
     public function testIndividualInclusionsMatchDeviceId()
     {
         $user = $this->userContext(null, 'device_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-individual-inclusions'];
-        $this->assertEquals('on', $result['key']);
-        $this->assertEquals('individual-inclusions', $result['metadata']['segmentName']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-individual-inclusions'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+        $this->assertEquals('individual-inclusions', $variant->metadata['segmentName']);
     }
 
     public function testIndividualInclusionsNoMatchUserId()
     {
         $user = $this->userContext('not_user_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-individual-inclusions'];
-        $this->assertEquals('off', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-individual-inclusions'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('off', $variant->key);
     }
 
     public function testIndividualInclusionsNoMatchDeviceId()
     {
         $user = $this->userContext(null, 'not_device_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-individual-inclusions'];
-        $this->assertEquals('off', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-individual-inclusions'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('off', $variant->key);
     }
 
     public function testFlagDependenciesOn()
     {
         $user = $this->userContext('user_id', 'device_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-flag-dependencies-on'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-flag-dependencies-on'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+         $this->assertEquals('on', $variant->key);
     }
 
     public function testFlagDependenciesOff()
     {
         $user = $this->userContext('user_id', 'device_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-flag-dependencies-off'];
-        $this->assertEquals('off', $result['key']);
-        $this->assertEquals('flag-dependencies', $result['metadata']['segmentName']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-flag-dependencies-off'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('off', $variant->key);
+        $this->assertEquals('flag-dependencies', $variant->metadata['segmentName']);
     }
 
     public function testStickyBucketingOn()
     {
         $user = $this->userContext('user_id', 'device_id', null, ['[Experiment] test-sticky-bucketing' => 'on']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-sticky-bucketing'];
-        $this->assertEquals('on', $result['key']);
-        $this->assertEquals('sticky-bucketing', $result['metadata']['segmentName']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-sticky-bucketing'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+        $this->assertEquals('sticky-bucketing', $variant->metadata['segmentName']);
     }
 
     public function testStickyBucketingOff()
     {
         $user = $this->userContext('user_id', 'device_id', null, ['[Experiment] test-sticky-bucketing' => 'off']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-sticky-bucketing'];
-        $this->assertEquals('off', $result['key']);
-        $this->assertEquals('All Other Users', $result['metadata']['segmentName']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-sticky-bucketing'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('off', $variant->key);
+        $this->assertEquals('All Other Users', $variant->metadata['segmentName']);
     }
 
     public function testStickyBucketingNonVariant()
     {
         $user = $this->userContext('user_id', 'device_id', null, ['[Experiment] test-sticky-bucketing' => 'not-a-variant']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-sticky-bucketing'];
-        $this->assertEquals('off', $result['key']);
-        $this->assertEquals('All Other Users', $result['metadata']['segmentName']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-sticky-bucketing'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('off', $variant->key);
+        $this->assertEquals('All Other Users', $variant->metadata['segmentName']);
     }
 
     public function testExperiment()
     {
         $user = $this->userContext('user_id', 'device_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-experiment'];
-        $this->assertEquals('on', $result['key']);
-        $this->assertEquals('exp-1', $result['metadata']['experimentKey']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-experiment'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+        $this->assertEquals('exp-1', $variant->metadata['experimentKey']);
     }
 
     public function testFlag()
     {
         $user = $this->userContext('user_id', 'device_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-flag'];
-        $this->assertEquals('on', $result['key']);
-        $this->assertArrayNotHasKey('experimentKey', $result['metadata']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-flag'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+        $this->assertArrayNotHasKey('experimentKey', $variant->metadata);
     }
 
     public function testMultipleConditionsAndValuesAllMatch()
@@ -128,8 +164,10 @@ class EvaluateIntegrationTest extends TestCase
             'key-2' => 'value-2',
             'key-3' => 'value-3',
         ]);
-        $result = $this->engine->evaluate($user, $this->flags)['test-multiple-conditions-and-values'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-multiple-conditions-and-values'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testMultipleConditionsAndValuesSomeMatch()
@@ -138,85 +176,109 @@ class EvaluateIntegrationTest extends TestCase
             'key-1' => 'value-1',
             'key-2' => 'value-2',
         ]);
-        $result = $this->engine->evaluate($user, $this->flags)['test-multiple-conditions-and-values'];
-        $this->assertEquals('off', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-multiple-conditions-and-values'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('off', $variant->key);
     }
 
     public function testAmplitudePropertyTargeting()
     {
         $user = $this->userContext('user_id', 'device_id', null, ['key-1' => 'value-1']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-amplitude-property-targeting'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-amplitude-property-targeting'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testCohortTargetingOn()
     {
         $user = $this->userContext(null, null, null, null, ['u0qtvwla', '12345678']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-cohort-targeting'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-cohort-targeting'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testCohortTargetingOff()
     {
         $user = $this->userContext(null, null, null, null, ['12345678', '87654321']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-cohort-targeting'];
-        $this->assertEquals('off', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-cohort-targeting'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('off', $variant->key);
     }
 
     public function testGroupNameTargeting()
     {
         $user = $this->groupContext('org name', 'amplitude');
-        $result = $this->engine->evaluate($user, $this->flags)['test-group-name-targeting'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-group-name-targeting'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testGroupPropertyTargeting()
     {
         $user = $this->groupContext('org name', 'amplitude', ['org plan' => 'enterprise2']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-group-property-targeting'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-group-property-targeting'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testAmplitudeIdBucketing()
     {
         $user = $this->userContext(null, null, '1234567890');
-        $result = $this->engine->evaluate($user, $this->flags)['test-amplitude-id-bucketing'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-amplitude-id-bucketing'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testUserIdBucketing()
     {
         $user = $this->userContext('user_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-user-id-bucketing'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-user-id-bucketing'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testDeviceIdBucketing()
     {
         $user = $this->userContext(null, 'device_id');
-        $result = $this->engine->evaluate($user, $this->flags)['test-device-id-bucketing'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-device-id-bucketing'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testCustomUserPropertyBucketing()
     {
         $user = $this->userContext(null, null, null, ['key' => 'value']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-custom-user-property-bucketing'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-custom-user-property-bucketing'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testGroupNameBucketing()
     {
         $user = $this->groupContext('org name', 'amplitude');
-        $result = $this->engine->evaluate($user, $this->flags)['test-group-name-bucketing'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-group-name-bucketing'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testGroupPropertyBucketing()
     {
         $user = $this->groupContext('org name', 'amplitude', ['org plan' => 'enterprise2']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-group-name-bucketing'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-group-name-bucketing'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testOnePercentAllocation()
@@ -224,8 +286,10 @@ class EvaluateIntegrationTest extends TestCase
         $on = 0;
         for ($i = 0; $i < 10000; $i++) {
             $user = $this->userContext(null, (string)($i + 1));
-            $result = $this->engine->evaluate($user, $this->flags)['test-1-percent-allocation'];
-            if ($result['key'] === 'on') {
+            $results = $this->engine->evaluate($user, $this->flags);
+            $result = $results['test-1-percent-allocation'];
+            $variant = Variant::convertEvaluationVariantToVariant($result);
+            if ($variant->key === 'on') {
                 $on++;
             }
         }
@@ -237,8 +301,10 @@ class EvaluateIntegrationTest extends TestCase
         $on = 0;
         for ($i = 0; $i < 10000; $i++) {
             $user = $this->userContext(null, (string)($i + 1));
-            $result = $this->engine->evaluate($user, $this->flags)['test-50-percent-allocation'];
-            if ($result['key'] === 'on') {
+            $results = $this->engine->evaluate($user, $this->flags);
+            $result = $results['test-50-percent-allocation'];
+            $variant = Variant::convertEvaluationVariantToVariant($result);
+            if ($variant->key === 'on') {
                 $on++;
             }
         }
@@ -250,8 +316,10 @@ class EvaluateIntegrationTest extends TestCase
         $on = 0;
         for ($i = 0; $i < 10000; $i++) {
             $user = $this->userContext(null, (string)($i + 1));
-            $result = $this->engine->evaluate($user, $this->flags)['test-99-percent-allocation'];
-            if ($result['key'] === 'on') {
+            $results = $this->engine->evaluate($user, $this->flags);
+            $result = $results['test-99-percent-allocation'];
+            $variant = Variant::convertEvaluationVariantToVariant($result);
+            if ($variant->key === 'on') {
                 $on++;
             }
         }
@@ -264,10 +332,12 @@ class EvaluateIntegrationTest extends TestCase
         $treatment = 0;
         for ($i = 0; $i < 10000; $i++) {
             $user = $this->userContext(null, (string)($i + 1));
-            $result = $this->engine->evaluate($user, $this->flags)['test-1-percent-distribution'];
-            if ($result['key'] === 'control') {
+            $results = $this->engine->evaluate($user, $this->flags);
+            $result = $results['test-1-percent-distribution'];
+            $variant = Variant::convertEvaluationVariantToVariant($result);
+            if ($variant->key === 'control') {
                 $control++;
-            } elseif ($result['key'] === 'treatment') {
+            } elseif ($variant->key === 'treatment') {
                 $treatment++;
             }
         }
@@ -281,10 +351,12 @@ class EvaluateIntegrationTest extends TestCase
         $treatment = 0;
         for ($i = 0; $i < 10000; $i++) {
             $user = $this->userContext(null, (string)($i + 1));
-            $result = $this->engine->evaluate($user, $this->flags)['test-50-percent-distribution'];
-            if ($result['key'] === 'control') {
+            $results = $this->engine->evaluate($user, $this->flags);
+            $result = $results['test-50-percent-distribution'];
+            $variant = Variant::convertEvaluationVariantToVariant($result);
+            if ($variant->key === 'control') {
                 $control++;
-            } elseif ($result['key'] === 'treatment') {
+            } elseif ($variant->key === 'treatment') {
                 $treatment++;
             }
         }
@@ -298,10 +370,12 @@ class EvaluateIntegrationTest extends TestCase
         $treatment = 0;
         for ($i = 0; $i < 10000; $i++) {
             $user = $this->userContext(null, (string)($i + 1));
-            $result = $this->engine->evaluate($user, $this->flags)['test-99-percent-distribution'];
-            if ($result['key'] === 'control') {
+            $results = $this->engine->evaluate($user, $this->flags);
+            $result = $results['test-99-percent-distribution'];
+            $variant = Variant::convertEvaluationVariantToVariant($result);
+            if ($variant->key === 'control') {
                 $control++;
-            } elseif ($result['key'] === 'treatment') {
+            } elseif ($variant->key === 'treatment') {
                 $treatment++;
             }
         }
@@ -317,14 +391,16 @@ class EvaluateIntegrationTest extends TestCase
         $d = 0;
         for ($i = 0; $i < 10000; $i++) {
             $user = $this->userContext(null, (string)($i + 1));
-            $result = $this->engine->evaluate($user, $this->flags)['test-multiple-distributions'];
-            if ($result['key'] === 'a') {
+            $results = $this->engine->evaluate($user, $this->flags);
+            $result = $results['test-multiple-distributions'];
+            $variant = Variant::convertEvaluationVariantToVariant($result);
+            if ($variant->key === 'a') {
                 $a++;
-            } elseif ($result['key'] === 'b') {
+            } elseif ($variant->key === 'b') {
                 $b++;
-            } elseif ($result['key'] === 'c') {
+            } elseif ($variant->key === 'c') {
                 $c++;
-            } elseif ($result['key'] === 'd') {
+            } elseif ($variant->key === 'd') {
                 $d++;
             }
         }
@@ -337,154 +413,200 @@ class EvaluateIntegrationTest extends TestCase
     public function testIs()
     {
         $user = $this->userContext(null, null, null, ['key' => 'value']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-is'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-is'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testIsNot()
     {
         $user = $this->userContext(null, null, null, ['key' => 'value']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-is-not'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-is-not'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testContains()
     {
         $user = $this->userContext(null, null, null, ['key' => 'value']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-contains'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-contains'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testDoesNotContain()
     {
         $user = $this->userContext(null, null, null, ['key' => 'value']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-does-not-contain'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-does-not-contain'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testLess()
     {
         $user = $this->userContext(null, null, null, ['key' => '-1']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-less'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-less'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testLessOrEqual()
     {
         $user = $this->userContext(null, null, null, ['key' => '0']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-less-or-equal'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-less-or-equal'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testGreater()
     {
         $user = $this->userContext(null, null, null, ['key' => '1']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-greater'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-greater'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testGreaterOrEqual()
     {
         $user = $this->userContext(null, null, null, ['key' => '0']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-greater-or-equal'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-greater-or-equal'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testVersionLess()
     {
         $user = $this->freeformUserContext(['version' => '1.9.0']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-version-less'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-version-less'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testVersionLessOrEqual()
     {
         $user = $this->freeformUserContext(['version' => '1.10.0']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-version-less-or-equal'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-version-less-or-equal'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testVersionGreater()
     {
         $user = $this->freeformUserContext(['version' => '1.10.0']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-version-greater'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-version-greater'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testVersionGreaterOrEqual()
     {
         $user = $this->freeformUserContext(['version' => '1.9.0']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-version-greater-or-equal'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-version-greater-or-equal'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testSetIs()
     {
         $user = $this->userContext(null, null, null, ['key' => ['1', '2', '3']]);
-        $result = $this->engine->evaluate($user, $this->flags)['test-set-is'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-set-is'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testSetIsNot()
     {
         $user = $this->userContext(null, null, null, ['key' => ['1', '2']]);
-        $result = $this->engine->evaluate($user, $this->flags)['test-set-is-not'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-set-is-not'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testSetContains()
     {
         $user = $this->userContext(null, null, null, ['key' => ['1', '2', '3', '4']]);
-        $result = $this->engine->evaluate($user, $this->flags)['test-set-contains'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-set-contains'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testSetDoesNotContain()
     {
         $user = $this->userContext(null, null, null, ['key' => ['1', '2', '4']]);
-        $result = $this->engine->evaluate($user, $this->flags)['test-set-does-not-contain'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-set-does-not-contain'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testSetContainsAny()
     {
         $user = $this->userContext(null, null, null, null, ['u0qtvwla', '12345678']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-set-contains-any'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-set-contains-any'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testSetDoesNotContainAny()
     {
         $user = $this->userContext(null, null, null, null, ['12345678', '87654321']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-set-does-not-contain-any'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-set-does-not-contain-any'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testGlobMatch()
     {
         $user = $this->userContext(null, null, null, ['key' => '/path/1/2/3/end']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-glob-match'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-glob-match'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testGlobDoesNotMatch()
     {
         $user = $this->userContext(null, null, null, ['key' => '/path/1/2/3']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-glob-does-not-match'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-glob-does-not-match'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     public function testIsWithBooleans()
     {
         $user = $this->userContext(null, null, null, ['true' => 'TRUE', 'false' => 'FALSE']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-is-with-booleans'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-is-with-booleans'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
         $user = $this->userContext(null, null, null, ['true' => 'True', 'false' => 'False']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-is-with-booleans'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-is-with-booleans'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
         $user = $this->userContext(null, null, null, ['true' => 'true', 'false' => 'false']);
-        $result = $this->engine->evaluate($user, $this->flags)['test-is-with-booleans'];
-        $this->assertEquals('on', $result['key']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-is-with-booleans'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     private function userContext($userId = null, $deviceId = null, $amplitudeId = null, $userProperties = [], $cohortIds = []): array

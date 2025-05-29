@@ -2,6 +2,8 @@
 
 namespace AmplitudeExperiment;
 
+use AmplitudeExperiment\EvaluationCore\Types\EvaluationVariant;
+
 class Variant
 {
     /**
@@ -48,41 +50,39 @@ class Variant
     }
 
     /**
-     * @param array<mixed> $evaluationVariant
+     * Converts an EvaluationVariant to a public Variant
+     *
+     * @param EvaluationVariant $evaluationVariant The evaluation variant to convert
+     * @return Variant The converted variant
      */
-    public static function convertEvaluationVariantToVariant(array $evaluationVariant): Variant
+    public static function convertEvaluationVariantToVariant(EvaluationVariant $evaluationVariant): Variant
     {
-
         $variant = new Variant();
-
-        if (empty($evaluationVariant)) {
-            return $variant;
-        }
 
         $experimentKey = null;
 
-        if (isset($evaluationVariant['metadata'])) {
-            $experimentKey = $evaluationVariant['metadata']['experimentKey'] ?? null;
+        if (isset($evaluationVariant->metadata)) {
+            $experimentKey = $evaluationVariant->metadata['experimentKey'] ?? null;
         }
 
-        if (isset($evaluationVariant['key'])) {
-            $variant->key = $evaluationVariant['key'];
+        if ($evaluationVariant->key !== null) {
+            $variant->key = $evaluationVariant->key;
         }
 
-        if (isset($evaluationVariant['value'])) {
-            $variant->value = (string)$evaluationVariant['value'];
+        if ($evaluationVariant->value !== null) {
+            $variant->value = (string)$evaluationVariant->value;
         }
 
-        if (isset($evaluationVariant['payload'])) {
-            $variant->payload = $evaluationVariant['payload'];
+        if ($evaluationVariant->payload !== null) {
+            $variant->payload = $evaluationVariant->payload;
         }
 
-        if ($experimentKey) {
+        if ($experimentKey !== null) {
             $variant->expKey = $experimentKey;
         }
 
-        if (isset($evaluationVariant['metadata'])) {
-            $variant->metadata = $evaluationVariant['metadata'];
+        if (isset($evaluationVariant->metadata)) {
+            $variant->metadata = $evaluationVariant->metadata;
         }
 
         return $variant;
