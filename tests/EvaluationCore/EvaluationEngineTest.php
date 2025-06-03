@@ -46,7 +46,14 @@ class EvaluationEngineTest extends TestCase
             'off'
         );
 
-        $segments = [$trueSegment, $falseSegment];
+        // Default segment for all other users
+        $defaultSegment = new EvaluationSegment(
+            null,
+            null,
+            'off'
+        );
+
+        $segments = [$trueSegment, $falseSegment, $defaultSegment];
         $flag = new EvaluationFlag('test-bool', $variants, $segments);
         $flags = ['test-bool' => $flag];
 
@@ -79,6 +86,26 @@ class EvaluationEngineTest extends TestCase
         $context = ['user' => ['user_properties' => ['boolProp' => 'False']]];
         $results = $this->engine->evaluate($context, $flags);
         $this->assertEquals('off', $results['test-bool']->key);
+
+        // Test case 7: Non-boolean value - should fall to default segment
+        $context = ['user' => ['user_properties' => ['boolProp' => 'not a boolean']]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('off', $results['test-bool']->key);
+
+        // Test case 8: Missing property - should fall to default segment
+        $context = ['user' => ['user_properties' => []]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('off', $results['test-bool']->key);
+
+        // Test case 9: Numeric 1 - should NOT match 'true' and fall to default
+        $context = ['user' => ['user_properties' => ['boolProp' => 1]]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('off', $results['test-bool']->key);
+
+        // Test case 10: Numeric 0 - should NOT match 'false' and fall to default
+        $context = ['user' => ['user_properties' => ['boolProp' => 0]]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('off', $results['test-bool']->key);
     }
 
     public function testBooleanIsNotMatching()
@@ -88,7 +115,8 @@ class EvaluationEngineTest extends TestCase
             'off' => new EvaluationVariant('off')
         ];
 
-        $segment = new EvaluationSegment(
+        // Segment for "is not true"
+        $notTrueSegment = new EvaluationSegment(
             null,
             [[new EvaluationCondition(
                 ['context','user', 'user_properties', 'boolProp'],
@@ -98,19 +126,54 @@ class EvaluationEngineTest extends TestCase
             'on'
         );
 
-        $flag = new EvaluationFlag('test-bool-not', $variants, [$segment]);
+        // Default segment for all other users
+        $defaultSegment = new EvaluationSegment(
+            null,
+            null,
+            'off'
+        );
+
+        $segments = [$notTrueSegment, $defaultSegment];
+        $flag = new EvaluationFlag('test-bool-not', $variants, $segments);
         $flags = ['test-bool-not' => $flag];
 
-        // Test negative cases
+        // Test with PHP boolean false - should match 'is not true'
         $context = ['user' => ['user_properties' => ['boolProp' => false]]];
         $results = $this->engine->evaluate($context, $flags);
         $this->assertEquals('on', $results['test-bool-not']->key);
 
+        // Test with string 'false' - should match 'is not true'
         $context = ['user' => ['user_properties' => ['boolProp' => 'false']]];
         $results = $this->engine->evaluate($context, $flags);
         $this->assertEquals('on', $results['test-bool-not']->key);
 
+        // Test with capitalized 'False' - should match 'is not true'
         $context = ['user' => ['user_properties' => ['boolProp' => 'False']]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('on', $results['test-bool-not']->key);
+
+        // Test with PHP boolean true - should NOT match 'is not true' and fall to default
+        $context = ['user' => ['user_properties' => ['boolProp' => true]]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('off', $results['test-bool-not']->key);
+
+        // Test with string 'true' - should NOT match 'is not true' and fall to default
+        $context = ['user' => ['user_properties' => ['boolProp' => 'true']]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('off', $results['test-bool-not']->key);
+
+        // Test with capitalized 'True' - should NOT match 'is not true' and fall to default
+        $context = ['user' => ['user_properties' => ['boolProp' => 'True']]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('off', $results['test-bool-not']->key);
+
+        // Test with non-boolean value - should match 'is not true'
+        $context = ['user' => ['user_properties' => ['boolProp' => 'not a boolean']]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('on', $results['test-bool-not']->key);
+
+        // Test with missing property - should match 'is not true'
+        $context = ['user' => ['user_properties' => []]];
         $results = $this->engine->evaluate($context, $flags);
         $this->assertEquals('on', $results['test-bool-not']->key);
     }
@@ -122,8 +185,8 @@ class EvaluationEngineTest extends TestCase
             'off' => new EvaluationVariant('off')
         ];
 
-        // Create a segment with mixed case boolean conditions
-        $mixedCaseSegment = new EvaluationSegment(
+        // Create segments with mixed case boolean conditions
+        $trueSegment = new EvaluationSegment(
             null,
             [[new EvaluationCondition(
                 ['context','user', 'user_properties', 'boolProp'],
@@ -133,16 +196,61 @@ class EvaluationEngineTest extends TestCase
             'on'
         );
 
-        $flag = new EvaluationFlag('test-case-bool', $variants, [$mixedCaseSegment]);
+        $falseSegment = new EvaluationSegment(
+            null,
+            [[new EvaluationCondition(
+                ['context','user', 'user_properties', 'boolProp'],
+                'is',
+                ['FALSE']
+            )]],
+            'off'
+        );
+
+        // Default segment for all other users
+        $defaultSegment = new EvaluationSegment(
+            null,
+            null,
+            'off'
+        );
+
+        $segments = [$trueSegment, $falseSegment, $defaultSegment];
+        $flag = new EvaluationFlag('test-case-bool', $variants, $segments);
         $flags = ['test-case-bool' => $flag];
 
-        // Test with different case boolean representations
-        $testCases = ['true', 'True', 'TRUE'];
-
-        foreach ($testCases as $testCase) {
+        // Test with different case TRUE representations
+        $trueCases = ['true', 'True', 'TRUE', 'tRuE'];
+        foreach ($trueCases as $testCase) {
             $context = ['user' => ['user_properties' => ['boolProp' => $testCase]]];
             $results = $this->engine->evaluate($context, $flags);
-            $this->assertEquals('on', $results['test-case-bool']->key, "Failed for value: " . var_export($testCase, true));
+            $this->assertEquals('on', $results['test-case-bool']->key,
+                "Failed for TRUE value: " . var_export($testCase, true));
         }
+
+        // Test with PHP boolean true
+        $context = ['user' => ['user_properties' => ['boolProp' => true]]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('on', $results['test-case-bool']->key,
+            "Failed for PHP boolean true");
+
+        // Test with different case FALSE representations
+        $falseCases = ['false', 'False', 'FALSE', 'fAlSe'];
+        foreach ($falseCases as $testCase) {
+            $context = ['user' => ['user_properties' => ['boolProp' => $testCase]]];
+            $results = $this->engine->evaluate($context, $flags);
+            $this->assertEquals('off', $results['test-case-bool']->key,
+                "Failed for FALSE value: " . var_export($testCase, true));
+        }
+
+        // Test with PHP boolean false
+        $context = ['user' => ['user_properties' => ['boolProp' => false]]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('off', $results['test-case-bool']->key,
+            "Failed for PHP boolean false");
+
+        // Test with non-boolean value - should fall to default segment
+        $context = ['user' => ['user_properties' => ['boolProp' => 'not a boolean']]];
+        $results = $this->engine->evaluate($context, $flags);
+        $this->assertEquals('off', $results['test-case-bool']->key,
+            "Non-boolean value should match default segment");
     }
 }
