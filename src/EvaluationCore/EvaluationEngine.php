@@ -309,16 +309,18 @@ class EvaluationEngine
      */
     private function matchesIs(string $propValue, array $filterValues): bool
     {
-        $lowerFilterValues = array_map('strtolower', $filterValues);
+        // Case-sensitive exact match
+        if (in_array($propValue, $filterValues)) {
+            return true;
+        }
         $lowerPropValue = strtolower($propValue);
-        if (in_array('true', $lowerFilterValues) && in_array($lowerPropValue, ['true', '1'])) {
+        if ($lowerPropValue === 'true' && in_array('true', array_map('strtolower', $filterValues))) {
             return true;
         }
-
-        if (in_array('false', $lowerFilterValues) && in_array($lowerPropValue, ['false', '0'])) {
+        if ($lowerPropValue === 'false' && in_array('false', array_map('strtolower', $filterValues))) {
             return true;
         }
-        return in_array($propValue, $filterValues);
+        return false;
     }
 
     /**

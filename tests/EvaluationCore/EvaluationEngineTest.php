@@ -79,26 +79,6 @@ class EvaluationEngineTest extends TestCase
         $context = ['user' => ['user_properties' => ['boolProp' => 'False']]];
         $results = $this->engine->evaluate($context, $flags);
         $this->assertEquals('off', $results['test-bool']->key);
-
-        // Test case 7: Numeric 1
-        $context = ['user' => ['user_properties' => ['boolProp' => 1]]];
-        $results = $this->engine->evaluate($context, $flags);
-        $this->assertEquals('on', $results['test-bool']->key);
-
-        // Test case 8: Numeric 0
-        $context = ['user' => ['user_properties' => ['boolProp' => 0]]];
-        $results = $this->engine->evaluate($context, $flags);
-        $this->assertEquals('off', $results['test-bool']->key);
-
-        // Test case 9: String '1'
-        $context = ['user' => ['user_properties' => ['boolProp' => '1']]];
-        $results = $this->engine->evaluate($context, $flags);
-        $this->assertEquals('on', $results['test-bool']->key);
-
-        // Test case 10: String '0'
-        $context = ['user' => ['user_properties' => ['boolProp' => '0']]];
-        $results = $this->engine->evaluate($context, $flags);
-        $this->assertEquals('off', $results['test-bool']->key);
     }
 
     public function testBooleanIsNotMatching()
@@ -133,5 +113,36 @@ class EvaluationEngineTest extends TestCase
         $context = ['user' => ['user_properties' => ['boolProp' => 'False']]];
         $results = $this->engine->evaluate($context, $flags);
         $this->assertEquals('on', $results['test-bool-not']->key);
+    }
+
+    public function testCaseInsensitiveBooleanMatching()
+    {
+        $variants = [
+            'on' => new EvaluationVariant('on'),
+            'off' => new EvaluationVariant('off')
+        ];
+
+        // Create a segment with mixed case boolean conditions
+        $mixedCaseSegment = new EvaluationSegment(
+            null,
+            [[new EvaluationCondition(
+                ['context','user', 'user_properties', 'boolProp'],
+                'is',
+                ['TRUE']
+            )]],
+            'on'
+        );
+
+        $flag = new EvaluationFlag('test-case-bool', $variants, [$mixedCaseSegment]);
+        $flags = ['test-case-bool' => $flag];
+
+        // Test with different case boolean representations
+        $testCases = ['true', 'True', 'TRUE'];
+
+        foreach ($testCases as $testCase) {
+            $context = ['user' => ['user_properties' => ['boolProp' => $testCase]]];
+            $results = $this->engine->evaluate($context, $flags);
+            $this->assertEquals('on', $results['test-case-bool']->key, "Failed for value: " . var_export($testCase, true));
+        }
     }
 }
