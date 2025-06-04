@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/amplitude/experiment-php-server/compare/1.2.3...1.2.4) (2025-06-04)
+
+
+### Bug Fixes
+
+* remove local evaluation boolean matching for 0/1 values ([#37](https://github.com/amplitude/experiment-php-server/issues/37)) ([1dc1953](https://github.com/amplitude/experiment-php-server/commit/1dc19533b5865b117d1858af73ab87e0b8878d9b))
+
 ## [1.2.3](https://github.com/amplitude/experiment-php-server/compare/1.2.2...1.2.3) (2025-05-29)
 
 
