@@ -607,6 +607,11 @@ class EvaluateIntegrationTest extends TestCase
         $result = $results['test-is-with-booleans'];
         $variant = Variant::convertEvaluationVariantToVariant($result);
         $this->assertEquals('on', $variant->key);
+        $user = $this->userContext(null, null, null, ['true' => true, 'false' => false]);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-is-with-booleans'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
     }
 
     private function userContext($userId = null, $deviceId = null, $amplitudeId = null, $userProperties = [], $cohortIds = []): array
