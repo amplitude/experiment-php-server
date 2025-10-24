@@ -5,6 +5,7 @@ namespace AmplitudeExperiment\Test\Remote;
 use AmplitudeExperiment\Experiment;
 use AmplitudeExperiment\Remote\RemoteEvaluationClient;
 use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
+use AmplitudeExperiment\Remote\FetchOptions;
 use AmplitudeExperiment\Test\Util\MockGuzzleHttpClient;
 use AmplitudeExperiment\User;
 use GuzzleHttp\Exception\RequestException;
@@ -152,5 +153,74 @@ class RemoteEvaluationClientTest extends TestCase
         $experiment = new Experiment();
         $client = $experiment->initializeRemote($this->apiKey);
         $this->assertEquals($client, $experiment->initializeRemote($this->apiKey));
+    }
+
+    public function testFetchWithFetchOptionsSuccess()
+    {
+        // Create an instance of GuzzleFetchClient with the custom handler stack
+        $mockHandler = new MockHandler([
+            function (RequestInterface $request, array $options) {
+                $headers = $request->getHeaders();
+                $this->assertEquals(base64_encode('["sdk-ci-test"]'), $headers['X-Amp-Exp-Flag-Keys'][0]);
+                $this->assertEquals('track', $headers['X-Amp-Exp-Track'][0]);
+                $this->assertEquals('track', $headers['X-Amp-Exp-Exposure-Track'][0]);
+                return new Response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
+            },
+            function (RequestInterface $request, array $options) {
+                $headers = $request->getHeaders();
+                $this->assertEquals(base64_encode('["sdk-ci-test"]'), $headers['X-Amp-Exp-Flag-Keys'][0]);
+                $this->assertEquals('no-track', $headers['X-Amp-Exp-Track'][0]);
+                $this->assertEquals('no-track', $headers['X-Amp-Exp-Exposure-Track'][0]);
+                return new Response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
+            },
+            function (RequestInterface $request, array $options) {
+                $headers = $request->getHeaders();
+                $this->assertEquals(base64_encode('["sdk-ci-test"]'), $headers['X-Amp-Exp-Flag-Keys'][0]);
+                $this->assertArrayNotHasKey('X-Amp-Exp-Track', $headers);
+                $this->assertArrayNotHasKey('X-Amp-Exp-Exposure-Track', $headers);
+                return new Response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
+            },
+            function (RequestInterface $request, array $options) {
+                $headers = $request->getHeaders();
+                $this->assertEquals(base64_encode('["sdk-ci-test"]'), $headers['X-Amp-Exp-Flag-Keys'][0]);
+                $this->assertArrayNotHasKey('X-Amp-Exp-Track', $headers);
+                $this->assertArrayNotHasKey('X-Amp-Exp-Exposure-Track', $headers);
+                return new Response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
+            },
+            function (RequestInterface $request, array $options) {
+                $headers = $request->getHeaders();
+                $this->assertArrayNotHasKey('X-Amp-Exp-Flag-Keys', $headers);
+                $this->assertArrayNotHasKey('X-Amp-Exp-Track', $headers);
+                $this->assertArrayNotHasKey('X-Amp-Exp-Exposure-Track', $headers);
+                return new Response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
+            },
+        ]);
+        $handlerStack = HandlerStack::create($mockHandler);
+        $httpClient = new MockGuzzleHttpClient([
+            'retries' => 1,
+            'timeoutMillis' => 1000,
+        ], $handlerStack);
+
+        $client = new RemoteEvaluationClient($this->apiKey, RemoteEvaluationConfig::builder()->httpClient($httpClient)->build());
+
+        $variants = $client->fetch($this->testUser, new FetchOptions(['sdk-ci-test'], true, true));
+        $this->assertEquals(1, sizeof($variants));
+        $this->assertEquals("on", $variants['sdk-ci-test']->key);
+
+        $variants = $client->fetch($this->testUser, new FetchOptions(['sdk-ci-test'], false, false));
+        $this->assertEquals(1, sizeof($variants));
+        $this->assertEquals("on", $variants['sdk-ci-test']->key);
+
+        $variants = $client->fetch($this->testUser, new FetchOptions(['sdk-ci-test']));
+        $this->assertEquals(1, sizeof($variants));
+        $this->assertEquals("on", $variants['sdk-ci-test']->key);
+
+        $variants = $client->fetch($this->testUser, ['sdk-ci-test']);
+        $this->assertEquals(1, sizeof($variants));
+        $this->assertEquals("on", $variants['sdk-ci-test']->key);
+
+        $variants = $client->fetch($this->testUser);
+        $this->assertEquals(1, sizeof($variants));
+        $this->assertEquals("on", $variants['sdk-ci-test']->key);
     }
 }

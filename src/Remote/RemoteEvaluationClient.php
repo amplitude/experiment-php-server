@@ -40,17 +40,12 @@ class RemoteEvaluationClient
         $this->logger = new InternalLogger($this->config->logger ?? new DefaultLogger(), $this->config->logLevel);
     }
 
-    /**
-     * Fetch all variants for a user.
-     *
-     * This method will automatically retry if configured (default).
-     *
-     * @param User $user The {@link User} context
-     * @param array<string> $flagKeys The flags to evaluate for this specific fetch request.
-     * @return array<Variant> A {@link Variant} array for the user on success, empty array on error.
-     */
-    public function fetch(User $user, array $flagKeys = []): array
+    private function fetchWithOptions(User $user, FetchOptions $options): array
     {
+        $flagKeys = $options->flagKeys;
+        $tracksAssignment = $options->tracksAssignment;
+        $tracksExposure = $options->tracksExposure;
+
         if ($user->userId == null && $user->deviceId == null) {
             $this->logger->warning('[Experiment] user id and device id are null; Amplitude may not resolve identity');
         }
@@ -72,13 +67,20 @@ class RemoteEvaluationClient
             ->withHeader('Content-Type', 'application/json')
             ->withHeader('X-Amp-Exp-User', $serializedUser);
 
-        if (!empty($flagKeys)) {
+        if ($flagKeys !== null && !empty($flagKeys)) {
             $flagKeysJson = json_encode($flagKeys);
             if ($flagKeysJson === false) {
                 $this->logger->error('[Experiment] Failed to fetch variants: ' . json_last_error_msg());
                 return [];
             }
             $request = $request->withHeader('X-Amp-Exp-Flag-Keys', base64_encode($flagKeysJson));
+        }
+
+        if ($tracksAssignment !== null) {
+            $request = $request->withHeader('X-Amp-Exp-Track', $tracksAssignment ? 'track' : 'no-track');
+        }
+        if ($tracksExposure !== null) {
+            $request = $request->withHeader('X-Amp-Exp-Exposure-Track', $tracksExposure ? 'track' : 'no-track');
         }
 
         $httpClient = $this->httpClient->getClient();
@@ -100,5 +102,28 @@ class RemoteEvaluationClient
             $this->logger->error('[Experiment] Failed to fetch variants: ' . $e->getMessage());
             return [];
         }
+    }
+
+    /**
+     * Fetch all variants for a user.
+     *
+     * This method will automatically retry if configured (default).
+     *
+     * @param User $user The {@link User} context
+     * @param array<string>|FetchOptions $args The flags to evaluate for this specific fetch request or a {@link FetchOptions} object.
+     * If an array is provided, it will be converted to a {@link FetchOptions} object.
+     * If a {@link FetchOptions} object is provided, it will be used as is.
+     * If no arguments are provided, a default {@link FetchOptions} object without any options will be used.
+     * @return array<Variant> A {@link Variant} array for the user on success, empty array on error.
+     */
+    public function fetch(User $user, array|FetchOptions|null $arg = null): array
+    {
+        if ($arg !== null && is_array($arg)) {
+            return $this->fetchWithOptions($user, new FetchOptions($arg, null, null));
+        }
+        if ($arg !== null && is_object($arg) && $arg instanceof FetchOptions) {
+            return $this->fetchWithOptions($user, $arg);
+        }
+        return $this->fetchWithOptions($user, new FetchOptions());
     }
 }
