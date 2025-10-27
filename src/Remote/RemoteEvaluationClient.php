@@ -114,7 +114,7 @@ class RemoteEvaluationClient
      * If an array is provided, it is treated as the flag keys and will be converted to a {@link FetchOptions} object.
      * If a {@link FetchOptions} object is provided, it will be used as is.
      * If no arguments are provided, a default {@link FetchOptions} object without any options will be used.
-     * @return array<Variant> A {@link Variant} array for the user on success, empty array on error.
+     * @return Variant[] A {@link Variant} array for the user on success, empty array on error.
      */
     public function fetch(User $user, mixed $arg = null): array
     {
