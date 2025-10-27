@@ -116,7 +116,7 @@ class RemoteEvaluationClient
      * If no arguments are provided, a default {@link FetchOptions} object without any options will be used.
      * @return array<Variant> A {@link Variant} array for the user on success, empty array on error.
      */
-    public function fetch(User $user, array|FetchOptions|null $arg = null): array
+    public function fetch(User $user, mixed $arg = null): array
     {
         if ($arg !== null && is_array($arg)) {
             return $this->fetchWithOptions($user, new FetchOptions($arg, null, null));
