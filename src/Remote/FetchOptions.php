@@ -35,7 +35,7 @@ class FetchOptions
      * @param ?bool $tracksAssignment Whether to track the assignment event.
      * @param ?bool $tracksExposure Whether to track the exposure event.
      */
-    public function __construct(?array $flagKeys = [], ?bool $tracksAssignment = null, ?bool $tracksExposure = null)
+    public function __construct(array $flagKeys = [], ?bool $tracksAssignment = null, ?bool $tracksExposure = null)
     {
         $this->flagKeys = $flagKeys;
         $this->tracksAssignment = $tracksAssignment;
