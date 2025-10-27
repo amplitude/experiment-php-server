@@ -110,8 +110,8 @@ class RemoteEvaluationClient
      * This method will automatically retry if configured (default).
      *
      * @param User $user The {@link User} context
-     * @param array<string>|FetchOptions $args The flags to evaluate for this specific fetch request or a {@link FetchOptions} object.
-     * If an array is provided, it will be converted to a {@link FetchOptions} object.
+     * @param mixed $arg Either flags to evaluate for this specific fetch request or a {@link FetchOptions} object.
+     * If an array is provided, it is treated as the flag keys and will be converted to a {@link FetchOptions} object.
      * If a {@link FetchOptions} object is provided, it will be used as is.
      * If no arguments are provided, a default {@link FetchOptions} object without any options will be used.
      * @return array<Variant> A {@link Variant} array for the user on success, empty array on error.
