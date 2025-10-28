@@ -2,12 +2,12 @@
 
 namespace AmplitudeExperiment;
 
+require_once __DIR__ . '/Util.php';
+
 use AmplitudeExperiment\Logger\DefaultLogger;
 use AmplitudeExperiment\Logger\InternalLogger;
 use AmplitudeExperiment\Logger\LogLevel;
 use Exception;
-
-require_once __DIR__ . '/Util.php';
 
 class AmplitudeCookie
 {

@@ -2,10 +2,10 @@
 
 namespace AmplitudeExperiment\Assignment;
 
+require_once __DIR__ . '/../Util.php';
+
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
-
-require_once __DIR__ . '/../Util.php';
 
 const FLAG_TYPE_MUTUAL_EXCLUSION_GROUP = 'mutual-exclusion-group';
 const DAY_MILLIS = 24 * 60 * 60 * 1000;

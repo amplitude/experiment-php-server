@@ -1,6 +1,7 @@
 <?php
 
 namespace AmplitudeExperiment\Assignment;
+
 require_once __DIR__ . '/AssignmentService.php';
 
 use Psr\Cache\CacheItemPoolInterface;

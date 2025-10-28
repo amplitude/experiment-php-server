@@ -2,6 +2,8 @@
 
 namespace AmplitudeExperiment\Test\EvaluationCore;
 
+require_once __DIR__ . '/../../src/Flag/Util.php';
+
 use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
 use AmplitudeExperiment\Variant;
@@ -10,7 +12,6 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use PHPUnit\Framework\TestCase;
 
-require_once __DIR__ . '/../../src/Flag/Util.php';
 use function AmplitudeExperiment\Flag\createFlagsFromArray;
 
 class EvaluateIntegrationTest extends TestCase

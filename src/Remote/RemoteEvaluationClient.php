@@ -2,6 +2,8 @@
 
 namespace AmplitudeExperiment\Remote;
 
+require_once __DIR__ . '/../Version.php';
+
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationVariant;
 use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Http\GuzzleHttpClient;
@@ -12,8 +14,6 @@ use AmplitudeExperiment\Variant;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
 use const AmplitudeExperiment\VERSION;
-
-require_once __DIR__ . '/../Version.php';
 
 /**
  * Experiment client for fetching variants for a user remotely.

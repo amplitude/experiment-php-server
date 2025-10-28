@@ -2,14 +2,14 @@
 
 namespace AmplitudeExperiment\Test\Assignment;
 
+require_once __DIR__ . '/../../src/Util.php';
+
 use AmplitudeExperiment\Assignment\Assignment;
 use AmplitudeExperiment\Assignment\DefaultAssignmentFilter;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
-
-require_once __DIR__ . '/../../src/Util.php';
 
 class AssignmentFilterTest extends TestCase
 {

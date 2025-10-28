@@ -2,12 +2,12 @@
 
 namespace AmplitudeExperiment\Test\EvaluationCore;
 
+require_once __DIR__ . '/../../src/EvaluationCore/Util.php';
+
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
-
-require_once __DIR__ . '/../../src/EvaluationCore/Util.php';
 
 class TopologicalSortTest extends TestCase
 {

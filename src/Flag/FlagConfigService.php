@@ -2,12 +2,12 @@
 
 namespace AmplitudeExperiment\Flag;
 
+require_once __DIR__ . '/Util.php';
+
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
 use Exception;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
-
-require_once __DIR__ . '/Util.php';
 
 class FlagConfigService
 {

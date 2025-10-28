@@ -2,13 +2,13 @@
 
 namespace AmplitudeExperiment\EvaluationCore;
 
+require_once __DIR__ . '/Util.php';
+
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationVariant;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationSegment;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationCondition;
 use Exception;
-
-require_once __DIR__ . '/Util.php';
 
 class EvaluationEngine
 {

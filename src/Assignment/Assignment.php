@@ -2,14 +2,14 @@
 
 namespace AmplitudeExperiment\Assignment;
 
+require_once __DIR__ . '/../Util.php';
+require_once __DIR__ . '/AssignmentService.php';
+
 use AmplitudeExperiment\Amplitude\Event;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use RuntimeException;
 use function AmplitudeExperiment\hashCode;
-
-require_once __DIR__ . '/../Util.php';
-require_once __DIR__ . '/AssignmentService.php';
 
 /**
  * Event class for tracking assignments to Amplitude Experiment.

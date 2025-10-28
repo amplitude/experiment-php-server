@@ -2,6 +2,8 @@
 
 namespace AmplitudeExperiment\Local;
 
+require_once __DIR__ . '/../EvaluationCore/Util.php';
+
 use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
@@ -15,8 +17,6 @@ use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use Psr\Log\LoggerInterface;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
-
-require_once __DIR__ . '/../EvaluationCore/Util.php';
 
 /**
  * Experiment client for evaluating variants for a user locally.
