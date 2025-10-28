@@ -40,6 +40,13 @@ class RemoteEvaluationClient
         $this->logger = new InternalLogger($this->config->logger ?? new DefaultLogger(), $this->config->logLevel);
     }
 
+    /**
+     * Fetch variants for a user with specific options.
+     *
+     * @param User $user The {@link User} context
+     * @param FetchOptions $options The {@link FetchOptions} object
+     * @return Variant[] A {@link Variant} array for the user on success, empty array on error.
+     */
     private function fetchWithOptions(User $user, FetchOptions $options): array
     {
         $flagKeys = $options->flagKeys;
