@@ -1,3 +1,10 @@
+## [1.2.5](https://github.com/amplitude/experiment-php-server/compare/1.2.4...1.2.5) (2025-10-28)
+
+
+### Bug Fixes
+
+* Introduce PHP 8.5 compatibility for hashCode function  ([#38](https://github.com/amplitude/experiment-php-server/issues/38)) ([8f87a6e](https://github.com/amplitude/experiment-php-server/commit/8f87a6ee056f9f00fd269ad80936f50afc5aa522))
+
 ## [1.2.4](https://github.com/amplitude/experiment-php-server/compare/1.2.3...1.2.4) (2025-06-04)
 
 
