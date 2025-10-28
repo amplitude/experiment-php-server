@@ -10,7 +10,9 @@ function hashCode(string $s): int
     }
     for ($i = 0; $i < strlen($s); $i++) {
         $chr = ord($s[$i]);
-        $hash = (int) (($hash << 5) - $hash + $chr);
+        // Use bitwise operations to ensure we stay within 32-bit signed integer range
+        // This prevents float conversion and maintains compatibility with PHP 8.5+
+        $hash = ((($hash << 5) - $hash) + $chr) & 0x7FFFFFFF;
     }
     return $hash;
 }
