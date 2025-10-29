@@ -7,8 +7,6 @@ use Exception;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
 
-require_once __DIR__ . '/Util.php';
-
 class FlagConfigService
 {
     private LoggerInterface $logger;

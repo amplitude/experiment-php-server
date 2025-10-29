@@ -9,8 +9,6 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use PHPUnit\Framework\TestCase;
-
-require_once __DIR__ . '/../../src/Flag/Util.php';
 use function AmplitudeExperiment\Flag\createFlagsFromArray;
 
 class EvaluateIntegrationTest extends TestCase

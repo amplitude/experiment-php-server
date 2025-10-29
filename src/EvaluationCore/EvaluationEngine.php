@@ -8,8 +8,6 @@ use AmplitudeExperiment\EvaluationCore\Types\EvaluationSegment;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationCondition;
 use Exception;
 
-require_once __DIR__ . '/Util.php';
-
 class EvaluationEngine
 {
     /**

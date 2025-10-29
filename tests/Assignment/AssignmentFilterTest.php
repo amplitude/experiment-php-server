@@ -9,8 +9,6 @@ use AmplitudeExperiment\Variant;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-require_once __DIR__ . '/../../src/Util.php';
-
 class AssignmentFilterTest extends TestCase
 {
     public function testSingleAssignment()

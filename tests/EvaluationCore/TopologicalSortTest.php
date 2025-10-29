@@ -7,8 +7,6 @@ use Exception;
 use PHPUnit\Framework\TestCase;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
 
-require_once __DIR__ . '/../../src/EvaluationCore/Util.php';
-
 class TopologicalSortTest extends TestCase
 {
     /**

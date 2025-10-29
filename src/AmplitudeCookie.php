@@ -7,8 +7,6 @@ use AmplitudeExperiment\Logger\InternalLogger;
 use AmplitudeExperiment\Logger\LogLevel;
 use Exception;
 
-require_once __DIR__ . '/Util.php';
-
 class AmplitudeCookie
 {
     /**
