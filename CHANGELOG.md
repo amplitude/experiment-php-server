@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/amplitude/experiment-php-server/compare/1.2.5...1.3.0) (2025-10-30)
+
+
+### Features
+
+* autoload files ([#43](https://github.com/amplitude/experiment-php-server/issues/43)) ([261c313](https://github.com/amplitude/experiment-php-server/commit/261c313a4a320e169f10888f2551916a1cdf5117))
+
 ## [1.2.5](https://github.com/amplitude/experiment-php-server/compare/1.2.4...1.2.5) (2025-10-28)
 
 
