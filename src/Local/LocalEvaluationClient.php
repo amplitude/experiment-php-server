@@ -16,8 +16,6 @@ use AmplitudeExperiment\Variant;
 use Psr\Log\LoggerInterface;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
 
-require_once __DIR__ . '/../EvaluationCore/Util.php';
-
 /**
  * Experiment client for evaluating variants for a user locally.
  * @category Core Usage

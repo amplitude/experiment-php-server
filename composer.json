@@ -36,7 +36,15 @@
   "autoload": {
     "psr-4": {
       "AmplitudeExperiment\\": "src/"
-    }
+    },
+    "files": [
+      "src/Version.php",
+      "src/Util.php",
+      "src/EvaluationCore/Util.php",
+      "src/Flag/Util.php",
+      "src/Assignment/AssignmentConstants.php",
+      "src/Http/GuzzleConstants.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

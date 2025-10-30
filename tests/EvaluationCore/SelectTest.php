@@ -5,8 +5,6 @@ namespace AmplitudeExperiment\Test\EvaluationCore;
 use PHPUnit\Framework\TestCase;
 use function AmplitudeExperiment\EvaluationCore\select;
 
-require_once __DIR__ . '/../../src/EvaluationCore/Util.php';
-
 class SelectTest extends TestCase {
     public function testSelectorEvaluationContextTypes() {
         $primitiveObject = [
