@@ -42,8 +42,8 @@
       "src/Util.php",
       "src/EvaluationCore/Util.php",
       "src/Flag/Util.php",
-      "src/Assignment/AssignmentService.php",
-      "src/Http/GuzzleHttpClient.php"
+      "src/Assignment/AssignmentConstants.php",
+      "src/Http/GuzzleConstants.php"
     ]
   },
   "autoload-dev": {
