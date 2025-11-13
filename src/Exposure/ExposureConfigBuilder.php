@@ -4,7 +4,7 @@ namespace AmplitudeExperiment\Exposure;
 
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 
-use const AmplitudeExperiment\Assignment\DAY_MILLIS;
+use const AmplitudeExperiment\Exposure\DAY_MILLIS;
 
 class ExposureConfigBuilder
 {
