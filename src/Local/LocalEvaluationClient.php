@@ -66,10 +66,10 @@ class LocalEvaluationClient
      * @param User $user The user to evaluate
      * @param array<string> $flagKeys The flags to evaluate with the user. If empty, all flags
      * from the flag cache are evaluated.
-     * @param EvaluateOptions $options The options for the evaluation.
+     * @param EvaluateOptions|null $options The options for the evaluation. If null, default options are used.
      * @return array<string, Variant> evaluated variants
      */
-    public function evaluate(User $user, array $flagKeys = [], EvaluateOptions $options = null): array
+    public function evaluate(User $user, array $flagKeys = [], ?EvaluateOptions $options = null): array
     {
         $options = $options ?? new EvaluateOptions();
 
