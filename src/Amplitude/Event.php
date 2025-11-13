@@ -27,6 +27,10 @@ class Event
      * @var array<mixed>|null
      */
     public ?array $userProperties;
+    /**
+     * @var array<mixed>|null
+     */
+    public ?array $groups;
     public ?string $userId;
     public ?string $deviceId;
     public ?string $insertId;

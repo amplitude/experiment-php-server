@@ -3,6 +3,7 @@
 namespace AmplitudeExperiment\Local;
 
 use AmplitudeExperiment\Assignment\AssignmentConfig;
+use AmplitudeExperiment\Exposure\ExposureConfig;
 use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Logger\LogLevel;
 use Psr\Log\LoggerInterface;

@@ -132,7 +132,7 @@ class LocalEvaluationClient
         if ($config == null) {
             $config = ExposureConfig::builder($deploymentKey, new DefaultExposureTrackingProvider(new Amplitude($deploymentKey)))->build();
         }
-        $exposureTrackingProvider = $config->exposureTrackingProvider ?? new DefaultExposureTrackingProvider($config->apiKey ?? $deploymentKey);
+        $exposureTrackingProvider = $config->exposureTrackingProvider ?? new DefaultExposureTrackingProvider(new Amplitude($config->apiKey ?? $deploymentKey));
         $exposureFilter = $config->exposureFilter ?? new DefaultExposureFilter();
         $this->exposureService = new ExposureService($exposureTrackingProvider, $exposureFilter);
     }
