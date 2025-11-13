@@ -133,7 +133,7 @@ class LocalEvaluationClient
             $config = ExposureConfig::builder($deploymentKey, new DefaultExposureTrackingProvider(new Amplitude($deploymentKey)))->build();
         }
         $exposureTrackingProvider = $config->exposureTrackingProvider ?? new DefaultExposureTrackingProvider(new Amplitude($config->apiKey ?? $deploymentKey));
-        $exposureFilter = $config->exposureFilter ?? new DefaultExposureFilter();
+        $exposureFilter = $config->exposureFilter;
         $this->exposureService = new ExposureService($exposureTrackingProvider, $exposureFilter);
     }
 }
