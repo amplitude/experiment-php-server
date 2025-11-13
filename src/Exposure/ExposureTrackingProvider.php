@@ -13,12 +13,8 @@ interface ExposureTrackingProvider
     /**
      * Called when {@link LocalEvaluationClient} intends to track an Exposure event
      *
-     * Use {@link Exposure::toJSONPayload()} to convert the Exposure to a JSON string which can be used as a payload
-     * to the Amplitude event upload API.
-     *
-     * Use {@link Exposure::toArray()} to convert the Exposure to an array representation of an Amplitude event
-     *
-     * Used {@link Exposure::toJSONString()} to convert the Exposure to an Amplitude event JSON string
+     * Use {@link Exposure::toEvents()} to convert the Exposure to an array of Event objects,
+     * which can then be serialized or processed as needed for sending to Amplitude.
      *
      * @param Exposure $events
      */

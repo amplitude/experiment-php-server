@@ -20,6 +20,7 @@ class EvaluateOptions
 
     /**
      * @param array<string>|null $flagKeys
+     * @param bool|null $tracksExposure
      */
     public function __construct(?array $flagKeys = null, ?bool $tracksExposure = null)
     {

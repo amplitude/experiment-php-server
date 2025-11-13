@@ -7,7 +7,7 @@ namespace AmplitudeExperiment\Exposure;
  * a {@link ExposureConfigBuilder}. Example usage:
  *
  * ```
- * ExposureConfigBuilder::builder('api-key')->cacheCapacity(1000)->build();
+ * ExposureConfig::builder('api-key')->cacheCapacity(1000)->build();
  * ```
  */
 class ExposureConfig
