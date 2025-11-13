@@ -110,7 +110,7 @@ class LocalEvaluationClientTest extends TestCase
         $amplitudeProperty->setValue($trackingProvider, $amplitudeMock);
         
         // Perform evaluation with tracksExposure=true
-        $options = new EvaluateOptions(null, true);
+        $options = new EvaluateOptions(true);
         $variants = $this->client->evaluate($this->testUser, ['sdk-local-evaluation-ci-test'], $options);
         
         // Verify that logEvent was called

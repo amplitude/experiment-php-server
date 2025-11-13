@@ -8,23 +8,15 @@ namespace AmplitudeExperiment\Local;
 class EvaluateOptions
 {
     /**
-     * The flags to evaluate with the user. If null or empty, all flags are evaluated.
-     * @var array<string>|null
-     */
-    public ?array $flagKeys;
-
-    /**
      * Whether to track exposure event for the evaluation.
      */
     public ?bool $tracksExposure;
 
     /**
-     * @param array<string>|null $flagKeys
      * @param bool|null $tracksExposure
      */
-    public function __construct(?array $flagKeys = null, ?bool $tracksExposure = null)
+    public function __construct(?bool $tracksExposure = null)
     {
-        $this->flagKeys = $flagKeys;
         $this->tracksExposure = $tracksExposure;
     }
 }
