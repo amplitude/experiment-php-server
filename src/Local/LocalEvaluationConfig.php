@@ -36,6 +36,7 @@ class LocalEvaluationConfig
      */
     public array $bootstrap;
     public ?AssignmentConfig $assignmentConfig;
+    public ?ExposureConfig $exposureConfig;
     /**
      * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleHttpClient} will be used.
      */
@@ -52,6 +53,7 @@ class LocalEvaluationConfig
         'serverUrl' => 'https://api.lab.amplitude.com',
         'bootstrap' => [],
         'assignmentConfig' => null,
+        'exposureConfig' => null,
         'httpClient' => null,
         'guzzleClientConfig' => []
     ];
@@ -60,13 +62,14 @@ class LocalEvaluationConfig
      * @param array<string, mixed> $guzzleClientConfig
      * @param array<string, mixed> $bootstrap
      */
-    public function __construct(?LoggerInterface $logger, int $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?HttpClientInterface $httpClient, array $guzzleClientConfig)
+    public function __construct(?LoggerInterface $logger, int $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?ExposureConfig $exposureConfig, ?HttpClientInterface $httpClient, array $guzzleClientConfig)
     {
         $this->logger = $logger;
         $this->logLevel = $logLevel;
         $this->serverUrl = $serverUrl;
         $this->bootstrap = $bootstrap;
         $this->assignmentConfig = $assignmentConfig;
+        $this->exposureConfig = $exposureConfig;
         $this->httpClient = $httpClient;
         $this->guzzleClientConfig = $guzzleClientConfig;
     }

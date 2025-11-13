@@ -16,6 +16,7 @@ class LocalEvaluationConfigBuilder
      */
     protected array $bootstrap = LocalEvaluationConfig::DEFAULTS['bootstrap'];
     protected ?AssignmentConfig $assignmentConfig = LocalEvaluationConfig::DEFAULTS['assignmentConfig'];
+    protected ?ExposureConfig $exposureConfig = LocalEvaluationConfig::DEFAULTS['exposureConfig'];
     protected ?HttpClientInterface $httpClient = LocalEvaluationConfig::DEFAULTS['httpClient'];
     /**
      * @var array<string, mixed>
@@ -59,6 +60,12 @@ class LocalEvaluationConfigBuilder
         return $this;
     }
 
+    public function exposureConfig(ExposureConfig $exposureConfig): LocalEvaluationConfigBuilder
+    {
+        $this->exposureConfig = $exposureConfig;
+        return $this;
+    }
+
     public function httpClient(HttpClientInterface $httpClient): LocalEvaluationConfigBuilder
     {
         $this->httpClient = $httpClient;
@@ -82,6 +89,7 @@ class LocalEvaluationConfigBuilder
             $this->serverUrl,
             $this->bootstrap,
             $this->assignmentConfig,
+            $this->exposureConfig,
             $this->httpClient,
             $this->guzzleClientConfig
         );

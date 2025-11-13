@@ -6,14 +6,21 @@ use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
+use AmplitudeExperiment\Exposure\DefaultExposureFilter;
+use AmplitudeExperiment\Exposure\DefaultExposureTrackingProvider;
+use AmplitudeExperiment\Exposure\Exposure;
+use AmplitudeExperiment\Exposure\ExposureConfig;
+use AmplitudeExperiment\Exposure\ExposureService;
 use AmplitudeExperiment\Flag\FlagConfigFetcher;
 use AmplitudeExperiment\Flag\FlagConfigService;
 use AmplitudeExperiment\Http\GuzzleHttpClient;
 use AmplitudeExperiment\Logger\DefaultLogger;
 use AmplitudeExperiment\Logger\InternalLogger;
+use AmplitudeExperiment\Amplitude\Amplitude;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
 
 /**
@@ -27,6 +34,7 @@ class LocalEvaluationClient
     private EvaluationEngine $evaluation;
     private LoggerInterface $logger;
     private ?AssignmentService $assignmentService = null;
+    private ExposureService $exposureService;
 
     public function __construct(string $apiKey, ?LocalEvaluationConfig $config = null)
     {
@@ -36,6 +44,7 @@ class LocalEvaluationClient
         $fetcher = new FlagConfigFetcher($apiKey, $this->logger, $httpClient, $this->config->serverUrl);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->logger, $this->config->bootstrap);
         $this->initializeAssignmentService($this->config->assignmentConfig);
+        $this->initializeExposureService($apiKey, $this->config->exposureConfig);
         $this->evaluation = new EvaluationEngine();
     }
 
@@ -57,10 +66,13 @@ class LocalEvaluationClient
      * @param User $user The user to evaluate
      * @param array<string> $flagKeys The flags to evaluate with the user. If empty, all flags
      * from the flag cache are evaluated.
+     * @param EvaluateOptions $options The options for the evaluation.
      * @return array<string, Variant> evaluated variants
      */
-    public function evaluate(User $user, array $flagKeys = []): array
+    public function evaluate(User $user, array $flagKeys = [], EvaluateOptions $options = null): array
     {
+        $options = $options ?? new EvaluateOptions();
+
         // Get translated flags from the flag config service
         $flags = $this->flagConfigService->getTranslatedFlags();
 
@@ -88,6 +100,9 @@ class LocalEvaluationClient
         if ($this->assignmentService) {
             $this->assignmentService->track($this->assignmentService->createAssignment($user, $results));
         }
+        if ($options->tracksExposure) {
+            $this->exposureService->track(new Exposure($user, $results));
+        }
 
         return $results;
     }
@@ -110,5 +125,15 @@ class LocalEvaluationClient
                 $config->apiKey,
                 $config->minIdLength);
         }
+    }
+
+    private function initializeExposureService(string $deploymentKey, ?ExposureConfig $config): void
+    {
+        if ($config == null) {
+            $config = ExposureConfig::builder($deploymentKey, new DefaultExposureTrackingProvider(new Amplitude($deploymentKey)))->build();
+        }
+        $exposureTrackingProvider = $config->exposureTrackingProvider ?? new DefaultExposureTrackingProvider($config->apiKey ?? $deploymentKey);
+        $exposureFilter = $config->exposureFilter ?? new DefaultExposureFilter();
+        $this->exposureService = new ExposureService($exposureTrackingProvider, $exposureFilter);
     }
 }

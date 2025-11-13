@@ -28,14 +28,14 @@ class ExposureConfig
      * The filter used to determine whether an Exposure event should be tracked.
      * Default to {@link DefaultExposureFilter}.
      */
-    public ?ExposureFilterInterface $exposureFilter;
+    public ExposureFilterInterface $exposureFilter;
 
     const DEFAULTS = [
         'cacheCapacity' => 65536
     ];
 
     public function __construct(?string $apiKey, int $cacheCapacity, ?ExposureTrackingProvider $exposureTrackingProvider,
-                                ?ExposureFilterInterface $exposureFilter)
+                                ExposureFilterInterface $exposureFilter)
     {
         $this->apiKey = $apiKey;
         $this->cacheCapacity = $cacheCapacity;

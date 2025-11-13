@@ -2,6 +2,10 @@
 
 namespace AmplitudeExperiment\Exposure;
 
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+
+use const AmplitudeExperiment\Assignment\DAY_MILLIS;
+
 class ExposureConfigBuilder
 {
     protected int $cacheCapacity = ExposureConfig::DEFAULTS['cacheCapacity'];
@@ -29,6 +33,9 @@ class ExposureConfigBuilder
 
     public function build(): ExposureConfig
     {
+        if ($this->exposureFilter === null) {
+            $this->exposureFilter = new DefaultExposureFilter(new ArrayAdapter(DAY_MILLIS / 1000, false, 0, $this->cacheCapacity));
+        }
         return new ExposureConfig(
             $this->apiKey,
             $this->cacheCapacity,
