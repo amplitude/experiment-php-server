@@ -32,8 +32,8 @@ class FetchOptions
      * FetchOptions constructor.
      *
      * @param string[] $flagKeys Specific flag keys to evaluate and set variants for.
-     * @param ?bool $tracksAssignment Whether to track the assignment event.
-     * @param ?bool $tracksExposure Whether to track the exposure event.
+     * @param ?bool $tracksAssignment Whether to track the assignment event. If null, server side default is used (to track assignment event).
+     * @param ?bool $tracksExposure Whether to track the exposure event. If null, server side default is used (to not track exposure event).
      */
     public function __construct(array $flagKeys = [], ?bool $tracksAssignment = null, ?bool $tracksExposure = null)
     {
