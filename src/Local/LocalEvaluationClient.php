@@ -44,7 +44,7 @@ class LocalEvaluationClient
         $fetcher = new FlagConfigFetcher($apiKey, $this->logger, $httpClient, $this->config->serverUrl);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->logger, $this->config->bootstrap);
         $this->initializeAssignmentService($this->config->assignmentConfig);
-        $this->initializeExposureService($apiKey, $this->config->exposureConfig);
+        $this->initializeExposureService($this->config->exposureConfig);
         $this->evaluation = new EvaluationEngine();
     }
 
@@ -127,13 +127,12 @@ class LocalEvaluationClient
         }
     }
 
-    private function initializeExposureService(string $deploymentKey, ?ExposureConfig $config): void
+    private function initializeExposureService(?ExposureConfig $config): void
     {
-        if ($config == null) {
-            $config = ExposureConfig::builder($deploymentKey, new DefaultExposureTrackingProvider(new Amplitude($deploymentKey)))->build();
+        if ($config) {
+            $exposureTrackingProvider = $config->exposureTrackingProvider ?? new DefaultExposureTrackingProvider(new Amplitude($config->apiKey));
+            $exposureFilter = $config->exposureFilter;
+            $this->exposureService = new ExposureService($exposureTrackingProvider, $exposureFilter);
         }
-        $exposureTrackingProvider = $config->exposureTrackingProvider ?? new DefaultExposureTrackingProvider(new Amplitude($config->apiKey ?? $deploymentKey));
-        $exposureFilter = $config->exposureFilter;
-        $this->exposureService = new ExposureService($exposureTrackingProvider, $exposureFilter);
     }
 }

@@ -13,7 +13,7 @@ class ExposureConfigBuilder
     protected ?string $apiKey;
     protected ?ExposureFilterInterface $exposureFilter = null;
 
-    public function __construct(?string $apiKey = null, ?ExposureTrackingProvider $exposureTrackingProvider = null)
+    public function __construct(?string $apiKey, ?ExposureTrackingProvider $exposureTrackingProvider = null)
     {
         $this->apiKey = $apiKey;
         $this->exposureTrackingProvider = $exposureTrackingProvider;

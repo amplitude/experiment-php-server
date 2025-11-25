@@ -13,7 +13,7 @@ namespace AmplitudeExperiment\Exposure;
 class ExposureConfig
 {
     /**
-     * The Amplitude Project API key. If not provided, the deployment key will be used.
+     * The Amplitude Project API key.
      */
     public ?string $apiKey;
     /**
@@ -21,7 +21,7 @@ class ExposureConfig
      */
     public int $cacheCapacity;
     /**
-     * The provider for tracking exposure events to Amplitude
+     * The provider for tracking exposure events to Amplitude. If not provided, the {@link DefaultExposureTrackingProvider} will be used and initialized with the apiKey.
      */
     public ?ExposureTrackingProvider $exposureTrackingProvider;
     /**
