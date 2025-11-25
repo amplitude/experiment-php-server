@@ -100,7 +100,7 @@ class LocalEvaluationClient
         if ($this->assignmentService) {
             $this->assignmentService->track($this->assignmentService->createAssignment($user, $results));
         }
-        if ($options->tracksExposure) {
+        if ($options->tracksExposure && $this->exposureService) {
             $this->exposureService->track(new Exposure($user, $results));
         }
 

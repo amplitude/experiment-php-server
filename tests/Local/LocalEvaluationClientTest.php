@@ -25,8 +25,7 @@ class LocalEvaluationClientTest extends TestCase
             ->deviceId('test_device')
             ->build();
         $experiment = new Experiment();
-        $exposureConfig = ExposureConfig::builder($this->apiKey)->build();
-        $config = LocalEvaluationConfig::builder()->exposureConfig($exposureConfig)->logLevel(LogLevel::DEBUG)->build();
+        $config = LocalEvaluationConfig::builder()->logLevel(LogLevel::INFO)->build();
         $this->client = $experiment->initializeLocal($this->apiKey, $config);
     }
 
@@ -86,12 +85,16 @@ class LocalEvaluationClientTest extends TestCase
 
     public function testEvaluateWithTracksExposureTracksNonDefaultVariants()
     {
+        $exposureConfig = ExposureConfig::builder(apiKey: $this->apiKey)->build();
+        $client = new LocalEvaluationClient($this->apiKey, LocalEvaluationConfig::builder()->exposureConfig($exposureConfig)->logLevel(LogLevel::DEBUG)->build());
+        $client->refreshFlagConfigs();
+
         // Mock the amplitude client's logEvent method
         $trackedEvents = [];
-        $reflection = new \ReflectionClass($this->client);
+        $reflection = new \ReflectionClass($client);
         $exposureServiceProperty = $reflection->getProperty('exposureService');
         $exposureServiceProperty->setAccessible(true);
-        $exposureService = $exposureServiceProperty->getValue($this->client);
+        $exposureService = $exposureServiceProperty->getValue($client);
         
         $trackingProviderReflection = new \ReflectionClass($exposureService);
         $trackingProviderProperty = $trackingProviderReflection->getProperty('exposureTrackingProvider');
@@ -113,7 +116,7 @@ class LocalEvaluationClientTest extends TestCase
         
         // Perform evaluation with tracksExposure=true
         $options = new EvaluateOptions(true);
-        $variants = $this->client->evaluate($this->testUser, ['sdk-local-evaluation-ci-test'], $options);
+        $variants = $client->evaluate($this->testUser, ['sdk-local-evaluation-ci-test'], $options);
         
         // Verify that logEvent was called
         $this->assertGreaterThan(0, count($trackedEvents), 'Amplitude logEvent should be called when tracksExposure is true');
