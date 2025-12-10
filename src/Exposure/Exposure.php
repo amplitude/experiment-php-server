@@ -55,7 +55,6 @@ class Exposure
         $events = [];
         $canonicalized = $this->canonicalize();
         foreach ($this->variants as $flagKey => $variant) {
-            // TODO: We don't seem to use trackExposure metadata.
             $trackExposure = $variant->metadata['trackExposure'] ?? true;
             if ($trackExposure === false) {
                 continue;
@@ -77,34 +76,26 @@ class Exposure
             $set = [];
             $unset = [];
             $flagType = $variant->metadata['flagType'] ?? null;
-            $isDefault = $variant->metadata['default'] ?? false;
 
             if ($flagType != 'mutual-exclusion-group') {
-                if ($isDefault) {
-                    $unset["[Experiment] {$flagKey}"] = '-';
-                } else {
-                    if ($variant->key) {
-                        $set["[Experiment] {$flagKey}"] = $variant->key;
-                    } elseif ($variant->value) {
-                        $set["[Experiment] {$flagKey}"] = $variant->value;
-                    }
-                }
-            }
-
-            if (!$isDefault) {
-                $event->eventProperties['[Experiment] Flag Key'] = $flagKey;
                 if ($variant->key) {
-                    $event->eventProperties['[Experiment] Variant'] = $variant->key;
+                    $set["[Experiment] {$flagKey}"] = $variant->key;
                 } elseif ($variant->value) {
-                    $event->eventProperties['[Experiment] Variant'] = $variant->value;
-                }
-                if ($variant->metadata) {
-                    $event->eventProperties['metadata'] = $variant->metadata;
+                    $set["[Experiment] {$flagKey}"] = $variant->value;
                 }
             }
-
             $event->userProperties['$set'] = $set;
             $event->userProperties['$unset'] = $unset;
+
+            $event->eventProperties['[Experiment] Flag Key'] = $flagKey;
+            if ($variant->key) {
+                $event->eventProperties['[Experiment] Variant'] = $variant->key;
+            } elseif ($variant->value) {
+                $event->eventProperties['[Experiment] Variant'] = $variant->value;
+            }
+            if ($variant->metadata) {
+                $event->eventProperties['metadata'] = $variant->metadata;
+            }
 
             $hash = hashCode("{$flagKey} {$canonicalized}");
 

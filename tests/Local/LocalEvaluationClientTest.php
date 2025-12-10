@@ -85,7 +85,7 @@ class LocalEvaluationClientTest extends TestCase
 
     public function testEvaluateWithTracksExposureTracksNonDefaultVariants()
     {
-        $exposureConfig = ExposureConfig::builder(apiKey: $this->apiKey)->build();
+        $exposureConfig = ExposureConfig::builder(apiKey: "some_api_key")->build();
         $client = new LocalEvaluationClient($this->apiKey, LocalEvaluationConfig::builder()->exposureConfig($exposureConfig)->logLevel(LogLevel::DEBUG)->build());
         $client->refreshFlagConfigs();
 
@@ -116,7 +116,7 @@ class LocalEvaluationClientTest extends TestCase
         
         // Perform evaluation with tracksExposure=true
         $options = new EvaluateOptions(true);
-        $variants = $client->evaluate($this->testUser, ['sdk-local-evaluation-ci-test'], $options);
+        $variants = $client->evaluate($this->testUser, [], $options);
         
         // Verify that logEvent was called
         $this->assertGreaterThan(0, count($trackedEvents), 'Amplitude logEvent should be called when tracksExposure is true');
