@@ -85,7 +85,7 @@ class LocalEvaluationClientTest extends TestCase
 
     public function testEvaluateWithTracksExposureTracksNonDefaultVariants()
     {
-        $exposureConfig = ExposureConfig::builder(apiKey: "some_api_key")->build();
+        $exposureConfig = ExposureConfig::builder("some_api_key")->build();
         $client = new LocalEvaluationClient($this->apiKey, LocalEvaluationConfig::builder()->exposureConfig($exposureConfig)->logLevel(LogLevel::DEBUG)->build());
         $client->refreshFlagConfigs();
 
