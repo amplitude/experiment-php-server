@@ -34,7 +34,7 @@ class LocalEvaluationClient
     private EvaluationEngine $evaluation;
     private LoggerInterface $logger;
     private ?AssignmentService $assignmentService = null;
-    private ExposureService $exposureService;
+    private ?ExposureService $exposureService = null;
 
     public function __construct(string $apiKey, ?LocalEvaluationConfig $config = null)
     {
@@ -129,7 +129,7 @@ class LocalEvaluationClient
 
     private function initializeExposureService(?ExposureConfig $config): void
     {
-        if ($config) {
+        if ($config?->apiKey) {
             $exposureTrackingProvider = $config->exposureTrackingProvider ?? new DefaultExposureTrackingProvider(new Amplitude($config->apiKey));
             $exposureFilter = $config->exposureFilter;
             $this->exposureService = new ExposureService($exposureTrackingProvider, $exposureFilter);
