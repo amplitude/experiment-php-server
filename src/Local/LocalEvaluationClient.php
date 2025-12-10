@@ -129,7 +129,7 @@ class LocalEvaluationClient
 
     private function initializeExposureService(?ExposureConfig $config): void
     {
-        if ($config?->apiKey) {
+        if ($config && $config->apiKey) {
             $exposureTrackingProvider = $config->exposureTrackingProvider ?? new DefaultExposureTrackingProvider(new Amplitude($config->apiKey));
             $exposureFilter = $config->exposureFilter;
             $this->exposureService = new ExposureService($exposureTrackingProvider, $exposureFilter);
