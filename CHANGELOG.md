@@ -1,3 +1,17 @@
+# [1.4.0](https://github.com/amplitude/experiment-php-server/compare/1.3.0...1.4.0) (2025-12-17)
+
+
+### Bug Fixes
+
+* use string casting for messages in logger ([0b5e108](https://github.com/amplitude/experiment-php-server/commit/0b5e108aa13a35550b0fd5d6067e60795e685a4c))
+
+
+### Features
+
+* add assignment and exposure event tracking options ([#41](https://github.com/amplitude/experiment-php-server/issues/41)) ([bb255be](https://github.com/amplitude/experiment-php-server/commit/bb255be9c71cff9f88f14b03b053fd15b4649509))
+* add exposure service ([#44](https://github.com/amplitude/experiment-php-server/issues/44)) ([ab3dc4c](https://github.com/amplitude/experiment-php-server/commit/ab3dc4c2adbf66191c8638ba4213531b8c01ee36))
+* Allow symfony/cache 8 ([#45](https://github.com/amplitude/experiment-php-server/issues/45)) ([1abb515](https://github.com/amplitude/experiment-php-server/commit/1abb515ddef8ec08109e67190eace730bfc117d1))
+
 # [1.3.0](https://github.com/amplitude/experiment-php-server/compare/1.2.5...1.3.0) (2025-10-30)
 
 
