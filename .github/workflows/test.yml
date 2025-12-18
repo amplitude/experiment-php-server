@@ -41,5 +41,30 @@ jobs:
       - name: Run test suite
         run: composer run-script test
 
+  static-analysis:
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['7.4', '8.5']
+        os: [ubuntu-latest]
+        dependency-versions: ['highest']
+    runs-on: ${{ matrix.os }}
+    name: PHP ${{ matrix.php-version }} ${{ matrix.dependency-versions }} dependencies
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+
+      - name: Setup problem matchers for PHP
+        run: echo "::add-matcher::${{ runner.tool_cache }}/php.json"
+
+      - uses: "ramsey/composer-install@v3"
+        with:
+          dependency-versions: ${{ matrix.dependency-versions }}
+
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse --ansi
