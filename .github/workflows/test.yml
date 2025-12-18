@@ -13,8 +13,9 @@ jobs:
       matrix:
         php-version: ['7.4', '8.0', '8.1', '8.2', '8.3', '8.4', '8.5']
         os: [ubuntu-latest]
+        dependency-versions: ['lowest', 'highest']
     runs-on: ${{ matrix.os }}
-
+    name: PHP ${{ matrix.php-version }} ${{ matrix.dependency-versions }} dependencies
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -22,21 +23,14 @@ jobs:
       - name: Validate composer.json
         run: composer validate --strict --no-check-lock
 
-      - name: Cache Composer packages
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.json') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
-
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-version }}
 
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+      - uses: "ramsey/composer-install@v3"
+        with:
+          dependency-versions: ${{ matrix.dependency-versions }}
 
       - name: Run test suite
         run: composer run-script test
