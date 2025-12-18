@@ -5,67 +5,41 @@ declare(strict_types=1);
 namespace AmplitudeExperiment\Logger;
 
 use DateTimeImmutable;
-use Psr\Log\LoggerInterface;
+use Psr\Log\AbstractLogger;
+use Psr\Log\LogLevel as PsrLogLevel;
 
 /**
- * A default LoggerInterface implementation that logs to error_log.
+ * A default logger implementation that logs to error_log.
  */
-class DefaultLogger implements LoggerInterface
+class DefaultLogger extends AbstractLogger
 {
-    public function emergency($message, array $context = []): void
-    {
-        self::logMessage(LogLevel::EMERGENCY, (string) $message, $context);
-    }
-
-    public function alert($message, array $context = []): void
-    {
-        self::logMessage(LogLevel::ALERT, (string) $message, $context);
-    }
-
-    public function critical($message, array $context = []): void
-    {
-        self::logMessage(LogLevel::CRITICAL, (string) $message, $context);
-    }
-
-    public function error($message, array $context = []): void
-    {
-        self::logMessage(LogLevel::ERROR, (string) $message, $context);
-    }
-
-    public function warning($message, array $context = []): void
-    {
-        self::logMessage(LogLevel::WARNING, (string) $message, $context);
-    }
-
-    public function notice($message, array $context = []): void
-    {
-        self::logMessage(LogLevel::NOTICE, (string) $message, $context);
-    }
-
-    public function info($message, array $context = []): void
-    {
-        self::logMessage(LogLevel::INFO, (string) $message, $context);
-    }
-
-    public function debug($message, array $context = []): void
-    {
-        self::logMessage(LogLevel::DEBUG, (string) $message, $context);
-    }
-
-    public function log($level, $message, array $context = []): void
-    {
-        // Do nothing, only the leveled methods should be used.
-    }
+    private const LEVEL_MAP = [
+        PsrLogLevel::EMERGENCY => LogLevel::EMERGENCY,
+        PsrLogLevel::ALERT => LogLevel::ALERT,
+        PsrLogLevel::CRITICAL => LogLevel::CRITICAL,
+        PsrLogLevel::ERROR => LogLevel::ERROR,
+        PsrLogLevel::WARNING => LogLevel::WARNING,
+        PsrLogLevel::NOTICE => LogLevel::NOTICE,
+        PsrLogLevel::INFO => LogLevel::INFO,
+        PsrLogLevel::DEBUG => LogLevel::DEBUG,
+    ];
 
     /**
+     * @param mixed $level
+     * @param string|\Stringable $message
      * @param array<string, mixed> $context
      */
-    private static function logMessage(int $level, string $message, array $context = []): void
+    public function log($level, $message, array $context = []): void
     {
+        $intLevel = self::LEVEL_MAP[$level] ?? null;
+        if ($intLevel === null) {
+            return;
+        }
+
         $date = new DateTimeImmutable();
         $timestamp = $date->format('Y-m-d\\TH:i:sP');
-        $level = LogLevel::toString($level);
-        $message = "[$timestamp] AmplitudeExperiment.$level: $message";
-        error_log($message);
+        $levelString = LogLevel::toString($intLevel);
+        $logMessage = "[$timestamp] AmplitudeExperiment.$levelString: $message";
+        error_log($logMessage);
     }
 }
