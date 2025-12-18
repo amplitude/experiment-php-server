@@ -15,7 +15,7 @@ jobs:
         os: [ubuntu-latest]
         dependency-versions: ['lowest', 'highest']
     runs-on: ${{ matrix.os }}
-    name: PHP ${{ matrix.php-version }} ${{ matrix.dependency-versions }} dependencies
+    name: Tests on PHP ${{ matrix.php-version }} with {{ matrix.dependency-versions }} dependencies
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -49,7 +49,7 @@ jobs:
         os: [ubuntu-latest]
         dependency-versions: ['highest']
     runs-on: ${{ matrix.os }}
-    name: PHP ${{ matrix.php-version }} ${{ matrix.dependency-versions }} dependencies
+    name: PHPStan on PHP ${{ matrix.php-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
