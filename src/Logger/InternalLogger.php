@@ -1,11 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace AmplitudeExperiment\Logger;
 
+use Psr\Log\AbstractLogger;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel as PsrLogLevel;
 
-class InternalLogger implements LoggerInterface
+/**
+ * A logger wrapper that filters messages by log level.
+ */
+class InternalLogger extends AbstractLogger
 {
+    private const LEVEL_MAP = [
+        PsrLogLevel::EMERGENCY => LogLevel::EMERGENCY,
+        PsrLogLevel::ALERT => LogLevel::ALERT,
+        PsrLogLevel::CRITICAL => LogLevel::CRITICAL,
+        PsrLogLevel::ERROR => LogLevel::ERROR,
+        PsrLogLevel::WARNING => LogLevel::WARNING,
+        PsrLogLevel::NOTICE => LogLevel::NOTICE,
+        PsrLogLevel::INFO => LogLevel::INFO,
+        PsrLogLevel::DEBUG => LogLevel::DEBUG,
+    ];
+
     private LoggerInterface $logger;
     private int $logLevel;
 
@@ -15,69 +33,20 @@ class InternalLogger implements LoggerInterface
         $this->logLevel = $logLevel;
     }
 
-    public function emergency($message, array $context = []): void
-    {
-        if ($this->shouldLog(LogLevel::EMERGENCY)) {
-            $this->logger->emergency((string) $message, $context);
-        }
-    }
-
-    public function alert($message, array $context = []): void
-    {
-        if ($this->shouldLog(LogLevel::ALERT)) {
-            $this->logger->alert((string) $message, $context);
-        }
-    }
-
-    public function critical($message, array $context = []): void
-    {
-        if ($this->shouldLog(LogLevel::CRITICAL)) {
-            $this->logger->critical((string) $message, $context);
-        }
-    }
-
-    public function error($message, array $context = []): void
-    {
-        if ($this->shouldLog(LogLevel::ERROR)) {
-            $this->logger->error((string) $message, $context);
-        }
-    }
-
-    public function warning($message, array $context = []): void
-    {
-        if ($this->shouldLog(LogLevel::WARNING)) {
-            $this->logger->warning((string) $message, $context);
-        }
-    }
-
-    public function notice($message, array $context = []): void
-    {
-        if ($this->shouldLog(LogLevel::NOTICE)) {
-            $this->logger->notice((string) $message, $context);
-        }
-    }
-
-    public function info($message, array $context = []): void
-    {
-        if ($this->shouldLog(LogLevel::INFO)) {
-            $this->logger->info((string) $message, $context);
-        }
-    }
-
-    public function debug($message, array $context = []): void
-    {
-        if ($this->shouldLog(LogLevel::DEBUG)) {
-            $this->logger->debug((string) $message, $context);
-        }
-    }
-
+    /**
+     * @param mixed $level
+     * @param string|\Stringable $message
+     * @param array<string, mixed> $context
+     */
     public function log($level, $message, array $context = []): void
     {
-        // Do nothing
-    }
+        $intLevel = self::LEVEL_MAP[$level] ?? null;
+        if ($intLevel === null) {
+            return;
+        }
 
-    private function shouldLog(int $level): bool
-    {
-        return $level <= $this->logLevel;
+        if ($intLevel <= $this->logLevel) {
+            $this->logger->log($level, (string) $message, $context);
+        }
     }
 }
