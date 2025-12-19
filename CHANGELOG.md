@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/amplitude/experiment-php-server/compare/1.4.0...1.4.1) (2025-12-19)
+
+
+### Bug Fixes
+
+* Extend AbstractLogger for psr/log v1-v3 compatibility ([#51](https://github.com/amplitude/experiment-php-server/issues/51)) ([30f7083](https://github.com/amplitude/experiment-php-server/commit/30f7083230c3070ca584d6557cf07ad5ee071ec2))
+
 # [1.4.0](https://github.com/amplitude/experiment-php-server/compare/1.3.0...1.4.0) (2025-12-17)
 
 
