@@ -26,7 +26,7 @@ const GUZZLE_DEFAULTS = [
      */
     'retryBackoffScalar' => 1.5,
     /**
-     * The request timeout for retrying fetch requests.
+     * @deprecated This parameter is not used. All requests (initial and retries) use timeoutMillis.
      */
     'retryTimeoutMillis' => 10000
 ];
