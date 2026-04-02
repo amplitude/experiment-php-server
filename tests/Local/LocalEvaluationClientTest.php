@@ -7,7 +7,7 @@ use AmplitudeExperiment\Exposure\ExposureConfig;
 use AmplitudeExperiment\Local\EvaluateOptions;
 use AmplitudeExperiment\Local\LocalEvaluationClient;
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
-use AmplitudeExperiment\Logger\LogLevel;
+use Psr\Log\LogLevel;
 use AmplitudeExperiment\User;
 use PHPUnit\Framework\TestCase;
 

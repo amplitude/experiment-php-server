@@ -8,7 +8,7 @@ use Psr\Log\LoggerInterface;
 class RemoteEvaluationConfigBuilder
 {
     protected ?LoggerInterface $logger = RemoteEvaluationConfig::DEFAULTS['logger'];
-    protected int $logLevel = RemoteEvaluationConfig::DEFAULTS['logLevel'];
+    protected string $logLevel = RemoteEvaluationConfig::DEFAULTS['logLevel'];
     protected bool $debug = RemoteEvaluationConfig::DEFAULTS['debug'];
     protected string $serverUrl = RemoteEvaluationConfig::DEFAULTS['serverUrl'];
     protected ?HttpClientInterface $httpClient = RemoteEvaluationConfig::DEFAULTS['httpClient'];
@@ -27,7 +27,7 @@ class RemoteEvaluationConfigBuilder
         return $this;
     }
 
-    public function logLevel(int $logLevel): RemoteEvaluationConfigBuilder
+    public function logLevel(string $logLevel): RemoteEvaluationConfigBuilder
     {
         $this->logLevel = $logLevel;
         return $this;

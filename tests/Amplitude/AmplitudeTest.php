@@ -5,8 +5,6 @@ namespace AmplitudeExperiment\Test\Amplitude;
 use AmplitudeExperiment\Amplitude\AmplitudeConfig;
 use AmplitudeExperiment\Amplitude\Event;
 use AmplitudeExperiment\Logger\DefaultLogger;
-use AmplitudeExperiment\Logger\InternalLogger;
-use AmplitudeExperiment\Logger\LogLevel;
 use AmplitudeExperiment\Test\Util\MockGuzzleHttpClient;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Handler\MockHandler;

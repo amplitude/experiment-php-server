@@ -5,8 +5,8 @@ namespace AmplitudeExperiment\Local;
 use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Exposure\ExposureConfig;
 use AmplitudeExperiment\Http\HttpClientInterface;
-use AmplitudeExperiment\Logger\LogLevel;
 use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
 
 /**
  * Configuration options. This is an object that can be created using
@@ -25,7 +25,7 @@ class LocalEvaluationConfig
     /**
      * The {@link LogLevel} to use for the logger.
      */
-    public int $logLevel;
+    public string $logLevel;
     /**
      * The server endpoint from which to request variants.
      */
@@ -63,7 +63,7 @@ class LocalEvaluationConfig
      * @param array<string, mixed> $guzzleClientConfig
      * @param array<string, mixed> $bootstrap
      */
-    public function __construct(?LoggerInterface $logger, int $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?ExposureConfig $exposureConfig, ?HttpClientInterface $httpClient, array $guzzleClientConfig)
+    public function __construct(?LoggerInterface $logger, string $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?ExposureConfig $exposureConfig, ?HttpClientInterface $httpClient, array $guzzleClientConfig)
     {
         $this->logger = $logger;
         $this->logLevel = $logLevel;

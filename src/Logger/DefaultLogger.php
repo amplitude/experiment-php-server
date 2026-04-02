@@ -4,42 +4,47 @@ declare(strict_types=1);
 
 namespace AmplitudeExperiment\Logger;
 
-use DateTimeImmutable;
 use Psr\Log\AbstractLogger;
-use Psr\Log\LogLevel as PsrLogLevel;
+use Psr\Log\InvalidArgumentException;
+use Psr\Log\LogLevel;
 
-/**
- * A default logger implementation that logs to error_log.
- */
 class DefaultLogger extends AbstractLogger
 {
-    private const LEVEL_MAP = [
-        PsrLogLevel::EMERGENCY => LogLevel::EMERGENCY,
-        PsrLogLevel::ALERT => LogLevel::ALERT,
-        PsrLogLevel::CRITICAL => LogLevel::CRITICAL,
-        PsrLogLevel::ERROR => LogLevel::ERROR,
-        PsrLogLevel::WARNING => LogLevel::WARNING,
-        PsrLogLevel::NOTICE => LogLevel::NOTICE,
-        PsrLogLevel::INFO => LogLevel::INFO,
-        PsrLogLevel::DEBUG => LogLevel::DEBUG,
+    private string $minLevel;
+
+    private const LEVELS = [
+        LogLevel::EMERGENCY => 0,
+        LogLevel::ALERT     => 1,
+        LogLevel::CRITICAL  => 2,
+        LogLevel::ERROR     => 3,
+        LogLevel::WARNING   => 4,
+        LogLevel::NOTICE    => 5,
+        LogLevel::INFO      => 6,
+        LogLevel::DEBUG     => 7
     ];
 
+    public function __construct(string $minLevel = LogLevel::ERROR)
+    {
+        if (!isset(self::LEVELS[$minLevel])) {
+            throw new InvalidArgumentException("Unknown log level: $minLevel");
+        }
+        $this->minLevel = $minLevel;
+    }
+
     /**
-     * @param mixed $level
+     * @param string $level
      * @param string|\Stringable $message
      * @param array<string, mixed> $context
      */
     public function log($level, $message, array $context = []): void
     {
-        $intLevel = self::LEVEL_MAP[$level] ?? null;
-        if ($intLevel === null) {
+        if (!isset(self::LEVELS[$level])) {
+            throw new InvalidArgumentException("Unknown log level: $level");
+        }
+        if (self::LEVELS[$level] > self::LEVELS[$this->minLevel]) {
             return;
         }
-
-        $date = new DateTimeImmutable();
-        $timestamp = $date->format('Y-m-d\\TH:i:sP');
-        $levelString = LogLevel::toString($intLevel);
-        $logMessage = "[$timestamp] AmplitudeExperiment.$levelString: $message";
-        error_log($logMessage);
+        $timestamp = date('Y-m-d\TH:i:sP');
+        error_log("[$timestamp] AmplitudeExperiment.$level: " . (string) $message);
     }
 }

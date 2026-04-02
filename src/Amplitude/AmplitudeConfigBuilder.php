@@ -18,7 +18,7 @@ class AmplitudeConfigBuilder
      */
     protected array $guzzleClientConfig = AmplitudeConfig::DEFAULTS['guzzleClientConfig'];
     protected ?LoggerInterface $logger = AmplitudeConfig::DEFAULTS['logger'];
-    protected int $logLevel = AmplitudeConfig::DEFAULTS['logLevel'];
+    protected string $logLevel = AmplitudeConfig::DEFAULTS['logLevel'];
 
     public function __construct()
     {
@@ -75,7 +75,7 @@ class AmplitudeConfigBuilder
         return $this;
     }
 
-    public function logLevel(int $logLevel): AmplitudeConfigBuilder
+    public function logLevel(string $logLevel): AmplitudeConfigBuilder
     {
         $this->logLevel = $logLevel;
         return $this;

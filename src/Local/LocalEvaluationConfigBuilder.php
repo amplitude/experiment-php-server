@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 class LocalEvaluationConfigBuilder
 {
     protected ?LoggerInterface $logger = LocalEvaluationConfig::DEFAULTS['logger'];
-    protected int $logLevel = LocalEvaluationConfig::DEFAULTS['logLevel'];
+    protected string $logLevel = LocalEvaluationConfig::DEFAULTS['logLevel'];
     protected string $serverUrl = LocalEvaluationConfig::DEFAULTS['serverUrl'];
     /**
      * @var array<string, mixed>
@@ -34,7 +34,7 @@ class LocalEvaluationConfigBuilder
         return $this;
     }
 
-    public function logLevel(int $logLevel): LocalEvaluationConfigBuilder
+    public function logLevel(string $logLevel): LocalEvaluationConfigBuilder
     {
         $this->logLevel = $logLevel;
         return $this;
