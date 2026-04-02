@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ${{ github.actor }} permission check to do a release
-        uses: octokit/request-action@v2.x
+        uses: octokit/request-action@02f5e7c637a73a3b12ed81015fa7fb5f11cc5d7d # v2.x
         with:
           route: GET /repos/:repository/collaborators/${{ github.actor }}
           repository: ${{ github.repository }}
@@ -27,12 +27,12 @@ jobs:
     needs: [ authorize ]
     steps:
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: '22'
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
         with:
           fetch-depth: 0
 
