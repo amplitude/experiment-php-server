@@ -7,7 +7,6 @@ use AmplitudeExperiment\Exposure\ExposureConfig;
 use AmplitudeExperiment\Local\EvaluateOptions;
 use AmplitudeExperiment\Local\LocalEvaluationClient;
 use AmplitudeExperiment\Local\LocalEvaluationConfig;
-use Psr\Log\LogLevel;
 use AmplitudeExperiment\User;
 use PHPUnit\Framework\TestCase;
 
@@ -25,8 +24,7 @@ class LocalEvaluationClientTest extends TestCase
             ->deviceId('test_device')
             ->build();
         $experiment = new Experiment();
-        $config = LocalEvaluationConfig::builder()->logLevel(LogLevel::INFO)->build();
-        $this->client = $experiment->initializeLocal($this->apiKey, $config);
+        $this->client = $experiment->initializeLocal($this->apiKey);
     }
 
     public function setUp(): void
@@ -86,7 +84,7 @@ class LocalEvaluationClientTest extends TestCase
     public function testEvaluateWithTracksExposureTracksNonDefaultVariants()
     {
         $exposureConfig = ExposureConfig::builder("some_api_key")->build();
-        $client = new LocalEvaluationClient($this->apiKey, LocalEvaluationConfig::builder()->exposureConfig($exposureConfig)->logLevel(LogLevel::DEBUG)->build());
+        $client = new LocalEvaluationClient($this->apiKey, LocalEvaluationConfig::builder()->exposureConfig($exposureConfig)->build());
         $client->refreshFlagConfigs();
 
         // Mock the amplitude client's logEvent method

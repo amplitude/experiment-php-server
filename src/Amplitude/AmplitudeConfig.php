@@ -6,7 +6,6 @@ use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Assignment\AssignmentConfigBuilder;
 use AmplitudeExperiment\Http\HttpClientInterface;
 use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
 
 /**
  * Configuration options for Amplitude. The Amplitude object is created when you create an {@link AssignmentConfig}.
@@ -48,10 +47,6 @@ class AmplitudeConfig
      * Set to use custom logger. If not set, a {@link DefaultLogger} is used.
      */
     public ?LoggerInterface $logger;
-    /**
-     * The {@link LogLevel} to use for the logger.
-     */
-    public string $logLevel;
 
     const DEFAULTS = [
         'serverZone' => 'US',
@@ -71,7 +66,6 @@ class AmplitudeConfig
         'httpClient' => null,
         'guzzleClientConfig' => [],
         'logger' => null,
-        'logLevel' => LogLevel::ERROR,
     ];
 
     /**
@@ -85,8 +79,7 @@ class AmplitudeConfig
         bool                 $useBatch,
         ?HttpClientInterface $httpClient,
         array                $guzzleClientConfig,
-        ?LoggerInterface      $logger,
-        string               $logLevel)
+        ?LoggerInterface      $logger)
     {
         $this->flushQueueSize = $flushQueueSize;
         $this->minIdLength = $minIdLength;
@@ -96,7 +89,6 @@ class AmplitudeConfig
         $this->httpClient = $httpClient;
         $this->guzzleClientConfig = $guzzleClientConfig;
         $this->logger = $logger;
-        $this->logLevel = $logLevel;
     }
 
     public static function builder(): AmplitudeConfigBuilder

@@ -38,7 +38,7 @@ class LocalEvaluationClient
     public function __construct(string $apiKey, ?LocalEvaluationConfig $config = null)
     {
         $this->config = $config ?? LocalEvaluationConfig::builder()->build();
-        $this->logger = $this->config->logger ?? new DefaultLogger($this->config->logLevel);
+        $this->logger = $this->config->logger ?? new DefaultLogger();
         $httpClient = $config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
         $fetcher = new FlagConfigFetcher($apiKey, $this->logger, $httpClient, $this->config->serverUrl);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->logger, $this->config->bootstrap);

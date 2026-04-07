@@ -34,7 +34,7 @@ class RemoteEvaluationClient
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
         $this->httpClient = $config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
-        $this->logger = $this->config->logger ?? new DefaultLogger($this->config->logLevel);
+        $this->logger = $this->config->logger ?? new DefaultLogger();
     }
 
     /**

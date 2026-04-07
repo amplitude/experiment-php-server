@@ -29,7 +29,7 @@ class Amplitude
     {
         $this->apiKey = $apiKey;
         $this->config = $config ?? AmplitudeConfig::builder()->build();
-        $this->logger = $this->config->logger ?? new DefaultLogger($this->config->logLevel);
+        $this->logger = $this->config->logger ?? new DefaultLogger();
         $this->httpClient = $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
     }
 

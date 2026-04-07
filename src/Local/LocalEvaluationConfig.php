@@ -6,7 +6,6 @@ use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Exposure\ExposureConfig;
 use AmplitudeExperiment\Http\HttpClientInterface;
 use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
 
 /**
  * Configuration options. This is an object that can be created using
@@ -22,10 +21,6 @@ class LocalEvaluationConfig
      * Set to use custom logger. If not set, a {@link DefaultLogger} is used.
      */
     public ?LoggerInterface $logger;
-    /**
-     * The {@link LogLevel} to use for the logger.
-     */
-    public string $logLevel;
     /**
      * The server endpoint from which to request variants.
      */
@@ -50,7 +45,6 @@ class LocalEvaluationConfig
 
     const DEFAULTS = [
         'logger' => null,
-        'logLevel' => LogLevel::ERROR,
         'serverUrl' => 'https://api.lab.amplitude.com',
         'bootstrap' => [],
         'assignmentConfig' => null,
@@ -63,10 +57,9 @@ class LocalEvaluationConfig
      * @param array<string, mixed> $guzzleClientConfig
      * @param array<string, mixed> $bootstrap
      */
-    public function __construct(?LoggerInterface $logger, string $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?ExposureConfig $exposureConfig, ?HttpClientInterface $httpClient, array $guzzleClientConfig)
+    public function __construct(?LoggerInterface $logger, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?ExposureConfig $exposureConfig, ?HttpClientInterface $httpClient, array $guzzleClientConfig)
     {
         $this->logger = $logger;
-        $this->logLevel = $logLevel;
         $this->serverUrl = $serverUrl;
         $this->bootstrap = $bootstrap;
         $this->assignmentConfig = $assignmentConfig;

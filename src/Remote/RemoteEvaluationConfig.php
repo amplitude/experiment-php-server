@@ -4,7 +4,6 @@ namespace AmplitudeExperiment\Remote;
 
 use AmplitudeExperiment\Http\HttpClientInterface;
 use Psr\Log\LoggerInterface;
-use Psr\Log\LogLevel;
 
 /**
  * Configuration options. This is an object that can be created using
@@ -21,10 +20,6 @@ class RemoteEvaluationConfig
      */
     public ?LoggerInterface $logger;
     /**
-     * The {@link LogLevel} to use for the logger.
-     */
-    public string $logLevel;
-    /**
      * The server endpoint from which to request variants.
      */
     public string $serverUrl;
@@ -40,7 +35,6 @@ class RemoteEvaluationConfig
 
     const DEFAULTS = [
         'logger' => null,
-        'logLevel' => LogLevel::ERROR,
         'debug' => false,
         'serverUrl' => 'https://api.lab.amplitude.com',
         'httpClient' => null,
@@ -53,14 +47,12 @@ class RemoteEvaluationConfig
      */
     public function __construct(
         ?LoggerInterface     $logger,
-        string               $logLevel,
         string               $serverUrl,
         ?HttpClientInterface $httpClient,
         array                $guzzleClientConfig
     )
     {
         $this->logger = $logger;
-        $this->logLevel = $logLevel;
         $this->serverUrl = $serverUrl;
         $this->httpClient = $httpClient;
         $this->guzzleClientConfig = $guzzleClientConfig;
