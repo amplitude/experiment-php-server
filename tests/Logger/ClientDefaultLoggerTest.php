@@ -19,66 +19,44 @@ class ClientDefaultLoggerTest extends TestCase
     private const API_KEY = 'test-api-key-ignored';
 
     /**
-     * @dataProvider clientKindProvider
+     * @dataProvider clientProvider
      */
-    public function testDefaultsToNullLogger(string $kind): void
+    public function testDefaultsToNullLogger(callable $build): void
     {
-        $client = self::buildWithoutLogger($kind);
-        $this->assertInstanceOf(NullLogger::class, $this->readLogger($client));
+        $this->assertInstanceOf(NullLogger::class, $this->readLogger($build(null)));
     }
 
     /**
-     * @dataProvider clientKindProvider
+     * @dataProvider clientProvider
      */
-    public function testCustomLoggerIsRespected(string $kind): void
+    public function testCustomLoggerIsRespected(callable $build): void
     {
         $logger = new DefaultLogger();
-        $client = self::buildWithLogger($kind, $logger);
-        $this->assertSame($logger, $this->readLogger($client));
+        $this->assertSame($logger, $this->readLogger($build($logger)));
     }
 
-    public static function clientKindProvider(): array
+    public static function clientProvider(): array
     {
         return [
-            'Amplitude' => ['Amplitude'],
-            'LocalEvaluationClient' => ['LocalEvaluationClient'],
-            'RemoteEvaluationClient' => ['RemoteEvaluationClient'],
+            'Amplitude' => [
+                fn(?LoggerInterface $l) => new Amplitude(
+                    self::API_KEY,
+                    $l ? AmplitudeConfig::builder()->logger($l)->build() : null
+                ),
+            ],
+            'LocalEvaluationClient' => [
+                fn(?LoggerInterface $l) => new LocalEvaluationClient(
+                    self::API_KEY,
+                    $l ? LocalEvaluationConfig::builder()->logger($l)->build() : null
+                ),
+            ],
+            'RemoteEvaluationClient' => [
+                fn(?LoggerInterface $l) => new RemoteEvaluationClient(
+                    self::API_KEY,
+                    $l ? RemoteEvaluationConfig::builder()->logger($l)->build() : null
+                ),
+            ],
         ];
-    }
-
-    private static function buildWithoutLogger(string $kind): object
-    {
-        switch ($kind) {
-            case 'Amplitude':
-                return new Amplitude(self::API_KEY);
-            case 'LocalEvaluationClient':
-                return new LocalEvaluationClient(self::API_KEY);
-            case 'RemoteEvaluationClient':
-                return new RemoteEvaluationClient(self::API_KEY);
-        }
-        throw new \InvalidArgumentException("Unknown client kind: $kind");
-    }
-
-    private static function buildWithLogger(string $kind, LoggerInterface $logger): object
-    {
-        switch ($kind) {
-            case 'Amplitude':
-                return new Amplitude(
-                    self::API_KEY,
-                    AmplitudeConfig::builder()->logger($logger)->build()
-                );
-            case 'LocalEvaluationClient':
-                return new LocalEvaluationClient(
-                    self::API_KEY,
-                    LocalEvaluationConfig::builder()->logger($logger)->build()
-                );
-            case 'RemoteEvaluationClient':
-                return new RemoteEvaluationClient(
-                    self::API_KEY,
-                    RemoteEvaluationConfig::builder()->logger($logger)->build()
-                );
-        }
-        throw new \InvalidArgumentException("Unknown client kind: $kind");
     }
 
     private function readLogger(object $client): LoggerInterface
