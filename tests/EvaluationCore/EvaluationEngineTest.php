@@ -253,4 +253,45 @@ class EvaluationEngineTest extends TestCase
         $this->assertEquals('off', $results['test-case-bool']->key,
             "Non-boolean value should match default segment");
     }
+
+    private function flagWithCondition(string $op, array $values): EvaluationFlag
+    {
+        $variants = ['on' => new EvaluationVariant('on')];
+        $segment = new EvaluationSegment(
+            null,
+            [[new EvaluationCondition(
+                ['context', 'user', 'user_properties', 'test_prop'],
+                $op,
+                $values
+            )]],
+            'on'
+        );
+        return new EvaluationFlag('test-flag', $variants, [$segment]);
+    }
+
+    private function contextWithProp($value): array
+    {
+        return ['user' => ['user_properties' => ['test_prop' => $value]]];
+    }
+
+    private function evaluateProp($propValue, string $op, array $values): ?EvaluationVariant
+    {
+        $flag = $this->flagWithCondition($op, $values);
+        $context = $this->contextWithProp($propValue);
+        $results = $this->engine->evaluate($context, ['test-flag' => $flag]);
+        return $results['test-flag'] ?? null;
+    }
+
+    private function assertMatch($propValue, string $op, array $values): void
+    {
+        $result = $this->evaluateProp($propValue, $op, $values);
+        $this->assertNotNull($result, "Expected match, got null");
+        $this->assertEquals('on', $result->key);
+    }
+
+    private function assertNoMatch($propValue, string $op, array $values): void
+    {
+        $result = $this->evaluateProp($propValue, $op, $values);
+        $this->assertNull($result, "Expected no match, got variant");
+    }
 }
