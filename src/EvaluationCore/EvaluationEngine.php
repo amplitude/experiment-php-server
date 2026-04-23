@@ -308,6 +308,21 @@ class EvaluationEngine
      */
     private function matchStringsNonSet(array $propValues, string $op, array $filterValues): bool
     {
+        $isNegationOp = in_array($op, [
+            EvaluationOperator::IS_NOT,
+            EvaluationOperator::DOES_NOT_CONTAIN,
+            EvaluationOperator::REGEX_DOES_NOT_MATCH
+        ]);
+
+        if ($isNegationOp) {
+            foreach ($propValues as $propValue) {
+                if (!$this->matchString($propValue, $op, $filterValues)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         foreach ($propValues as $propValue) {
             if ($this->matchString($propValue, $op, $filterValues)) {
                 return true;
