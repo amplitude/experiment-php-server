@@ -254,6 +254,41 @@ class EvaluationEngineTest extends TestCase
             "Non-boolean value should match default segment");
     }
 
+    public function testMultiValueArrayPropertyMatching()
+    {
+        // Scalar string cases (regression coverage)
+        $this->assertMatch('hello', 'is', ['hello']);
+        $this->assertMatch('hello', 'contains', ['ell']);
+        $this->assertMatch('2', 'greater', ['1']);
+        $this->assertNoMatch('world', 'is', ['hello']);
+
+        // Non-string scalar cases
+        $this->assertMatch(42, 'greater', ['1']);
+        $this->assertMatch(true, 'is', ['true']);
+
+        // JSON array string + set operator
+        $this->assertMatch('["a","b"]', 'set contains', ['a']);
+
+        // JSON array string + non-set operator (NEW behavior)
+        $this->assertMatch('["a","b"]', 'is', ['a']);
+
+        // Collection + set operator
+        $this->assertMatch(['a', 'b'], 'set contains', ['a']);
+
+        // Collection + non-set operator (NEW behavior)
+        $this->assertMatch(['a', 'b'], 'is', ['a']);
+
+        // Malformed JSON array -- falls through to scalar matchString
+        $this->assertMatch('[broken', 'is', ['[broken']);
+
+        // Empty JSON array + set operator
+        $this->assertNoMatch('[]', 'set contains', ['a']);
+
+        // Leading whitespace prevents array parsing -- treated as scalar
+        $this->assertMatch(' ["a"]', 'is', [' ["a"]']);
+        $this->assertNoMatch(' ["a"]', 'set contains', ['a']);
+    }
+
     private function flagWithCondition(string $op, array $values): EvaluationFlag
     {
         $variants = ['on' => new EvaluationVariant('on')];
