@@ -2,9 +2,6 @@
 
 namespace AmplitudeExperiment;
 
-use AmplitudeExperiment\Logger\DefaultLogger;
-use AmplitudeExperiment\Logger\InternalLogger;
-use AmplitudeExperiment\Logger\LogLevel;
 use Exception;
 
 class AmplitudeCookie
@@ -45,8 +42,6 @@ class AmplitudeCookie
 
             $userSession = json_decode($decoded, true);
             if ($userSession === null) {
-                $logger = new InternalLogger(new DefaultLogger(), LogLevel::INFO);
-                $logger->error("Error parsing the Amplitude cookie: '{$amplitudeCookie}'.");
                 return [];
             }
             return [

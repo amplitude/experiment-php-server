@@ -3,8 +3,6 @@
 namespace AmplitudeExperiment\Remote;
 
 use AmplitudeExperiment\Http\HttpClientInterface;
-use AmplitudeExperiment\Logger\DefaultLogger;
-use AmplitudeExperiment\Logger\LogLevel;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -18,13 +16,11 @@ use Psr\Log\LoggerInterface;
 class RemoteEvaluationConfig
 {
     /**
-     * Set to use custom logger. If not set, a {@link DefaultLogger} is used.
+     * Set to use a custom PSR-3 logger. If not set, a {@link \Psr\Log\NullLogger} is used
+     * and SDK log messages are discarded. Pass any PSR-3 implementation (e.g. Monolog, or
+     * the opt-in {@link \AmplitudeExperiment\Logger\DefaultLogger}) to receive log output.
      */
     public ?LoggerInterface $logger;
-    /**
-     * The {@link LogLevel} to use for the logger.
-     */
-    public int $logLevel;
     /**
      * The server endpoint from which to request variants.
      */
@@ -41,7 +37,6 @@ class RemoteEvaluationConfig
 
     const DEFAULTS = [
         'logger' => null,
-        'logLevel' => LogLevel::ERROR,
         'debug' => false,
         'serverUrl' => 'https://api.lab.amplitude.com',
         'httpClient' => null,
@@ -54,14 +49,12 @@ class RemoteEvaluationConfig
      */
     public function __construct(
         ?LoggerInterface     $logger,
-        int                  $logLevel,
         string               $serverUrl,
         ?HttpClientInterface $httpClient,
         array                $guzzleClientConfig
     )
     {
         $this->logger = $logger;
-        $this->logLevel = $logLevel;
         $this->serverUrl = $serverUrl;
         $this->httpClient = $httpClient;
         $this->guzzleClientConfig = $guzzleClientConfig;

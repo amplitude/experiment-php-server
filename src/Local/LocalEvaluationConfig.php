@@ -5,7 +5,6 @@ namespace AmplitudeExperiment\Local;
 use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Exposure\ExposureConfig;
 use AmplitudeExperiment\Http\HttpClientInterface;
-use AmplitudeExperiment\Logger\LogLevel;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,13 +18,11 @@ use Psr\Log\LoggerInterface;
 class LocalEvaluationConfig
 {
     /**
-     * Set to use custom logger. If not set, a {@link DefaultLogger} is used.
+     * Set to use a custom PSR-3 logger. If not set, a {@link \Psr\Log\NullLogger} is used
+     * and SDK log messages are discarded. Pass any PSR-3 implementation (e.g. Monolog, or
+     * the opt-in {@link \AmplitudeExperiment\Logger\DefaultLogger}) to receive log output.
      */
     public ?LoggerInterface $logger;
-    /**
-     * The {@link LogLevel} to use for the logger.
-     */
-    public int $logLevel;
     /**
      * The server endpoint from which to request variants.
      */
@@ -50,7 +47,6 @@ class LocalEvaluationConfig
 
     const DEFAULTS = [
         'logger' => null,
-        'logLevel' => LogLevel::ERROR,
         'serverUrl' => 'https://api.lab.amplitude.com',
         'bootstrap' => [],
         'assignmentConfig' => null,
@@ -63,10 +59,9 @@ class LocalEvaluationConfig
      * @param array<string, mixed> $guzzleClientConfig
      * @param array<string, mixed> $bootstrap
      */
-    public function __construct(?LoggerInterface $logger, int $logLevel, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?ExposureConfig $exposureConfig, ?HttpClientInterface $httpClient, array $guzzleClientConfig)
+    public function __construct(?LoggerInterface $logger, string $serverUrl, array $bootstrap, ?AssignmentConfig $assignmentConfig, ?ExposureConfig $exposureConfig, ?HttpClientInterface $httpClient, array $guzzleClientConfig)
     {
         $this->logger = $logger;
-        $this->logLevel = $logLevel;
         $this->serverUrl = $serverUrl;
         $this->bootstrap = $bootstrap;
         $this->assignmentConfig = $assignmentConfig;
