@@ -14,11 +14,11 @@ use AmplitudeExperiment\Exposure\ExposureService;
 use AmplitudeExperiment\Flag\FlagConfigFetcher;
 use AmplitudeExperiment\Flag\FlagConfigService;
 use AmplitudeExperiment\Http\GuzzleHttpClient;
-use AmplitudeExperiment\Logger\DefaultLogger;
 use AmplitudeExperiment\Amplitude\Amplitude;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
 
@@ -38,7 +38,7 @@ class LocalEvaluationClient
     public function __construct(string $apiKey, ?LocalEvaluationConfig $config = null)
     {
         $this->config = $config ?? LocalEvaluationConfig::builder()->build();
-        $this->logger = $this->config->logger ?? new DefaultLogger();
+        $this->logger = $this->config->logger ?? new NullLogger();
         $httpClient = $config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
         $fetcher = new FlagConfigFetcher($apiKey, $this->logger, $httpClient, $this->config->serverUrl);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->logger, $this->config->bootstrap);

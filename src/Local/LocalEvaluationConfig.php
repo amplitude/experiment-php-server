@@ -18,7 +18,9 @@ use Psr\Log\LoggerInterface;
 class LocalEvaluationConfig
 {
     /**
-     * Set to use custom logger. If not set, a {@link DefaultLogger} is used.
+     * Set to use a custom PSR-3 logger. If not set, a {@link \Psr\Log\NullLogger} is used
+     * and SDK log messages are discarded. Pass any PSR-3 implementation (e.g. Monolog, or
+     * the opt-in {@link \AmplitudeExperiment\Logger\DefaultLogger}) to receive log output.
      */
     public ?LoggerInterface $logger;
     /**

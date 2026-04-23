@@ -5,11 +5,11 @@ namespace AmplitudeExperiment\Remote;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationVariant;
 use AmplitudeExperiment\Http\HttpClientInterface;
 use AmplitudeExperiment\Http\GuzzleHttpClient;
-use AmplitudeExperiment\Logger\DefaultLogger;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use const AmplitudeExperiment\VERSION;
 
 /**
@@ -34,7 +34,7 @@ class RemoteEvaluationClient
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
         $this->httpClient = $config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
-        $this->logger = $this->config->logger ?? new DefaultLogger();
+        $this->logger = $this->config->logger ?? new NullLogger();
     }
 
     /**
