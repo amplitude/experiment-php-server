@@ -6,7 +6,6 @@ use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationVariant;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationSegment;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationCondition;
-use Exception;
 
 class EvaluationEngine
 {
@@ -452,22 +451,28 @@ class EvaluationEngine
     private function coerceStringArray($value): ?array
     {
         if (is_array($value)) {
-            return array_filter(array_map([$this, 'coerceString'], $value));
+            return $this->filterNonNullStrings(array_map([$this, 'coerceString'], $value));
         }
         $stringValue = strval($value);
         if (strncmp($stringValue, '[', 1) !== 0) {
             return null;
         }
-        try {
-            $parsedValue = json_decode($stringValue, true);
-            if (is_array($parsedValue)) {
-                return array_filter(array_map([$this, 'coerceString'], $parsedValue));
-            } else {
-                return null;
-            }
-        } catch (Exception $e) {
+        $parsedValue = json_decode($stringValue, true);
+        if (!is_array($parsedValue)) {
             return null;
         }
+        return $this->filterNonNullStrings(array_map([$this, 'coerceString'], $parsedValue));
+    }
+
+    /**
+     * @param array<mixed> $values
+     * @return array<string>
+     */
+    private function filterNonNullStrings(array $values): array
+    {
+        return array_values(array_filter($values, function ($v) {
+            return $v !== null;
+        }));
     }
 
     private function isSetOperator(string $op): bool

@@ -287,6 +287,10 @@ class EvaluationEngineTest extends TestCase
         // Leading whitespace prevents array parsing -- treated as scalar
         $this->assertMatch(' ["a"]', 'is', [' ["a"]']);
         $this->assertNoMatch(' ["a"]', 'set contains', ['a']);
+
+        // Falsy string elements ("0", "") are preserved (only nulls are dropped)
+        $this->assertMatch(['0', 'a'], 'is', ['0']);
+        $this->assertMatch(['', 'a'], 'is', ['']);
     }
 
     private function flagWithCondition(string $op, array $values): EvaluationFlag
