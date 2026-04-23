@@ -570,6 +570,69 @@ class EvaluateIntegrationTest extends TestCase
         $this->assertEquals('on', $variant->key);
     }
 
+    public function testSetIsWithJsonArrayString()
+    {
+        $user = $this->userContext(null, null, null, ['key' => '["1", "2", "3"]']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-set-is'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+    }
+
+    public function testIsWithArray()
+    {
+        $user = $this->userContext(null, null, null, ['key' => ['value1', 'value2']]);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-is-array'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+    }
+
+    public function testIsNotWithArray()
+    {
+        $user = $this->userContext(null, null, null, ['key' => ['value3', 'value4']]);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-is-not-array'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+    }
+
+    public function testContainsWithArray()
+    {
+        $user = $this->userContext(null, null, null, ['key' => ['has-target-value', 'has', 'value']]);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-contains-array'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+    }
+
+    public function testDoesNotContainWithArray()
+    {
+        $user = $this->userContext(null, null, null, ['key' => ['has-value', 'has', 'value']]);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-does-not-contain-array'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+    }
+
+    public function testIsWithJsonArrayString()
+    {
+        $user = $this->userContext(null, null, null, ['key' => '["value1", "value2"]']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-is-array'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+    }
+
+    public function testDoesNotContainWithJsonArrayString()
+    {
+        $user = $this->userContext(null, null, null, ['key' => '["has-value", "has", "value"]']);
+        $results = $this->engine->evaluate($user, $this->flags);
+        $result = $results['test-does-not-contain-array'];
+        $variant = Variant::convertEvaluationVariantToVariant($result);
+        $this->assertEquals('on', $variant->key);
+    }
+
     public function testGlobMatch()
     {
         $user = $this->userContext(null, null, null, ['key' => '/path/1/2/3/end']);
