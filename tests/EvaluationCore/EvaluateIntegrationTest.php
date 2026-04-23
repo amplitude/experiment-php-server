@@ -26,7 +26,7 @@ class EvaluateIntegrationTest extends TestCase
     protected function setUp(): void
     {
         $this->engine = new EvaluationEngine();
-        $rawFlags = $this->getFlags('server-NgJxxvg8OGwwBsWVXqyxQbdiflbhvugy');
+        $rawFlags = $this->getFlags('server-VVhLULXCxxY0xqmszXouXxiEzoeJWmSh');
         $this->flags = createFlagsFromArray($rawFlags);
     }
 
