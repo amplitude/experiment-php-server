@@ -117,29 +117,30 @@ class EvaluationEngine
 
         if ($propValue === null) {
             return $this->matchNull($condition->op, $condition->values);
-        } elseif (is_bool($propValue)) {
-            return $this->matchBoolean($propValue, $condition->op, $condition->values);
-        } elseif ($this->isSetOperator($condition->op)) {
-            $propValueStringList = $this->coerceStringArray($propValue);
+        }
 
+        if (is_bool($propValue)) {
+            return $this->matchBoolean($propValue, $condition->op, $condition->values);
+        }
+
+        $propValueStringList = $this->coerceStringArray($propValue);
+
+        if ($this->isSetOperator($condition->op)) {
             if ($propValueStringList === null) {
                 return false;
             }
-
             return $this->matchSet($propValueStringList, $condition->op, $condition->values);
-        } else {
-            $propValueString = $this->coerceString($propValue);
-
-            if ($propValueString !== null) {
-                return $this->matchString(
-                    $propValueString,
-                    $condition->op,
-                    $condition->values
-                );
-            } else {
-                return false;
-            }
         }
+
+        if ($propValueStringList !== null) {
+            return $this->matchStringsNonSet($propValueStringList, $condition->op, $condition->values);
+        }
+
+        $propValueString = $this->coerceString($propValue);
+        if ($propValueString === null) {
+            return false;
+        }
+        return $this->matchString($propValueString, $condition->op, $condition->values);
     }
 
     /**
@@ -301,6 +302,22 @@ class EvaluationEngine
     }
 
     /**
+     * @param array<string> $propValues
+     * @param string $op
+     * @param array<string> $filterValues
+     * @return bool
+     */
+    private function matchStringsNonSet(array $propValues, string $op, array $filterValues): bool
+    {
+        foreach ($propValues as $propValue) {
+            if ($this->matchString($propValue, $op, $filterValues)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param string $propValue
      * @param array<string> $filterValues
      * @return bool
@@ -438,6 +455,9 @@ class EvaluationEngine
             return array_filter(array_map([$this, 'coerceString'], $value));
         }
         $stringValue = strval($value);
+        if (strncmp($stringValue, '[', 1) !== 0) {
+            return null;
+        }
         try {
             $parsedValue = json_decode($stringValue, true);
             if (is_array($parsedValue)) {
