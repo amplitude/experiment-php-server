@@ -2,9 +2,11 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
-use AmplitudeExperiment\Http\HttpClientInterface;
-use AmplitudeExperiment\Http\GuzzleHttpClient;
+use AmplitudeExperiment\Http\HttpClientFactory;
 use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -21,7 +23,9 @@ class Amplitude
      * @var array<array<string,mixed>>
      */
     protected array $queue = [];
-    protected HttpClientInterface $httpClient;
+    protected ClientInterface $httpClient;
+    protected RequestFactoryInterface $requestFactory;
+    protected StreamFactoryInterface $streamFactory;
     private LoggerInterface $logger;
     private AmplitudeConfig $config;
 
@@ -30,7 +34,9 @@ class Amplitude
         $this->apiKey = $apiKey;
         $this->config = $config ?? AmplitudeConfig::builder()->build();
         $this->logger = $this->config->logger ?? new NullLogger();
-        $this->httpClient = $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
+        $this->httpClient = HttpClientFactory::resolveClient($this->config->httpClient, $this->config->retryConfig);
+        $this->requestFactory = HttpClientFactory::resolveRequestFactory($this->config->requestFactory);
+        $this->streamFactory = HttpClientFactory::resolveStreamFactory(null);
     }
 
     public function flush(): void
@@ -67,7 +73,6 @@ class Amplitude
      */
     private function post(string $url, array $payload): void
     {
-        $httpClient = $this->httpClient->getClient();
         $payloadJson = json_encode($payload);
 
         if ($payloadJson === false) {
@@ -77,12 +82,12 @@ class Amplitude
 
         $payloadString = $this->payloadToString($payload);
 
-        $request = $this->httpClient
-            ->createRequest('POST', $url, $payloadJson)
+        $request = $this->requestFactory->createRequest('POST', $url)
+            ->withBody($this->streamFactory->createStream($payloadJson))
             ->withHeader('Content-Type', 'application/json');
 
         try {
-            $response = $httpClient->sendRequest($request);
+            $response = $this->httpClient->sendRequest($request);
             if ($response->getStatusCode() != 200) {
                 $this->logger->error('[Amplitude] Failed to send event: ' . $payloadString . ', ' . $response->getStatusCode() . ' ' . $response->getReasonPhrase());
                 return;
