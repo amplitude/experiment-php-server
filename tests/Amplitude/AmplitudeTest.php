@@ -8,7 +8,6 @@ use AmplitudeExperiment\Http\RetryConfig;
 use AmplitudeExperiment\Http\RetryingClient;
 use AmplitudeExperiment\Test\Util\MockPsr18Client;
 use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;

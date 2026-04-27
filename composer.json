@@ -49,8 +49,7 @@
       "src/EvaluationCore/Util.php",
       "src/Flag/Util.php",
       "src/Assignment/AssignmentConstants.php",
-      "src/Exposure/ExposureConstants.php",
-      "src/Http/GuzzleConstants.php"
+      "src/Exposure/ExposureConstants.php"
     ]
   },
   "autoload-dev": {
