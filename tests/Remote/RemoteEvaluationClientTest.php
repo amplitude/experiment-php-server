@@ -9,9 +9,8 @@ use AmplitudeExperiment\Remote\FetchOptions;
 use AmplitudeExperiment\Remote\RemoteEvaluationClient;
 use AmplitudeExperiment\Remote\RemoteEvaluationConfig;
 use AmplitudeExperiment\Test\Util\MockPsr18Client;
+use AmplitudeExperiment\Test\Util\Psr7TestUtil;
 use AmplitudeExperiment\User;
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Psr7\Response;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 
@@ -42,7 +41,7 @@ class RemoteEvaluationClientTest extends TestCase
         // Single attempt, no retry — a transport error short-circuits to empty result.
         $mock = new MockPsr18Client([
             function (RequestInterface $request) {
-                return new ConnectException('Simulated transport failure', $request);
+                return Psr7TestUtil::clientException('Simulated transport failure');
             },
         ]);
         $config = RemoteEvaluationConfig::builder()
@@ -59,11 +58,11 @@ class RemoteEvaluationClientTest extends TestCase
         $mock = new MockPsr18Client([
             function (RequestInterface $request) use (&$requestCounter) {
                 $requestCounter++;
-                return new ConnectException('Error Communicating with Server', $request);
+                return Psr7TestUtil::clientException('Error Communicating with Server');
             },
             function (RequestInterface $request) use (&$requestCounter) {
                 $requestCounter++;
-                return new Response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
+                return Psr7TestUtil::response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
             },
         ]);
         $retryConfig = new RetryConfig(2, 100, 500, 2.0);
@@ -86,11 +85,11 @@ class RemoteEvaluationClientTest extends TestCase
         $mock = new MockPsr18Client([
             function (RequestInterface $request) use (&$requestCounter) {
                 $requestCounter++;
-                return new ConnectException('Error Communicating with Server', $request);
+                return Psr7TestUtil::clientException('Error Communicating with Server');
             },
             function (RequestInterface $request) use (&$requestCounter) {
                 $requestCounter++;
-                return new Response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
+                return Psr7TestUtil::response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
             },
         ]);
         $retryConfig = new RetryConfig(2, 0, 0, 1.0);
@@ -126,7 +125,7 @@ class RemoteEvaluationClientTest extends TestCase
 
     public function testFetchWithFetchOptionsSuccess(): void
     {
-        $assertExpectedHeaders = function (RequestInterface $request, ?string $expectedTrack, ?string $expectedExposure): Response {
+        $assertExpectedHeaders = function (RequestInterface $request, ?string $expectedTrack, ?string $expectedExposure) {
             $headers = $request->getHeaders();
             $this->assertEquals(base64_encode('["sdk-ci-test"]'), $headers['X-Amp-Exp-Flag-Keys'][0]);
             if ($expectedTrack === null) {
@@ -139,7 +138,7 @@ class RemoteEvaluationClientTest extends TestCase
             } else {
                 $this->assertEquals($expectedExposure, $headers['X-Amp-Exp-Exposure-Track'][0]);
             }
-            return new Response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
+            return Psr7TestUtil::response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
         };
 
         $mock = new MockPsr18Client([
@@ -160,7 +159,7 @@ class RemoteEvaluationClientTest extends TestCase
                 $this->assertArrayNotHasKey('X-Amp-Exp-Flag-Keys', $headers);
                 $this->assertArrayNotHasKey('X-Amp-Exp-Track', $headers);
                 $this->assertArrayNotHasKey('X-Amp-Exp-Exposure-Track', $headers);
-                return new Response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
+                return Psr7TestUtil::response(200, [], '{"sdk-ci-test":{"key":"on","payload":"payload"}}');
             },
         ]);
 

@@ -4,24 +4,21 @@ namespace AmplitudeExperiment\Test\Http;
 
 use AmplitudeExperiment\Http\RetryConfig;
 use AmplitudeExperiment\Http\RetryingClient;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Psr7\Response;
+use AmplitudeExperiment\Test\Util\MockPsr18Client;
+use AmplitudeExperiment\Test\Util\Psr7TestUtil;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Client\ClientExceptionInterface;
-use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 use RuntimeException;
 
 class RetryingClientTest extends TestCase
 {
     public function testSucceedsOnFirstAttemptWithoutRetry(): void
     {
-        $mock = $this->mockClient([new Response(200)]);
+        $mock = new MockPsr18Client([Psr7TestUtil::response(200)]);
         $client = new RetryingClient($mock, $this->fastConfig(['attempts' => 5]));
 
-        $response = $client->sendRequest(new Request('GET', 'https://x'));
+        $response = $client->sendRequest(Psr7TestUtil::request('GET'));
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame(1, $mock->callCount);
@@ -29,14 +26,14 @@ class RetryingClientTest extends TestCase
 
     public function testRetriesUntilSuccessWithinBudget(): void
     {
-        $mock = $this->mockClient([
-            $this->networkError(),
-            $this->networkError(),
-            new Response(200),
+        $mock = new MockPsr18Client([
+            Psr7TestUtil::clientException(),
+            Psr7TestUtil::clientException(),
+            Psr7TestUtil::response(200),
         ]);
         $client = new RetryingClient($mock, $this->fastConfig(['attempts' => 5]));
 
-        $response = $client->sendRequest(new Request('GET', 'https://x'));
+        $response = $client->sendRequest(Psr7TestUtil::request('GET'));
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame(3, $mock->callCount);
@@ -44,11 +41,15 @@ class RetryingClientTest extends TestCase
 
     public function testThrowsLastExceptionWhenBudgetExhausted(): void
     {
-        $mock = $this->mockClient(array_fill(0, 4, $this->networkError()));
+        $queue = [];
+        for ($i = 0; $i < 4; $i++) {
+            $queue[] = Psr7TestUtil::clientException();
+        }
+        $mock = new MockPsr18Client($queue);
         $client = new RetryingClient($mock, $this->fastConfig(['attempts' => 4]));
 
         try {
-            $client->sendRequest(new Request('GET', 'https://x'));
+            $client->sendRequest(Psr7TestUtil::request('GET'));
             $this->fail('expected ClientExceptionInterface to be thrown');
         } catch (ClientExceptionInterface $e) {
             $this->assertSame(4, $mock->callCount);
@@ -57,11 +58,11 @@ class RetryingClientTest extends TestCase
 
     public function testPostNotRetriedByDefault(): void
     {
-        $mock = $this->mockClient([$this->networkError()]);
+        $mock = new MockPsr18Client([Psr7TestUtil::clientException()]);
         $client = new RetryingClient($mock, $this->fastConfig(['attempts' => 5]));
 
         try {
-            $client->sendRequest(new Request('POST', 'https://x'));
+            $client->sendRequest(Psr7TestUtil::request('POST'));
             $this->fail('expected ClientExceptionInterface to be thrown');
         } catch (ClientExceptionInterface $e) {
             $this->assertSame(1, $mock->callCount);
@@ -70,16 +71,16 @@ class RetryingClientTest extends TestCase
 
     public function testPostRetriedWhenInRetryMethods(): void
     {
-        $mock = $this->mockClient([
-            $this->networkError(),
-            new Response(200),
+        $mock = new MockPsr18Client([
+            Psr7TestUtil::clientException(),
+            Psr7TestUtil::response(200),
         ]);
         $client = new RetryingClient($mock, $this->fastConfig([
             'attempts' => 3,
             'retryMethods' => ['GET', 'POST'],
         ]));
 
-        $response = $client->sendRequest(new Request('POST', 'https://x'));
+        $response = $client->sendRequest(Psr7TestUtil::request('POST'));
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame(2, $mock->callCount);
@@ -87,11 +88,11 @@ class RetryingClientTest extends TestCase
 
     public function testNonPsrExceptionPropagatesWithoutRetry(): void
     {
-        $mock = $this->mockClient([new RuntimeException('not a PSR-18 exception')]);
+        $mock = new MockPsr18Client([new RuntimeException('not a PSR-18 exception')]);
         $client = new RetryingClient($mock, $this->fastConfig(['attempts' => 5]));
 
         try {
-            $client->sendRequest(new Request('GET', 'https://x'));
+            $client->sendRequest(Psr7TestUtil::request('GET'));
             $this->fail('expected RuntimeException to be thrown');
         } catch (RuntimeException $e) {
             $this->assertSame('not a PSR-18 exception', $e->getMessage());
@@ -101,10 +102,10 @@ class RetryingClientTest extends TestCase
 
     public function testHttpErrorResponsesNotRetried(): void
     {
-        $mock = $this->mockClient([new Response(503)]);
+        $mock = new MockPsr18Client([Psr7TestUtil::response(503)]);
         $client = new RetryingClient($mock, $this->fastConfig(['attempts' => 5]));
 
-        $response = $client->sendRequest(new Request('GET', 'https://x'));
+        $response = $client->sendRequest(Psr7TestUtil::request('GET'));
 
         $this->assertSame(503, $response->getStatusCode());
         $this->assertSame(1, $mock->callCount);
@@ -112,11 +113,11 @@ class RetryingClientTest extends TestCase
 
     public function testSingleAttemptDisablesRetry(): void
     {
-        $mock = $this->mockClient([$this->networkError()]);
+        $mock = new MockPsr18Client([Psr7TestUtil::clientException()]);
         $client = new RetryingClient($mock, $this->fastConfig(['attempts' => 1]));
 
         try {
-            $client->sendRequest(new Request('GET', 'https://x'));
+            $client->sendRequest(Psr7TestUtil::request('GET'));
             $this->fail('expected ClientExceptionInterface to be thrown');
         } catch (ClientExceptionInterface $e) {
             $this->assertSame(1, $mock->callCount);
@@ -125,9 +126,9 @@ class RetryingClientTest extends TestCase
 
     public function testMethodMatchIsCaseInsensitive(): void
     {
-        $mock = $this->mockClient([
-            $this->networkError(),
-            new Response(200),
+        $mock = new MockPsr18Client([
+            Psr7TestUtil::clientException(),
+            Psr7TestUtil::response(200),
         ]);
         // retryMethods passed lowercase; constructor normalizes to uppercase
         $client = new RetryingClient($mock, $this->fastConfig([
@@ -135,7 +136,7 @@ class RetryingClientTest extends TestCase
             'retryMethods' => ['get'],
         ]));
 
-        $response = $client->sendRequest(new Request('GET', 'https://x'));
+        $response = $client->sendRequest(Psr7TestUtil::request('GET'));
 
         $this->assertSame(200, $response->getStatusCode());
         $this->assertSame(2, $mock->callCount);
@@ -160,14 +161,6 @@ class RetryingClientTest extends TestCase
     }
 
     /**
-     * @param array<int, ResponseInterface|\Throwable> $queue
-     */
-    private function mockClient(array $queue): MockHttpClient
-    {
-        return new MockHttpClient($queue);
-    }
-
-    /**
      * @param array<string, mixed> $overrides
      */
     private function fastConfig(array $overrides = []): RetryConfig
@@ -187,43 +180,5 @@ class RetryingClientTest extends TestCase
             $merged['backoffScalar'],
             $merged['retryMethods']
         );
-    }
-
-    private function networkError(): ClientExceptionInterface
-    {
-        return new class extends RuntimeException implements ClientExceptionInterface {
-        };
-    }
-}
-
-/**
- * Minimal PSR-18 client that returns queued responses or throws queued
- * exceptions in order. Tracks call count for assertions.
- */
-class MockHttpClient implements ClientInterface
-{
-    /** @var array<int, ResponseInterface|\Throwable> */
-    private array $queue;
-    public int $callCount = 0;
-
-    /**
-     * @param array<int, ResponseInterface|\Throwable> $queue
-     */
-    public function __construct(array $queue)
-    {
-        $this->queue = $queue;
-    }
-
-    public function sendRequest(RequestInterface $request): ResponseInterface
-    {
-        $this->callCount++;
-        if (empty($this->queue)) {
-            throw new RuntimeException('MockHttpClient queue exhausted');
-        }
-        $next = array_shift($this->queue);
-        if ($next instanceof \Throwable) {
-            throw $next;
-        }
-        return $next;
     }
 }

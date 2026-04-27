@@ -7,8 +7,7 @@ use AmplitudeExperiment\Amplitude\Event;
 use AmplitudeExperiment\Http\RetryConfig;
 use AmplitudeExperiment\Http\RetryingClient;
 use AmplitudeExperiment\Test\Util\MockPsr18Client;
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Psr7\Response;
+use AmplitudeExperiment\Test\Util\Psr7TestUtil;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 
@@ -44,7 +43,7 @@ class AmplitudeTest extends TestCase
     public function testEmptyQueueAfterFlushSuccess(): void
     {
         $client = new MockAmplitude(self::API_KEY);
-        $client->setHttpClient(new MockPsr18Client([new Response(200, ['X-Foo' => 'Bar'])]));
+        $client->setHttpClient(new MockPsr18Client([Psr7TestUtil::response(200, ['X-Foo' => 'Bar'])]));
 
         $client->logEvent(new Event('test1'));
         $client->logEvent(new Event('test2'));
@@ -64,7 +63,7 @@ class AmplitudeTest extends TestCase
         $mock = new MockPsr18Client([
             function (RequestInterface $request) use (&$requestCounter) {
                 $requestCounter++;
-                return new Response(200, ['X-Foo' => 'Bar']);
+                return Psr7TestUtil::response(200, ['X-Foo' => 'Bar']);
             },
         ]);
         $client->setHttpClient($mock);
@@ -85,7 +84,7 @@ class AmplitudeTest extends TestCase
 
         $mock = new MockPsr18Client(array_fill(0, 5, function (RequestInterface $request) use (&$requestCounter) {
             $requestCounter++;
-            return $this->connectError($request);
+            return Psr7TestUtil::clientException('Error Communicating with Server');
         }));
         $retryConfig = new RetryConfig(5, 0, 0, 1.0, ['POST']);
         $client->setHttpClient(new RetryingClient($mock, $retryConfig));
@@ -108,15 +107,15 @@ class AmplitudeTest extends TestCase
         $mock = new MockPsr18Client([
             function (RequestInterface $request) use (&$requestCounter) {
                 $requestCounter++;
-                return $this->connectError($request);
+                return Psr7TestUtil::clientException('Error Communicating with Server');
             },
             function (RequestInterface $request) use (&$requestCounter) {
                 $requestCounter++;
-                return $this->connectError($request);
+                return Psr7TestUtil::clientException('Error Communicating with Server');
             },
             function (RequestInterface $request) use (&$requestCounter) {
                 $requestCounter++;
-                return new Response(200, ['X-Foo' => 'Bar']);
+                return Psr7TestUtil::response(200, ['X-Foo' => 'Bar']);
             },
         ]);
         $retryConfig = new RetryConfig(5, 0, 0, 1.0, ['POST']);
@@ -139,7 +138,7 @@ class AmplitudeTest extends TestCase
 
         $mock = new MockPsr18Client(array_fill(0, 3, function (RequestInterface $request) use (&$requestCounter) {
             $requestCounter++;
-            return $this->connectError($request);
+            return Psr7TestUtil::clientException('Error Communicating with Server');
         }));
         // Default RetryConfig retries GET only — POST passes through with no retry.
         $client->setHttpClient(new RetryingClient($mock, new RetryConfig(5, 0, 0, 1.0)));
@@ -151,10 +150,5 @@ class AmplitudeTest extends TestCase
 
         $this->assertEquals(1, $requestCounter);
         $this->assertEquals(1, $client->getQueueSize());
-    }
-
-    private function connectError(RequestInterface $request): ConnectException
-    {
-        return new ConnectException('Error Communicating with Server', $request);
     }
 }
