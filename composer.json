@@ -18,6 +18,11 @@
   "license": "MIT",
   "minimum-stability": "dev",
   "prefer-stable": true,
+  "config": {
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
+  },
   "require": {
     "php": "^7.4 || ^8",
     "ext-json": "*",
