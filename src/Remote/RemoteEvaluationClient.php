@@ -3,11 +3,12 @@
 namespace AmplitudeExperiment\Remote;
 
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationVariant;
-use AmplitudeExperiment\Http\HttpClientInterface;
-use AmplitudeExperiment\Http\GuzzleHttpClient;
+use AmplitudeExperiment\Http\HttpClientFactory;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use Psr\Http\Client\ClientExceptionInterface;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use const AmplitudeExperiment\VERSION;
@@ -20,7 +21,8 @@ class RemoteEvaluationClient
 {
     private string $apiKey;
     private RemoteEvaluationConfig $config;
-    private HttpClientInterface $httpClient;
+    private ClientInterface $httpClient;
+    private RequestFactoryInterface $requestFactory;
     private LoggerInterface $logger;
 
     /**
@@ -33,7 +35,8 @@ class RemoteEvaluationClient
     {
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
-        $this->httpClient = $config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
+        $this->httpClient = HttpClientFactory::resolveClient($this->config->httpClient, $this->config->retryConfig);
+        $this->requestFactory = HttpClientFactory::resolveRequestFactory($this->config->requestFactory);
         $this->logger = $this->config->logger ?? new NullLogger();
     }
 
@@ -66,7 +69,7 @@ class RemoteEvaluationClient
 
         // Define the request URL
         $endpoint = $this->config->serverUrl . '/sdk/v2/vardata?v=0';
-        $request = $this->httpClient->createRequest('GET', $endpoint)
+        $request = $this->requestFactory->createRequest('GET', $endpoint)
             ->withHeader('Authorization', 'Api-Key ' . $this->apiKey)
             ->withHeader('Content-Type', 'application/json')
             ->withHeader('X-Amp-Exp-User', $serializedUser);
@@ -87,10 +90,8 @@ class RemoteEvaluationClient
             $request = $request->withHeader('X-Amp-Exp-Exposure-Track', $tracksExposure ? 'track' : 'no-track');
         }
 
-        $httpClient = $this->httpClient->getClient();
-
         try {
-            $response = $httpClient->sendRequest($request);
+            $response = $this->httpClient->sendRequest($request);
             if ($response->getStatusCode() != 200) {
                 $this->logger->error('[Experiment] Failed to fetch variants: ' . $response->getBody());
                 return [];
