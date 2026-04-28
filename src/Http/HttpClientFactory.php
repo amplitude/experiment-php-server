@@ -34,7 +34,6 @@ class HttpClientFactory
     public static function resolveAll(
         ?ClientInterface $client,
         ?RequestFactoryInterface $requestFactory,
-        ?StreamFactoryInterface $streamFactory,
         ?RetryConfig $retryConfig
     ): array {
         try {
@@ -43,7 +42,7 @@ class HttpClientFactory
                 $retryConfig ?? new RetryConfig()
             );
             $resolvedRequestFactory = $requestFactory ?? Psr17FactoryDiscovery::findRequestFactory();
-            $resolvedStreamFactory = $streamFactory ?? Psr17FactoryDiscovery::findStreamFactory();
+            $resolvedStreamFactory = Psr17FactoryDiscovery::findStreamFactory();
         } catch (DiscoveryFailedException $e) {
             throw new MissingHttpImplementationException(
                 'Amplitude Experiment SDK could not discover a PSR-18 / PSR-17 implementation. '

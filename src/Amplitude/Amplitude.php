@@ -37,7 +37,6 @@ class Amplitude
         [$this->httpClient, $this->requestFactory, $this->streamFactory] = HttpClientFactory::resolveAll(
             $this->config->httpClient,
             $this->config->requestFactory,
-            null,
             $this->config->retryConfig
         );
     }

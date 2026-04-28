@@ -38,7 +38,6 @@ class RemoteEvaluationClient
         [$this->httpClient, $this->requestFactory] = HttpClientFactory::resolveAll(
             $this->config->httpClient,
             $this->config->requestFactory,
-            null,
             $this->config->retryConfig
         );
         $this->logger = $this->config->logger ?? new NullLogger();

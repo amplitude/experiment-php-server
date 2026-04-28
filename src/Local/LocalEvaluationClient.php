@@ -39,7 +39,6 @@ class LocalEvaluationClient
         [$httpClient, $requestFactory] = HttpClientFactory::resolveAll(
             $this->config->httpClient,
             $this->config->requestFactory,
-            null,
             $this->config->retryConfig
         );
         $fetcher = new FlagConfigFetcher($apiKey, $this->logger, $httpClient, $requestFactory, $this->config->serverUrl);
