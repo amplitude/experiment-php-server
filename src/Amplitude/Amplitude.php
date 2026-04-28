@@ -34,9 +34,12 @@ class Amplitude
         $this->apiKey = $apiKey;
         $this->config = $config ?? AmplitudeConfig::builder()->build();
         $this->logger = $this->config->logger ?? new NullLogger();
-        $this->httpClient = HttpClientFactory::resolveClient($this->config->httpClient, $this->config->retryConfig);
-        $this->requestFactory = HttpClientFactory::resolveRequestFactory($this->config->requestFactory);
-        $this->streamFactory = HttpClientFactory::resolveStreamFactory(null);
+        [$this->httpClient, $this->requestFactory, $this->streamFactory] = HttpClientFactory::resolveAll(
+            $this->config->httpClient,
+            $this->config->requestFactory,
+            null,
+            $this->config->retryConfig
+        );
     }
 
     public function flush(): void

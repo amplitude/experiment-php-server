@@ -35,8 +35,12 @@ class RemoteEvaluationClient
     {
         $this->apiKey = $apiKey;
         $this->config = $config ?? RemoteEvaluationConfig::builder()->build();
-        $this->httpClient = HttpClientFactory::resolveClient($this->config->httpClient, $this->config->retryConfig);
-        $this->requestFactory = HttpClientFactory::resolveRequestFactory($this->config->requestFactory);
+        [$this->httpClient, $this->requestFactory] = HttpClientFactory::resolveAll(
+            $this->config->httpClient,
+            $this->config->requestFactory,
+            null,
+            $this->config->retryConfig
+        );
         $this->logger = $this->config->logger ?? new NullLogger();
     }
 

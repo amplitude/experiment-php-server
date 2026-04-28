@@ -36,8 +36,12 @@ class LocalEvaluationClient
     {
         $this->config = $config ?? LocalEvaluationConfig::builder()->build();
         $this->logger = $this->config->logger ?? new NullLogger();
-        $httpClient = HttpClientFactory::resolveClient($this->config->httpClient, $this->config->retryConfig);
-        $requestFactory = HttpClientFactory::resolveRequestFactory($this->config->requestFactory);
+        [$httpClient, $requestFactory] = HttpClientFactory::resolveAll(
+            $this->config->httpClient,
+            $this->config->requestFactory,
+            null,
+            $this->config->retryConfig
+        );
         $fetcher = new FlagConfigFetcher($apiKey, $this->logger, $httpClient, $requestFactory, $this->config->serverUrl);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->logger, $this->config->bootstrap);
         $this->initializeAssignmentService($this->config->assignmentConfig);
