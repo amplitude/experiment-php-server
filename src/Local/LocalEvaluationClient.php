@@ -5,21 +5,18 @@ namespace AmplitudeExperiment\Local;
 use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Assignment\AssignmentService;
 use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
-use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
-use AmplitudeExperiment\Exposure\DefaultExposureFilter;
 use AmplitudeExperiment\Exposure\DefaultExposureTrackingProvider;
 use AmplitudeExperiment\Exposure\Exposure;
 use AmplitudeExperiment\Exposure\ExposureConfig;
 use AmplitudeExperiment\Exposure\ExposureService;
 use AmplitudeExperiment\Flag\FlagConfigFetcher;
 use AmplitudeExperiment\Flag\FlagConfigService;
-use AmplitudeExperiment\Http\GuzzleHttpClient;
+use AmplitudeExperiment\Http\HttpClientFactory;
 use AmplitudeExperiment\Amplitude\Amplitude;
 use AmplitudeExperiment\User;
 use AmplitudeExperiment\Variant;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use function AmplitudeExperiment\EvaluationCore\topologicalSort;
 
 /**
@@ -39,8 +36,12 @@ class LocalEvaluationClient
     {
         $this->config = $config ?? LocalEvaluationConfig::builder()->build();
         $this->logger = $this->config->logger ?? new NullLogger();
-        $httpClient = $config->httpClient ?? $this->config->httpClient ?? new GuzzleHttpClient($this->config->guzzleClientConfig);
-        $fetcher = new FlagConfigFetcher($apiKey, $this->logger, $httpClient, $this->config->serverUrl);
+        [$httpClient, $requestFactory] = HttpClientFactory::resolveAll(
+            $this->config->httpClient,
+            $this->config->requestFactory,
+            $this->config->retryConfig
+        );
+        $fetcher = new FlagConfigFetcher($apiKey, $this->logger, $httpClient, $requestFactory, $this->config->serverUrl);
         $this->flagConfigService = new FlagConfigService($fetcher, $this->logger, $this->config->bootstrap);
         $this->initializeAssignmentService($this->config->assignmentConfig);
         $this->initializeExposureService($this->config->exposureConfig);

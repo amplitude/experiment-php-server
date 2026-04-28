@@ -4,7 +4,9 @@ namespace AmplitudeExperiment\Local;
 
 use AmplitudeExperiment\Assignment\AssignmentConfig;
 use AmplitudeExperiment\Exposure\ExposureConfig;
-use AmplitudeExperiment\Http\HttpClientInterface;
+use AmplitudeExperiment\Http\RetryConfig;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Log\LoggerInterface;
 
 class LocalEvaluationConfigBuilder
@@ -17,11 +19,9 @@ class LocalEvaluationConfigBuilder
     protected array $bootstrap = LocalEvaluationConfig::DEFAULTS['bootstrap'];
     protected ?AssignmentConfig $assignmentConfig = LocalEvaluationConfig::DEFAULTS['assignmentConfig'];
     protected ?ExposureConfig $exposureConfig = LocalEvaluationConfig::DEFAULTS['exposureConfig'];
-    protected ?HttpClientInterface $httpClient = LocalEvaluationConfig::DEFAULTS['httpClient'];
-    /**
-     * @var array<string, mixed>
-     */
-    protected array $guzzleClientConfig = LocalEvaluationConfig::DEFAULTS['guzzleClientConfig'];
+    protected ?ClientInterface $httpClient = LocalEvaluationConfig::DEFAULTS['httpClient'];
+    protected ?RequestFactoryInterface $requestFactory = LocalEvaluationConfig::DEFAULTS['requestFactory'];
+    protected ?RetryConfig $retryConfig = LocalEvaluationConfig::DEFAULTS['retryConfig'];
 
     public function __construct()
     {
@@ -60,18 +60,33 @@ class LocalEvaluationConfigBuilder
         return $this;
     }
 
-    public function httpClient(HttpClientInterface $httpClient): LocalEvaluationConfigBuilder
+    /**
+     * Supply a PSR-18 HTTP client. The SDK uses it verbatim — no retry wrap.
+     * If omitted, a client is auto-discovered and wrapped in
+     * {@link \AmplitudeExperiment\Http\RetryingClient} using {@link retryConfig}.
+     */
+    public function httpClient(ClientInterface $httpClient): LocalEvaluationConfigBuilder
     {
         $this->httpClient = $httpClient;
         return $this;
     }
 
     /**
-     * @param array<string, mixed> $guzzleClientConfig
+     * Supply a PSR-17 request factory. If omitted, a factory is auto-discovered.
      */
-    public function guzzleClientConfig(array $guzzleClientConfig): LocalEvaluationConfigBuilder
+    public function requestFactory(RequestFactoryInterface $requestFactory): LocalEvaluationConfigBuilder
     {
-        $this->guzzleClientConfig = $guzzleClientConfig;
+        $this->requestFactory = $requestFactory;
+        return $this;
+    }
+
+    /**
+     * Configure retry behavior for the auto-discovered client. Ignored when
+     * a client is supplied via {@link httpClient()}.
+     */
+    public function retryConfig(RetryConfig $retryConfig): LocalEvaluationConfigBuilder
+    {
+        $this->retryConfig = $retryConfig;
         return $this;
     }
 
@@ -84,7 +99,8 @@ class LocalEvaluationConfigBuilder
             $this->assignmentConfig,
             $this->exposureConfig,
             $this->httpClient,
-            $this->guzzleClientConfig
+            $this->requestFactory,
+            $this->retryConfig
         );
     }
 }
