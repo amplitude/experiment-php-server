@@ -93,6 +93,10 @@ class Exposure
             } elseif ($variant->value) {
                 $event->eventProperties['[Experiment] Variant'] = $variant->value;
             }
+            $experimentKey = $variant->metadata['experimentKey'] ?? null;
+            if ($experimentKey) {
+                $event->eventProperties['[Experiment] Experiment Key'] = $experimentKey;
+            }
             if ($variant->metadata) {
                 $event->eventProperties['metadata'] = $variant->metadata;
             }
