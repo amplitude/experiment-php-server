@@ -69,6 +69,13 @@ class ExposureServiceTest extends TestCase
         ]);
         $emptyMetadata = new Variant('on', 'on');
         $emptyVariant = new Variant();
+        $withExperimentKey = new Variant('treatment', 'treatment', null, null, [
+            'segmentName' => 'All Other Users',
+            'flagType' => 'experiment',
+            'flagVersion' => 10,
+            'default' => false,
+            'experimentKey' => 'exp-1'
+        ]);
         $results = [
             'basic' => $basic,
             'different_value' => $differentValue,
@@ -77,23 +84,24 @@ class ExposureServiceTest extends TestCase
             'holdout' => $holdout,
             'partial_metadata' => $partialMetadata,
             'empty_metadata' => $emptyMetadata,
-            'empty_variant' => $emptyVariant
+            'empty_variant' => $emptyVariant,
+            'with_experiment_key' => $withExperimentKey
         ];
         $exposure = new Exposure($user, $results);
         $events = $exposure->toEvents();
         // Should exclude default (default=true) only
-        // basic, different_value, mutex, holdout, partial_metadata, empty_metadata, empty_variant = 7 events
-        $this->assertCount(7, $events);
-        
+        // basic, different_value, mutex, holdout, partial_metadata, empty_metadata, empty_variant, with_experiment_key = 8 events
+        $this->assertCount(8, $events);
+
         foreach ($events as $event) {
             $this->assertEquals('[Experiment] Exposure', $event->eventType);
             $this->assertEquals($user->userId, $event->userId);
             $this->assertEquals($user->deviceId, $event->deviceId);
-            
+
             $flagKey = $event->eventProperties['[Experiment] Flag Key'];
             $this->assertArrayHasKey($flagKey, $results);
             $variant = $results[$flagKey];
-            
+
             // Validate event properties
             if ($variant->key) {
                 $this->assertEquals($variant->key, $event->eventProperties['[Experiment] Variant']);
@@ -102,6 +110,12 @@ class ExposureServiceTest extends TestCase
             }
             if ($variant->metadata) {
                 $this->assertEquals($variant->metadata, $event->eventProperties['metadata']);
+            }
+
+            if ($flagKey === 'with_experiment_key') {
+                $this->assertEquals('exp-1', $event->eventProperties['[Experiment] Experiment Key']);
+            } else {
+                $this->assertArrayNotHasKey('[Experiment] Experiment Key', $event->eventProperties);
             }
             
             // Validate user properties
