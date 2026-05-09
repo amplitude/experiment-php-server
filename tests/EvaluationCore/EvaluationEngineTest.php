@@ -253,4 +253,84 @@ class EvaluationEngineTest extends TestCase
         $this->assertEquals('off', $results['test-case-bool']->key,
             "Non-boolean value should match default segment");
     }
+
+    public function testMultiValueArrayPropertyMatching()
+    {
+        // Scalar string cases (regression coverage)
+        $this->assertMatch('hello', 'is', ['hello']);
+        $this->assertMatch('hello', 'contains', ['ell']);
+        $this->assertMatch('2', 'greater', ['1']);
+        $this->assertNoMatch('world', 'is', ['hello']);
+
+        // Non-string scalar cases
+        $this->assertMatch(42, 'greater', ['1']);
+        $this->assertMatch(true, 'is', ['true']);
+
+        // JSON array string + set operator
+        $this->assertMatch('["a","b"]', 'set contains', ['a']);
+
+        // JSON array string + non-set operator (NEW behavior)
+        $this->assertMatch('["a","b"]', 'is', ['a']);
+
+        // Collection + set operator
+        $this->assertMatch(['a', 'b'], 'set contains', ['a']);
+
+        // Collection + non-set operator (NEW behavior)
+        $this->assertMatch(['a', 'b'], 'is', ['a']);
+
+        // Malformed JSON array -- falls through to scalar matchString
+        $this->assertMatch('[broken', 'is', ['[broken']);
+
+        // Empty JSON array + set operator
+        $this->assertNoMatch('[]', 'set contains', ['a']);
+
+        // Leading whitespace prevents array parsing -- treated as scalar
+        $this->assertMatch(' ["a"]', 'is', [' ["a"]']);
+        $this->assertNoMatch(' ["a"]', 'set contains', ['a']);
+
+        // Falsy string elements ("0", "") are preserved (only nulls are dropped)
+        $this->assertMatch(['0', 'a'], 'is', ['0']);
+        $this->assertMatch(['', 'a'], 'is', ['']);
+    }
+
+    private function flagWithCondition(string $op, array $values): EvaluationFlag
+    {
+        $variants = ['on' => new EvaluationVariant('on')];
+        $segment = new EvaluationSegment(
+            null,
+            [[new EvaluationCondition(
+                ['context', 'user', 'user_properties', 'test_prop'],
+                $op,
+                $values
+            )]],
+            'on'
+        );
+        return new EvaluationFlag('test-flag', $variants, [$segment]);
+    }
+
+    private function contextWithProp($value): array
+    {
+        return ['user' => ['user_properties' => ['test_prop' => $value]]];
+    }
+
+    private function evaluateProp($propValue, string $op, array $values): ?EvaluationVariant
+    {
+        $flag = $this->flagWithCondition($op, $values);
+        $context = $this->contextWithProp($propValue);
+        $results = $this->engine->evaluate($context, ['test-flag' => $flag]);
+        return $results['test-flag'] ?? null;
+    }
+
+    private function assertMatch($propValue, string $op, array $values): void
+    {
+        $result = $this->evaluateProp($propValue, $op, $values);
+        $this->assertNotNull($result, "Expected match, got null");
+        $this->assertEquals('on', $result->key);
+    }
+
+    private function assertNoMatch($propValue, string $op, array $values): void
+    {
+        $result = $this->evaluateProp($propValue, $op, $values);
+        $this->assertNull($result, "Expected no match, got variant");
+    }
 }

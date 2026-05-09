@@ -6,7 +6,6 @@ use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationVariant;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationSegment;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationCondition;
-use Exception;
 
 class EvaluationEngine
 {
@@ -117,29 +116,30 @@ class EvaluationEngine
 
         if ($propValue === null) {
             return $this->matchNull($condition->op, $condition->values);
-        } elseif (is_bool($propValue)) {
-            return $this->matchBoolean($propValue, $condition->op, $condition->values);
-        } elseif ($this->isSetOperator($condition->op)) {
-            $propValueStringList = $this->coerceStringArray($propValue);
+        }
 
+        if (is_bool($propValue)) {
+            return $this->matchBoolean($propValue, $condition->op, $condition->values);
+        }
+
+        $propValueStringList = $this->coerceStringArray($propValue);
+
+        if ($this->isSetOperator($condition->op)) {
             if ($propValueStringList === null) {
                 return false;
             }
-
             return $this->matchSet($propValueStringList, $condition->op, $condition->values);
-        } else {
-            $propValueString = $this->coerceString($propValue);
-
-            if ($propValueString !== null) {
-                return $this->matchString(
-                    $propValueString,
-                    $condition->op,
-                    $condition->values
-                );
-            } else {
-                return false;
-            }
         }
+
+        if ($propValueStringList !== null) {
+            return $this->matchStringsNonSet($propValueStringList, $condition->op, $condition->values);
+        }
+
+        $propValueString = $this->coerceString($propValue);
+        if ($propValueString === null) {
+            return false;
+        }
+        return $this->matchString($propValueString, $condition->op, $condition->values);
     }
 
     /**
@@ -301,6 +301,22 @@ class EvaluationEngine
     }
 
     /**
+     * @param array<string> $propValues
+     * @param string $op
+     * @param array<string> $filterValues
+     * @return bool
+     */
+    private function matchStringsNonSet(array $propValues, string $op, array $filterValues): bool
+    {
+        foreach ($propValues as $propValue) {
+            if ($this->matchString($propValue, $op, $filterValues)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * @param string $propValue
      * @param array<string> $filterValues
      * @return bool
@@ -435,19 +451,28 @@ class EvaluationEngine
     private function coerceStringArray($value): ?array
     {
         if (is_array($value)) {
-            return array_filter(array_map([$this, 'coerceString'], $value));
+            return $this->filterNonNullStrings(array_map([$this, 'coerceString'], $value));
         }
         $stringValue = strval($value);
-        try {
-            $parsedValue = json_decode($stringValue, true);
-            if (is_array($parsedValue)) {
-                return array_filter(array_map([$this, 'coerceString'], $parsedValue));
-            } else {
-                return null;
-            }
-        } catch (Exception $e) {
+        if (strncmp($stringValue, '[', 1) !== 0) {
             return null;
         }
+        $parsedValue = json_decode($stringValue, true);
+        if (!is_array($parsedValue)) {
+            return null;
+        }
+        return $this->filterNonNullStrings(array_map([$this, 'coerceString'], $parsedValue));
+    }
+
+    /**
+     * @param array<mixed> $values
+     * @return array<string>
+     */
+    private function filterNonNullStrings(array $values): array
+    {
+        return array_values(array_filter($values, function ($v) {
+            return $v !== null;
+        }));
     }
 
     private function isSetOperator(string $op): bool
