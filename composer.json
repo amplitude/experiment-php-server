@@ -18,19 +18,32 @@
   "license": "MIT",
   "minimum-stability": "dev",
   "prefer-stable": true,
+  "config": {
+    "allow-plugins": {
+      "php-http/discovery": false
+    }
+  },
   "require": {
     "php": "^7.4 || ^8",
     "ext-json": "*",
-    "guzzlehttp/guzzle": "^7",
+    "php-http/discovery": "^1.15",
     "psr/cache": "^1 || ^2 || ^3",
+    "psr/http-client": "^1.0",
+    "psr/http-client-implementation": "^1.0",
+    "psr/http-factory": "^1.0",
+    "psr/http-factory-implementation": "^1.0",
     "psr/log": "^1 || ^2 || ^3",
     "symfony/cache": "^5.1.0 || ^6 || ^7 || ^8"
   },
   "require-dev": {
-    "phpunit/phpunit": "=9.6.33",
-    "phpstan/phpstan": "=1.12.32"
+    "guzzlehttp/guzzle": "^7.4",
+    "guzzlehttp/psr7": "^2.0",
+    "phpstan/phpstan": "=1.12.32",
+    "phpunit/phpunit": "=9.6.33"
   },
   "suggest": {
+    "guzzlehttp/guzzle": "A widely-used PSR-18 HTTP client; auto-discovered when installed.",
+    "symfony/http-client": "Symfony's PSR-18 HTTP client; auto-discovered when installed.",
     "monolog/monolog": "A PSR-3 logger to receive SDK log output; pass it via the logger config option. The SDK defaults to Psr\\Log\\NullLogger."
   },
   "autoload": {
@@ -43,8 +56,7 @@
       "src/EvaluationCore/Util.php",
       "src/Flag/Util.php",
       "src/Assignment/AssignmentConstants.php",
-      "src/Exposure/ExposureConstants.php",
-      "src/Http/GuzzleConstants.php"
+      "src/Exposure/ExposureConstants.php"
     ]
   },
   "autoload-dev": {

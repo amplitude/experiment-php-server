@@ -41,6 +41,35 @@ jobs:
       - name: Run test suite
         run: composer run-script test
 
+  # Smoke-test the SDK against Symfony HttpClient as the discovered PSR-18
+  # implementation, ensuring the discovery + integration path doesn't
+  # regress on a non-Guzzle stack. Single PHP version is sufficient since
+  # the SDK doesn't reference symfony types directly.
+  tests-symfony:
+    runs-on: ubuntu-latest
+    name: Tests with Symfony HttpClient (PSR-18)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f # v2
+        with:
+          php-version: '8.3'
+
+      - name: Swap PSR-18 implementation to Symfony HttpClient
+        run: |
+          composer remove --dev --no-update guzzlehttp/guzzle
+          composer require --dev --no-update \
+            "symfony/http-client:^6.0 || ^7.0" \
+            "nyholm/psr7:^1.0"
+
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
+
+      - name: Run test suite
+        run: composer run-script test
+
   static-analysis:
     strategy:
       fail-fast: false

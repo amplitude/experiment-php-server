@@ -2,7 +2,9 @@
 
 namespace AmplitudeExperiment\Remote;
 
-use AmplitudeExperiment\Http\HttpClientInterface;
+use AmplitudeExperiment\Http\RetryConfig;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -26,38 +28,45 @@ class RemoteEvaluationConfig
      */
     public string $serverUrl;
     /**
-     * The underlying HTTP client to use for requests, if this is not set, the default {@link GuzzleHttpClient} will be used.
+     * The PSR-18 HTTP client to use for requests. If null, a PSR-18
+     * implementation is auto-discovered via php-http/discovery and wrapped
+     * in {@link \AmplitudeExperiment\Http\RetryingClient} using
+     * {@link $retryConfig}. A user-supplied client is used verbatim with
+     * no retry wrap.
      */
-    public ?HttpClientInterface $httpClient;
+    public ?ClientInterface $httpClient;
     /**
-     * @var array<string, mixed>
-     * The configuration for the underlying default {@link GuzzleHttpClient} (if used). See {@link GUZZLE_DEFAULTS} for defaults.
+     * The PSR-17 request factory used to construct requests. If null, a
+     * PSR-17 factory is auto-discovered.
      */
-    public array $guzzleClientConfig;
+    public ?RequestFactoryInterface $requestFactory;
+    /**
+     * Retry configuration for the auto-wrapped client. Ignored when
+     * {@link $httpClient} is supplied — the user's client is used verbatim.
+     */
+    public ?RetryConfig $retryConfig;
 
     const DEFAULTS = [
         'logger' => null,
         'debug' => false,
         'serverUrl' => 'https://api.lab.amplitude.com',
         'httpClient' => null,
-        'guzzleClientConfig' => []
+        'requestFactory' => null,
+        'retryConfig' => null,
     ];
 
-
-    /**
-     * @param array<string, mixed> $guzzleClientConfig
-     */
     public function __construct(
-        ?LoggerInterface     $logger,
-        string               $serverUrl,
-        ?HttpClientInterface $httpClient,
-        array                $guzzleClientConfig
-    )
-    {
+        ?LoggerInterface $logger,
+        string $serverUrl,
+        ?ClientInterface $httpClient,
+        ?RequestFactoryInterface $requestFactory,
+        ?RetryConfig $retryConfig
+    ) {
         $this->logger = $logger;
         $this->serverUrl = $serverUrl;
         $this->httpClient = $httpClient;
-        $this->guzzleClientConfig = $guzzleClientConfig;
+        $this->requestFactory = $requestFactory;
+        $this->retryConfig = $retryConfig;
     }
 
     public static function builder(): RemoteEvaluationConfigBuilder
