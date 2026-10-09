@@ -4,21 +4,18 @@ namespace AmplitudeExperiment\Test\Amplitude;
 
 use AmplitudeExperiment\Amplitude\AmplitudeConfig;
 use AmplitudeExperiment\Amplitude\Event;
-use AmplitudeExperiment\Logger\DefaultLogger;
-use AmplitudeExperiment\Test\Util\MockGuzzleHttpClient;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Response;
+use AmplitudeExperiment\Http\RetryConfig;
+use AmplitudeExperiment\Http\RetryingClient;
+use AmplitudeExperiment\Test\Util\MockPsr18Client;
+use AmplitudeExperiment\Test\Util\Psr7TestUtil;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
-use Psr\Log\LoggerInterface;
 
 class AmplitudeTest extends TestCase
 {
     const API_KEY = 'test';
 
-    public function testAmplitudeConfigServerUrl()
+    public function testAmplitudeConfigServerUrl(): void
     {
         $config = AmplitudeConfig::builder()
             ->build();
@@ -43,115 +40,115 @@ class AmplitudeTest extends TestCase
         $this->assertEquals('test', $config->serverUrl);
     }
 
-    public function testEmptyQueueAfterFlushSuccess()
+    public function testEmptyQueueAfterFlushSuccess(): void
     {
         $client = new MockAmplitude(self::API_KEY);
-        $mock = new MockHandler([
-            new Response(200, ['X-Foo' => 'Bar']),
-        ]);
-        $handlerStack = HandlerStack::create($mock);
-        $httpClient = new MockGuzzleHttpClient([], $handlerStack);
-        $client->setHttpClient($httpClient);
-        $event1 = new Event('test1');
-        $event2 = new Event('test2');
-        $event3 = new Event('test3');
-        $client->logEvent($event1);
-        $client->logEvent($event2);
-        $client->logEvent($event3);
+        $client->setHttpClient(new MockPsr18Client([Psr7TestUtil::response(200, ['X-Foo' => 'Bar'])]));
+
+        $client->logEvent(new Event('test1'));
+        $client->logEvent(new Event('test2'));
+        $client->logEvent(new Event('test3'));
         $this->assertEquals(3, $client->getQueueSize());
         $client->flush();
         $this->assertEquals(0, $client->getQueueSize());
     }
 
-    public function testFlushAfterMaxQueue()
+    public function testFlushAfterMaxQueue(): void
     {
-        // Initialize the request counter
         $requestCounter = 0;
-
         $config = AmplitudeConfig::builder()
             ->flushQueueSize(3)
             ->build();
         $client = new MockAmplitude(self::API_KEY, $config);
-        $mockHandler = new MockHandler([
-            function (RequestInterface $request, array $options) use (&$requestCounter) {
+        $mock = new MockPsr18Client([
+            function (RequestInterface $request) use (&$requestCounter) {
                 $requestCounter++;
-
-                return new Response(200, ['X-Foo' => 'Bar']);
+                return Psr7TestUtil::response(200, ['X-Foo' => 'Bar']);
             },
         ]);
+        $client->setHttpClient($mock);
 
-        // Create a handler stack with the mock handler
-        $handlerStack = HandlerStack::create($mockHandler);
-
-        // Create an instance of GuzzleFetchClient with the custom handler stack
-        $httpClient = new MockGuzzleHttpClient([], $handlerStack);
-        $client->setHttpClient($httpClient);
-        $event1 = new Event('test1');
-        $event2 = new Event('test2');
-        $event3 = new Event('test3');
-        $client->logEvent($event1);
-        $client->logEvent($event2);
+        $client->logEvent(new Event('test1'));
+        $client->logEvent(new Event('test2'));
         $this->assertEquals(2, $client->getQueueSize());
-        $client->logEvent($event3);
+        $client->logEvent(new Event('test3'));
         $this->assertEquals(1, $requestCounter);
         $this->assertEquals(0, $client->getQueueSize());
     }
 
-    public function testBackoffRetriesToFailure()
+    public function testBackoffRetriesToFailureWhenPostRetryEnabled(): void
     {
-        // Initialize the request counter
         $requestCounter = 0;
         $config = AmplitudeConfig::builder()->build();
         $client = new MockAmplitude(self::API_KEY, $config);
 
-        // Set up the mock handler with request counter incrementation logic
-        $mockHandler = new MockHandler(array_fill(1, 5, function (RequestInterface $request, array $options) use (&$requestCounter) {
+        $mock = new MockPsr18Client(array_fill(0, 5, function (RequestInterface $request) use (&$requestCounter) {
             $requestCounter++;
-            return new RequestException('Error Communicating with Server', $request);
+            return Psr7TestUtil::clientException('Error Communicating with Server');
         }));
+        $retryConfig = new RetryConfig(5, 0, 0, 1.0, ['POST']);
+        $client->setHttpClient(new RetryingClient($mock, $retryConfig));
 
-        $handlerStack = HandlerStack::create($mockHandler);
-        $httpClient = new MockGuzzleHttpClient(['retries' => 4], $handlerStack);
-        $client->setHttpClient($httpClient);
-
-        $event1 = new Event('test');
-        $event1->userId = 'user_id';
-        $client->logEvent($event1);
+        $event = new Event('test');
+        $event->userId = 'user_id';
+        $client->logEvent($event);
         $client->flush();
 
-        // Assert the number of requests sent (including retries)
         $this->assertEquals(5, $requestCounter);
         $this->assertEquals(1, $client->getQueueSize());
     }
 
-
-    public function testBackoffRetriesThenSuccess()
+    public function testBackoffRetriesThenSuccessWhenPostRetryEnabled(): void
     {
-        // Initialize the request counter
         $requestCounter = 0;
         $config = AmplitudeConfig::builder()->build();
         $client = new MockAmplitude(self::API_KEY, $config);
 
-        // Set up the mock handler with request counter incrementation logic
-        $mockHandler = new MockHandler(array_fill(1, 2, function (RequestInterface $request, array $options) use (&$requestCounter) {
+        $mock = new MockPsr18Client([
+            function (RequestInterface $request) use (&$requestCounter) {
                 $requestCounter++;
-                return new RequestException('Error Communicating with Server', $request);
-            }) + [
-                function (RequestInterface $request, array $options) use (&$requestCounter) {
-                    $requestCounter++;
+                return Psr7TestUtil::clientException('Error Communicating with Server');
+            },
+            function (RequestInterface $request) use (&$requestCounter) {
+                $requestCounter++;
+                return Psr7TestUtil::clientException('Error Communicating with Server');
+            },
+            function (RequestInterface $request) use (&$requestCounter) {
+                $requestCounter++;
+                return Psr7TestUtil::response(200, ['X-Foo' => 'Bar']);
+            },
+        ]);
+        $retryConfig = new RetryConfig(5, 0, 0, 1.0, ['POST']);
+        $client->setHttpClient(new RetryingClient($mock, $retryConfig));
 
-                    return new Response(200, ['X-Foo' => 'Bar']);
-                },
-            ]);
-
-        $handlerStack = HandlerStack::create($mockHandler);
-        $httpClient = new MockGuzzleHttpClient(['retries' => 4], $handlerStack);
-        $client->setHttpClient($httpClient);
-        $event1 = new Event('test');
-        $event1->userId = 'user_id';
-        $client->logEvent($event1);
+        $event = new Event('test');
+        $event->userId = 'user_id';
+        $client->logEvent($event);
         $client->flush();
+
         $this->assertEquals(3, $requestCounter);
         $this->assertEquals(0, $client->getQueueSize());
+    }
+
+    public function testPostNotRetriedByDefaultRetryConfig(): void
+    {
+        $requestCounter = 0;
+        $config = AmplitudeConfig::builder()->build();
+        $client = new MockAmplitude(self::API_KEY, $config);
+
+        $mock = new MockPsr18Client(array_fill(0, 3, function (RequestInterface $request) use (&$requestCounter) {
+            $requestCounter++;
+            return Psr7TestUtil::clientException('Error Communicating with Server');
+        }));
+        // Default RetryConfig retries GET only — POST passes through with no retry.
+        $client->setHttpClient(new RetryingClient($mock, new RetryConfig(5, 0, 0, 1.0)));
+
+        $event = new Event('test');
+        $event->userId = 'user_id';
+        $client->logEvent($event);
+        $client->flush();
+
+        $this->assertEquals(1, $requestCounter);
+        $this->assertEquals(1, $client->getQueueSize());
     }
 }

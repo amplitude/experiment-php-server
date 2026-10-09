@@ -2,7 +2,9 @@
 
 namespace AmplitudeExperiment\Amplitude;
 
-use AmplitudeExperiment\Http\HttpClientInterface;
+use AmplitudeExperiment\Http\RetryConfig;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Log\LoggerInterface;
 
 class AmplitudeConfigBuilder
@@ -12,11 +14,9 @@ class AmplitudeConfigBuilder
     protected string $serverZone = AmplitudeConfig::DEFAULTS['serverZone'];
     protected ?string $serverUrl = null;
     protected bool $useBatch = AmplitudeConfig::DEFAULTS['useBatch'];
-    protected ?HttpClientInterface $httpClient = AmplitudeConfig::DEFAULTS['httpClient'];
-    /**
-     * @var array<string, mixed>
-     */
-    protected array $guzzleClientConfig = AmplitudeConfig::DEFAULTS['guzzleClientConfig'];
+    protected ?ClientInterface $httpClient = AmplitudeConfig::DEFAULTS['httpClient'];
+    protected ?RequestFactoryInterface $requestFactory = AmplitudeConfig::DEFAULTS['requestFactory'];
+    protected ?RetryConfig $retryConfig = AmplitudeConfig::DEFAULTS['retryConfig'];
     protected ?LoggerInterface $logger = AmplitudeConfig::DEFAULTS['logger'];
 
     public function __construct()
@@ -53,18 +53,33 @@ class AmplitudeConfigBuilder
         return $this;
     }
 
-    public function httpClient(HttpClientInterface $httpClient): AmplitudeConfigBuilder
+    /**
+     * Supply a PSR-18 HTTP client. The SDK uses it verbatim — no retry wrap.
+     * If omitted, a client is auto-discovered and wrapped in
+     * {@link \AmplitudeExperiment\Http\RetryingClient} using {@link retryConfig}.
+     */
+    public function httpClient(ClientInterface $httpClient): AmplitudeConfigBuilder
     {
         $this->httpClient = $httpClient;
         return $this;
     }
 
     /**
-     * @param array<string, mixed> $guzzleClientConfig
+     * Supply a PSR-17 request factory. If omitted, a factory is auto-discovered.
      */
-    public function guzzleClientConfig(array $guzzleClientConfig): AmplitudeConfigBuilder
+    public function requestFactory(RequestFactoryInterface $requestFactory): AmplitudeConfigBuilder
     {
-        $this->guzzleClientConfig = $guzzleClientConfig;
+        $this->requestFactory = $requestFactory;
+        return $this;
+    }
+
+    /**
+     * Configure retry behavior for the auto-discovered client. Ignored when
+     * a client is supplied via {@link httpClient()}.
+     */
+    public function retryConfig(RetryConfig $retryConfig): AmplitudeConfigBuilder
+    {
+        $this->retryConfig = $retryConfig;
         return $this;
     }
 
@@ -90,7 +105,8 @@ class AmplitudeConfigBuilder
             $this->serverUrl,
             $this->useBatch,
             $this->httpClient,
-            $this->guzzleClientConfig,
+            $this->requestFactory,
+            $this->retryConfig,
             $this->logger
         );
     }

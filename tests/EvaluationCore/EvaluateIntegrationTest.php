@@ -6,9 +6,10 @@ use AmplitudeExperiment\EvaluationCore\EvaluationEngine;
 use AmplitudeExperiment\EvaluationCore\Types\EvaluationFlag;
 use AmplitudeExperiment\Variant;
 use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
+use Http\Discovery\Psr17FactoryDiscovery;
+use Http\Discovery\Psr18ClientDiscovery;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Client\ClientExceptionInterface;
 use function AmplitudeExperiment\Flag\createFlagsFromArray;
 
 class EvaluateIntegrationTest extends TestCase
@@ -21,7 +22,7 @@ class EvaluateIntegrationTest extends TestCase
     private array $flags;
 
     /**
-     * @throws GuzzleException
+     * @throws ClientExceptionInterface
      */
     protected function setUp(): void
     {
@@ -645,19 +646,17 @@ class EvaluateIntegrationTest extends TestCase
     }
 
     /**
-     * @throws GuzzleException
+     * @throws ClientExceptionInterface
      * @throws Exception
      */
     private function getFlags($deploymentKey)
     {
         $serverUrl = 'https://api.lab.amplitude.com';
-        $client = new Client();
+        $request = Psr17FactoryDiscovery::findRequestFactory()
+            ->createRequest('GET', "{$serverUrl}/sdk/v2/flags?eval_mode=remote")
+            ->withHeader('Authorization', "Api-Key $deploymentKey");
 
-        $response = $client->request('GET', "{$serverUrl}/sdk/v2/flags?eval_mode=remote", [
-            'headers' => [
-                'Authorization' => "Api-Key $deploymentKey",
-            ],
-        ]);
+        $response = Psr18ClientDiscovery::find()->sendRequest($request);
 
         if ($response->getStatusCode() !== 200) {
             throw new Exception("Response error {$response->getStatusCode()}");

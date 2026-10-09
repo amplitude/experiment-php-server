@@ -2,7 +2,9 @@
 
 namespace AmplitudeExperiment\Remote;
 
-use AmplitudeExperiment\Http\HttpClientInterface;
+use AmplitudeExperiment\Http\RetryConfig;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
 use Psr\Log\LoggerInterface;
 
 class RemoteEvaluationConfigBuilder
@@ -10,11 +12,9 @@ class RemoteEvaluationConfigBuilder
     protected ?LoggerInterface $logger = RemoteEvaluationConfig::DEFAULTS['logger'];
     protected bool $debug = RemoteEvaluationConfig::DEFAULTS['debug'];
     protected string $serverUrl = RemoteEvaluationConfig::DEFAULTS['serverUrl'];
-    protected ?HttpClientInterface $httpClient = RemoteEvaluationConfig::DEFAULTS['httpClient'];
-    /**
-     * @var array<string, mixed>
-     */
-    protected array $guzzleClientConfig = RemoteEvaluationConfig::DEFAULTS['guzzleClientConfig'];
+    protected ?ClientInterface $httpClient = RemoteEvaluationConfig::DEFAULTS['httpClient'];
+    protected ?RequestFactoryInterface $requestFactory = RemoteEvaluationConfig::DEFAULTS['requestFactory'];
+    protected ?RetryConfig $retryConfig = RemoteEvaluationConfig::DEFAULTS['retryConfig'];
 
     public function __construct()
     {
@@ -32,19 +32,33 @@ class RemoteEvaluationConfigBuilder
         return $this;
     }
 
-    public function httpClient(HttpClientInterface $httpClient): RemoteEvaluationConfigBuilder
+    /**
+     * Supply a PSR-18 HTTP client. The SDK uses it verbatim — no retry wrap.
+     * If omitted, a client is auto-discovered and wrapped in
+     * {@link \AmplitudeExperiment\Http\RetryingClient} using {@link retryConfig}.
+     */
+    public function httpClient(ClientInterface $httpClient): RemoteEvaluationConfigBuilder
     {
         $this->httpClient = $httpClient;
         return $this;
     }
 
+    /**
+     * Supply a PSR-17 request factory. If omitted, a factory is auto-discovered.
+     */
+    public function requestFactory(RequestFactoryInterface $requestFactory): RemoteEvaluationConfigBuilder
+    {
+        $this->requestFactory = $requestFactory;
+        return $this;
+    }
 
     /**
-     * @param array<string, mixed> $guzzleClientConfig
+     * Configure retry behavior for the auto-discovered client. Ignored when
+     * a client is supplied via {@link httpClient()}.
      */
-    public function guzzleClientConfig(array $guzzleClientConfig): RemoteEvaluationConfigBuilder
+    public function retryConfig(RetryConfig $retryConfig): RemoteEvaluationConfigBuilder
     {
-        $this->guzzleClientConfig = $guzzleClientConfig;
+        $this->retryConfig = $retryConfig;
         return $this;
     }
 
@@ -54,7 +68,8 @@ class RemoteEvaluationConfigBuilder
             $this->logger,
             $this->serverUrl,
             $this->httpClient,
-            $this->guzzleClientConfig
+            $this->requestFactory,
+            $this->retryConfig
         );
     }
 }
